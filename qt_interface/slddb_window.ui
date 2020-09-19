@@ -1,0 +1,427 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SLDDBWindow</class>
+ <widget class="QMainWindow" name="SLDDBWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>558</width>
+    <height>691</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>SLD Database GUI</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="tab">
+       <attribute name="title">
+        <string>Find Material</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <widget class="QWidget" name="widget" native="true">
+          <layout class="QHBoxLayout" name="horizontalLayout">
+           <item>
+            <layout class="QFormLayout" name="formLayout">
+             <item row="0" column="0">
+              <widget class="QLabel" name="label">
+               <property name="text">
+                <string>Name</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QLineEdit" name="nameEdit"/>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="label_2">
+               <property name="text">
+                <string>Description</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QLineEdit" name="descriptionEdit"/>
+             </item>
+             <item row="2" column="0">
+              <widget class="QLabel" name="label_3">
+               <property name="text">
+                <string>Formula</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QLineEdit" name="formulaEdit"/>
+             </item>
+             <item row="5" column="0">
+              <widget class="QLabel" name="label_4">
+               <property name="text">
+                <string>X-Ray Energy (keV)</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="1">
+              <spacer name="verticalSpacer">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>10</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="5" column="1">
+              <widget class="QComboBox" name="xrayEnergyEdit">
+               <property name="editable">
+                <bool>true</bool>
+               </property>
+               <item>
+                <property name="text">
+                 <string>8.0478</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>17.45</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QGridLayout" name="gridLayout">
+             <item row="3" column="1">
+              <widget class="QComboBox" name="neutronUnit">
+               <item>
+                <property name="text">
+                 <string>10⁻⁻⁶ Å⁻²</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="5" column="1">
+              <widget class="QComboBox" name="xrayUnit">
+               <item>
+                <property name="text">
+                 <string>10⁻⁻⁶ Å⁻²</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="5" column="3">
+              <widget class="QLineEdit" name="xraySLDimag"/>
+             </item>
+             <item row="3" column="3">
+              <widget class="QLineEdit" name="neutronSLDimag"/>
+             </item>
+             <item row="5" column="2">
+              <widget class="QLineEdit" name="xraySLD"/>
+             </item>
+             <item row="3" column="0">
+              <widget class="QLabel" name="label_6">
+               <property name="text">
+                <string>Neutron SLD</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="2">
+              <widget class="QLineEdit" name="neutronSLD"/>
+             </item>
+             <item row="5" column="0">
+              <widget class="QLabel" name="label_7">
+               <property name="text">
+                <string>X-Ray SLD</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="2" colspan="2">
+              <widget class="QLabel" name="resultName">
+               <property name="styleSheet">
+                <string notr="true">font: 12pt;</string>
+               </property>
+               <property name="text">
+                <string>&lt;Select Material&gt;</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0" colspan="2">
+              <widget class="QComboBox" name="densityVolumeSelect">
+               <item>
+                <property name="text">
+                 <string>Density (g/cm³)</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>FU Volume (Å³)</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="2" column="2">
+              <widget class="QLineEdit" name="densityVolume"/>
+             </item>
+             <item row="1" column="0" colspan="2">
+              <widget class="QLabel" name="label_5">
+               <property name="styleSheet">
+                <string notr="true">font: 12pt;</string>
+               </property>
+               <property name="text">
+                <string>Resulting Data:</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTableWidget" name="resultTable">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>1</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="editTriggers">
+           <set>QAbstractItemView::NoEditTriggers</set>
+          </property>
+          <property name="showDropIndicator" stdset="0">
+           <bool>false</bool>
+          </property>
+          <property name="alternatingRowColors">
+           <bool>true</bool>
+          </property>
+          <property name="selectionBehavior">
+           <enum>QAbstractItemView::SelectRows</enum>
+          </property>
+          <property name="sortingEnabled">
+           <bool>true</bool>
+          </property>
+          <attribute name="verticalHeaderVisible">
+           <bool>false</bool>
+          </attribute>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_2">
+       <attribute name="title">
+        <string>Enter Material</string>
+       </attribute>
+       <widget class="QTableWidget" name="entryTable">
+        <property name="geometry">
+         <rect>
+          <x>30</x>
+          <y>50</y>
+          <width>291</width>
+          <height>381</height>
+         </rect>
+        </property>
+        <property name="horizontalScrollBarPolicy">
+         <enum>Qt::ScrollBarAlwaysOff</enum>
+        </property>
+        <attribute name="horizontalHeaderStretchLastSection">
+         <bool>true</bool>
+        </attribute>
+        <column>
+         <property name="text">
+          <string>Value</string>
+         </property>
+        </column>
+       </widget>
+       <widget class="QPushButton" name="pushButton">
+        <property name="geometry">
+         <rect>
+          <x>360</x>
+          <y>180</y>
+          <width>151</width>
+          <height>101</height>
+         </rect>
+        </property>
+        <property name="text">
+         <string>Add To Database</string>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="tab_3">
+       <attribute name="title">
+        <string>SLD Calculator</string>
+       </attribute>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>formulaEdit</sender>
+   <signal>returnPressed()</signal>
+   <receiver>SLDDBWindow</receiver>
+   <slot>searchDatabase()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>232</x>
+     <y>116</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>578</x>
+     <y>4</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>descriptionEdit</sender>
+   <signal>returnPressed()</signal>
+   <receiver>SLDDBWindow</receiver>
+   <slot>searchDatabase()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>232</x>
+     <y>92</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>472</x>
+     <y>8</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>nameEdit</sender>
+   <signal>returnPressed()</signal>
+   <receiver>SLDDBWindow</receiver>
+   <slot>searchDatabase()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>211</x>
+     <y>60</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>373</x>
+     <y>7</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>resultTable</sender>
+   <signal>cellDoubleClicked(int,int)</signal>
+   <receiver>SLDDBWindow</receiver>
+   <slot>selectItem(int,int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>466</x>
+     <y>296</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>606</x>
+     <y>139</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>densityVolumeSelect</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>SLDDBWindow</receiver>
+   <slot>updateResult()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>348</x>
+     <y>103</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>696</x>
+     <y>17</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>neutronUnit</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>SLDDBWindow</receiver>
+   <slot>updateResult()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>392</x>
+     <y>134</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>696</x>
+     <y>42</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>xrayUnit</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>SLDDBWindow</receiver>
+   <slot>updateResult()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>373</x>
+     <y>161</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>697</x>
+     <y>83</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>xrayEnergyEdit</sender>
+   <signal>currentTextChanged(QString)</signal>
+   <receiver>SLDDBWindow</receiver>
+   <slot>updateResult()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>180</x>
+     <y>152</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>695</x>
+     <y>126</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>xrayEnergyEdit</sender>
+   <signal>editTextChanged(QString)</signal>
+   <receiver>SLDDBWindow</receiver>
+   <slot>updateResult()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>148</x>
+     <y>158</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>697</x>
+     <y>167</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>searchDatabase()</slot>
+  <slot>selectItem(int,int)</slot>
+  <slot>updateResult()</slot>
+ </slots>
+</ui>
