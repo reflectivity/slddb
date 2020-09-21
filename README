@@ -1,0 +1,19 @@
+This is the development version for the SLD Database. To test on you local machine:
+
+1. Install python3 packages for periodictable, flask, bokeh
+2. Set environment variables:
+    - PYTHONPATH to directory of repository
+	- FLASK_APP = flaskr
+3. Create database with "python3 create_database.py"
+4. Run "flask run" and visit http://127.0.0.1:5000/
+
+The database is already filled with all elements and the densities for those. SLD calculation should therefore work. 
+Up to now there is no interface to enter data, yet. This can, however, be done through the python interface manually:
+	$ from slddb import *
+	$ db=SLDDB(DB_FILE)
+	$ db.add_material('test', 'Fe2O3', density=7.8)
+	
+You can also add additional fields to that entry, currently limited to: E_x, FU_volume, HR_fomula, SLD_n, SLD_x, description.
+Database queary from python is done using db.search_material(field=value).
+
+There is also a simple Qt5 interface that can be started with "slddbqt.py".
