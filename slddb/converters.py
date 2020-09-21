@@ -146,6 +146,16 @@ class CArray(Converter):
             shape=None
         return frombuffer(db_data[dstart:], dtype=dtype).reshape(shape)
 
+    def revert_serializable(self, db_data):
+        if db_data is None:
+            return None
+        else:
+            data=self.revert(db_data)
+            if data.dtype == complex:
+                return str(data)
+            else:
+                return data.tolist()
+
 class CLimited(CType):
     # a converter for numbers that checks the range
     def __init__(self, fromtype, db_type,

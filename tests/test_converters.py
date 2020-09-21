@@ -1,4 +1,5 @@
 import unittest
+import json
 from datetime import datetime
 from slddb.converters import CType, CLimited, CArray, CFormula, CComplex, Converter, CDate
 from slddb.material import Formula
@@ -106,7 +107,6 @@ class TestConverter(unittest.TestCase):
         self.assertFalse(conv.validate(-3.1))
         self.assertFalse(conv.validate(5.5))
 
-
     def test_array_general(self):
         conv=CArray()
         a=array([1,2,4,5,6])
@@ -165,3 +165,23 @@ class TestConverter(unittest.TestCase):
         self.assertFalse(conv.validate(-4.0))
         self.assertFalse(conv.validate('abc'))
 
+    def test_serialize(self):
+        conv=CType(float, float)
+        json.dumps(conv.revert_serializable(2.3))
+
+        conv=CDate()
+        now=datetime.now()
+        # round off the sub-seconds
+        now=now.strftime('%Y-%m-%d %H:%M:%S')
+        json.dumps(conv.revert_serializable(now))
+
+        conv=CComplex()
+        json.dumps(conv.revert_serializable(None))
+        json.dumps(conv.revert_serializable(conv.convert(14.5+3j)))
+
+        conv=CArray()
+        a=array([1,2,4,5,6])
+        c=array([1,2,4,5,6], dtype=complex)
+        json.dumps(conv.revert_serializable(None))
+        json.dumps(conv.revert_serializable(conv.convert(a)))
+        json.dumps(conv.revert_serializable(conv.convert(c)))

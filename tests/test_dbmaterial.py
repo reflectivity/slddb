@@ -1,4 +1,5 @@
 import unittest
+import json
 from slddb import SLDDB
 
 
@@ -26,6 +27,11 @@ class TestMaterialDB(unittest.TestCase):
         self.assertEqual(res['name'], 'Iron Oxide')
         self.assertEqual(res['formula'], 'Fe2O3')
         self.assertIsNone(res['FU_volume'])
+
+    def test_serializable_search(self):
+        self.db.add_material('Iron Oxide', 'Fe2O3', density=5.24)
+        res=self.db.search_material(name='iron', serializable=True)[0]
+        json.dumps(res)
 
     def test_search_fail(self):
         with self.assertRaises(KeyError):
