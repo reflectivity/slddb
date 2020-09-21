@@ -70,6 +70,11 @@ class TestMaterial(unittest.TestCase):
             self.assertAlmostEqual(sld.real,  4.274e-05)
             self.assertAlmostEqual(sld.imag, -9.5604e-07)
 
+    def test_xray_all(self):
+        m2=Material([(Element(self.db.db, 'Fe'), 2.0),
+                     (Element(self.db.db, 'O'), 3.0)], dens=5.24)
+        E,delta=m2.delta_vs_E()
+
     def test_magnetic(self):
         m2=Material([(Element(self.db.db, 'Fe'), 2.0),
                      (Element(self.db.db, 'O'), 3.0)], dens=5.24, mu=3.5)
@@ -77,7 +82,6 @@ class TestMaterial(unittest.TestCase):
         #self.assertAlmostEqual(m2.M, 0.)
         m2.rho_m
         m2.M
-
 
     def test_string_conversion(self):
         m2=Material([(Element(self.db.db, 'Mo'), 1.0),

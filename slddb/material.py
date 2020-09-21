@@ -4,6 +4,7 @@ of x-ray and neutron SLDs for different applications.
 """
 
 import re
+from numpy import array
 from collections import OrderedDict
 from .constants import u2g, r_e
 
@@ -128,6 +129,14 @@ class Material():
     def delta_of_E(self, E):
         f=self.f_of_E(E)
         return f*r_e*self.fu_dens*1e-8 # Å^-1
+
+    def delta_vs_E(self):
+        # generate full energy range data
+        E=self.elements[0][0].E
+        for element, number in self.elements:
+            E=E[(E>=element.E.min())&(E<=element.E.max())]
+        delta=array([self.delta_of_E(Ei) for Ei in E])
+        return E,delta
 
     @property
     def dens(self):

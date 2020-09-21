@@ -7,6 +7,11 @@ from slddb.dbconfig import DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA, db_loo
 from slddb.constants import Cu_kalpha, Mo_kalpha
 from slddb.material import Material, Formula
 
+try:
+    from .flask_embed import get_script
+except ImportError:
+    def get_script(*args): return ''
+
 app=Flask("ORSO SLD Data Base", template_folder='flaskr/templates',
           static_folder='flaskr/static')
 
@@ -68,7 +73,9 @@ def select_material():
                                                          "Raised when tried to parse material = %s"%res[0])
 
     out=result_table(material, res[0]['name'], res[0]['description'])
-    return render_template('sldcalc.html', result_table=out)
+    E,delta=material.delta_vs_E()
+    script=get_script(E, delta.real, delta.imag)
+    return render_template('sldcalc.html', result_table=out, script=script)
 
 @app.route('/material', methods=['GET'])
 def calculate_sld():
@@ -82,7 +89,9 @@ def calculate_sld():
             return render_template('sldcalc.html', result_table=repr(e)+'<br/>'+str(f))
         else:
             out=result_table(m, "User input")
-            return render_template('sldcalc.html', result_table=out)
+            E, delta=m.delta_vs_E()
+            script=get_script(E, delta.real, delta.imag)
+            return render_template('sldcalc.html', result_table=out, script=script)
     return render_template('sldcalc.html')
 
 def result_table(material, name, description=""):
@@ -134,6 +143,10 @@ def calc_api():
             out['rho_n_mag']=repr(material.rho_m)
             out['rho_Cu_kalpha']=repr(material.delta_of_E(Cu_kalpha))
             out['rho_Mo_kalpha']=repr(material.delta_of_E(Mo_kalpha))
+            E,delta=material.delta_vs_E()
+            out['xray_E']=E.tolist()
+            out['xray_delta_real']=delta.real.tolist()
+            out['xray_delta_imag']=delta.imag.tolist()
             return json.dumps(out)
 
 def select_api():
@@ -153,6 +166,10 @@ def select_api():
     out['rho_n_mag']=repr(material.rho_m)
     out['rho_Cu_kalpha']=repr(material.delta_of_E(Cu_kalpha))
     out['rho_Mo_kalpha']=repr(material.delta_of_E(Mo_kalpha))
+    E, delta=material.delta_vs_E()
+    out['xray_E']=E.tolist()
+    out['xray_delta_real']=delta.real.tolist()
+    out['xray_delta_imag']=delta.imag.tolist()
     return json.dumps(out)
 
 def search_api():

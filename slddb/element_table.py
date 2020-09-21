@@ -120,7 +120,7 @@ class Elements():
                     isotopes.append((Z, isotope, abundance))
 
             if element.neutron.b_c is not None:
-                b=array([element.neutron.b_c-1j*(element.neutron.b_c_i or 0.)])
+                b=array([element.neutron.b_c+1j*(element.neutron.b_c_i or 0.)])
                 nid=self.add_sldata(b)
             else:
                 nid=-1
