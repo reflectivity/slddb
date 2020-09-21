@@ -1,0 +1,48 @@
+
+table.withborder {
+  border-collapse: collapse;
+}
+
+table.withborder td,
+table.withborder th {
+      border: 1px solid black;
+      padding: 2px;
+    }
+
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  overflow: hidden;
+  background-color: #ddd;
+}
+
+li {
+  float: left;
+}
+
+li a {
+  display: block;
+  color: #000;
+  padding: 8px 16px;
+  text-decoration: none;
+}
+
+li.about{
+  float:right;
+}
+
+li.about a {
+  display: block;
+  color: #fff;
+  background-color: #000;
+  padding: 8px 16px;
+  text-decoration: none;
+}
+
+/* Change the link color on hover */
+li a:hover {
+  background-color: #555;
+  color: white;
+}

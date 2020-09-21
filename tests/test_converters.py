@@ -75,7 +75,7 @@ class TestConverter(unittest.TestCase):
         start_formula=str(Formula('Fe2O3'))
         self.assertEqual(start_formula, conv.revert(conv.convert(start_formula)))
         with self.assertRaises(ValueError):
-            conv.convert("Beer")
+            conv.convert("z1o")
 
     def test_date(self):
         conv=CDate()

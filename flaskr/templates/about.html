@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<center>
+    <p>
+        This is a database for materials for scattering length density (SLD)
+        calculations for neutron and x-ray reflectometry and small angle scattering.
+        It is provided by the Open Reflectometry Standards Organization (ORDO):
+        <br/>
+        <a href="https://www.reflectometry.org/">ORSO Website</a>
+    </p>
+    <p>
+        In addition to this website manual search we provide a simple API for
+        that can be called by other software and provides data as JSON text.
+    </p>
+    <p>
+        Usage:<br/><br/>
+
+        Manual calculation of SLD form formula and density values:<br/>
+        <i>https://{this website}/api?formula={}&density={}&sldcalc=true</i>
+        <br/><br/>
+
+        Retrieve a list of fields that can be used for database queries.<br/>
+        <i>https://{this website}/api?get_fields=True</i>
+        <br/><br/>
+
+        Search database for material using arbitrary fields.<br/>
+        <i>https://{this website}/api?field1={}&field2={}</i>
+        <br/><br/>
+
+        Manual calculation of SLD form formula and density values.<br/>
+        <i>https://{this website}/api?formula={}&density={}&sldcalc=true</i>:
+
+    </p>
+
+</center>
+{% endblock %}

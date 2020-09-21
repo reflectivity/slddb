@@ -3,8 +3,9 @@ Class to hold information for one material and allow calculation
 of x-ray and neutron SLDs for different applications.
 """
 
-from .constants import u2g, r_e
 import re
+from collections import OrderedDict
+from .constants import u2g, r_e
 
 SUBSCRIPT_DIGITS="₀₁₂₃₄₅₆₇₈₉"
 
@@ -17,7 +18,8 @@ class Formula(list):
                "Os?|P[abdmortu]?|R[abefghnu]|S[bcegimnr]?|T[abcehilm]|"
                "Uu[bhopqst]|U|V|W|Xe|Yb?|Z[nr]")
 
-    def __init__(self, string):
+    def __init__(self, string, sort=True):
+        self._do_sort=sort
         self.HR_formula=string
         list.__init__(self, [])
         self.parse_string(string)
@@ -34,35 +36,37 @@ class Formula(list):
 
     def parse_group(self, group):
         out=[]
-        prev=re.search(self.elements, group)
-        if prev is None:
+        prev=re.search(self.elements, group, flags=re.IGNORECASE)
+        if prev is None or prev.start()!=0:
             raise ValueError('Did not find any valid elemnt in string')
         pos=prev.end()
         while pos<len(group):
-            next=re.search(self.elements, group[pos:])
+            next=re.search(self.elements, group[pos:], flags=re.IGNORECASE)
             if next is None:
                 break
             if next.start()==0:
-                out.append((prev.string[prev.start():prev.end()], 1.0))
+                out.append((prev.string[prev.start():prev.end()].capitalize(), 1.0))
             else:
-                out.append((prev.string[prev.start():prev.end()], float(group[pos:pos+next.start()])))
+                out.append((prev.string[prev.start():prev.end()].capitalize(),
+                            float(group[pos:pos+next.start()])))
             prev=next
             pos+=next.end()
         if pos==len(group):
-            out.append((prev.string, 1.0))
+            out.append((prev.string[prev.start():].capitalize(), 1.0))
         else:
-            out.append((prev.string[prev.start():prev.end()], float(group[pos:])))
+            out.append((prev.string[prev.start():prev.end()].capitalize(), float(group[pos:])))
         return out
 
     def merge_same(self):
-        elements={}
+        elements=OrderedDict({})
         for ele, amount in self:
             if ele in elements:
                 elements[ele]+=amount
             else:
                 elements[ele]=amount
         self[:]=[items for items in elements.items()]
-        self.sort()
+        if self._do_sort:
+            self.sort()
 
     def __str__(self):
         output=''

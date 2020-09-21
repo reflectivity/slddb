@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <p><center>
+    <form action="{{ url_for('calculate_sld') }}" method="get">
+      <table class="withborder">
+        <tr><td>Field</td><td>value for calculation</td></tr>
+        <tr><td>Formula</td><td><input name="formula" id="compound formula" value="{{ request.args['formula'] }}"></td></tr>
+        <tr><td>Density (g/cm³)</td><td><input name="density" id="compound density" value="{{ request.args['density'] }}"></td></tr>
+        <tr><td colspan="2"><center><input type="submit"></center></td> </tr>
+      </table>
+    </form>
+    </center>
+  </p>
+
+  <p><center>
+    <form action="{{ url_for('start_page') }}">
+      <button type="submit" >back to database query</button>
+    </form>
+    </center>
+  </p>
+
+  {% if result_table %}
+  <p><center>
+  <h2>Result of SLD calculation:</h2>
+  <form method="post" action="{{ url_for('select_material') }}">
+      {{ result_table|safe }}
+  </form>
+  </center></p>
+  {% endif %}
+
+{% endblock %}

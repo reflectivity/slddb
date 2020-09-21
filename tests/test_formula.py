@@ -14,10 +14,11 @@ class TestFormula(unittest.TestCase):
         Formula('H2 O')
         Formula('Cr3O4')
         Formula('H12 C5O8')
+        Formula('H2O')
 
     def test_invalid(self):
         with self.assertRaises(ValueError):
-            f=Formula('Beer')
+            f=Formula('z')
         with self.assertRaises(ValueError):
             f=Formula('')
         with self.assertRaises(ValueError):
@@ -35,6 +36,10 @@ class TestFormula(unittest.TestCase):
         self.assertEqual(f1,f2)
 
         f2=Formula('ClNa1.0')
+        self.assertEqual(f1,f2)
+
+        f1=Formula("H2O")
+        f2=Formula("OH2")
         self.assertEqual(f1,f2)
 
     def test_strparse(self):

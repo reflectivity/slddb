@@ -10,3 +10,4 @@ Contributers:
 """
 
 from .database import SLDDB
+from .dbconfig import DB_FILE

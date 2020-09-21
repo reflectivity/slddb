@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <p><center>
+    <form action="{{ url_for('search_query') }}" method="post">
+      <table class="withborder">
+        <tr><td>Field</td><td>search for value</td></tr>
+        <tr><td>Name</td><td><input name="name" id="compound name" value="{{ request.form['name'] }}"></td></tr>
+        <tr><td>Formula</td><td><input name="formula" id="compound formula" value="{{ request.form['formula'] }}"></td></tr>
+        <tr><td>Description</td><td><input name="description" id="compound description" value="{{ request.form['description'] }}"></td></tr>
+        <tr><td colspan="2"><center><input type="submit"></center></td> </tr>
+      </table>
+    </form>
+    </center>
+  </p>
+
+  {% if result_table %}
+  <p><center>
+  <form method="post" action="{{ url_for('select_material') }}">
+      {{ result_table|safe }}
+  </form>
+  </center></p>
+  {% endif %}
+
+{% endblock %}

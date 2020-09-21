@@ -27,7 +27,7 @@ DB_MATERIALS_CONVERTERS=     [pint, cdate,         cdate, cint,       cint,
 DB_MATERIALS_FIELD_DEFAULTS= [None, 'CURRENT_TIMESTAMP',       None, 0,     0,
                               None,     None,   None, None,
                               None, None, None, None, None]
-DB_MATERIALS_HIDDEN_DATA=    []#'created', 'updated', 'accessed', 'selected']
+DB_MATERIALS_HIDDEN_DATA=    ['created', 'updated', 'accessed', 'selected']
 db_lookup=dict([(field, (i, converter, default))
                 for i, (field, converter, default) in
                 enumerate(zip(DB_MATERIALS_FIELDS,

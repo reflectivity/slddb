@@ -35,6 +35,10 @@ class Converter():
         # Default behavior is to return the database data directly
         return db_data
 
+    def revert_serializable(self, db_data):
+        # generage json serialisable value, default is the normal value
+        return self.revert(db_data)
+
 class CType(Converter):
     # converts between a python type and SQLite type
 
@@ -82,6 +86,10 @@ class CDate(Converter):
             return  datetime.strptime(db_data, '%Y-%m-%d %H:%M:%S')
         else:
             return None
+
+    def revert_serializable(self, db_data):
+        return db_data
+
 
 class CFormula(Converter):
     def __init__(self):
@@ -171,3 +179,9 @@ class CComplex(CArray):
             return None
         else:
             return CArray.revert(self, db_data)[0]
+
+    def revert_serializable(self, db_data):
+        if db_data is None:
+            return None
+        else:
+            return str(self.revert(db_data))

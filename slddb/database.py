@@ -42,7 +42,7 @@ class SLDDB():
         if commit:
             self.db.commit()
 
-    def search_material(self, join_and=True, **data):
+    def search_material(self, join_and=True, serializable=False, **data):
         for key, value in data.items():
             if not key in DB_MATERIALS_FIELDS:
                 raise KeyError('%s is not a valid data field'%key)
@@ -72,7 +72,7 @@ class SLDDB():
                     qstr+='  OR '
             qstr=qstr[:-5]
         c=self.db.cursor()
-        c.execute(sstr+qstr+' ORDER BY accessed DESC', qlst)
+        c.execute(sstr+qstr+' ORDER BY accessed DESC LIMIT 100', qlst)
         results=c.fetchall()
         keys=[key for key, *ignore in c.description]
         # update access counter
@@ -82,9 +82,14 @@ class SLDDB():
 
         # convert values
         output=[]
-        for row in results:
-            rowdict={key: db_lookup[key][1].revert(value) for key,value in zip(keys, row)}
-            output.append(rowdict)
+        if serializable:
+            for row in results:
+                rowdict={key: db_lookup[key][1].revert_serializable(value) for key,value in zip(keys, row)}
+                output.append(rowdict)
+        else:
+            for row in results:
+                rowdict={key: db_lookup[key][1].revert(value) for key,value in zip(keys, row)}
+                output.append(rowdict)
         return output
 
     def select_material(self, result):
