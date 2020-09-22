@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <center>
+        {% if comment %}
+        <p style="color: #f00;">
+            {{comment}}
+        </p>
+        {% endif %}
+
+
+    <form method="POST">
+      <table class="withborder">
+    {%for field in fields%}
+          <tr><td>{{field}}</td><td><input name="{{field}}" id="compound {{field}}"
+           value="{{ request.form[field] }}"></td></tr>
+    {%endfor%}
+        <tr><td colspan="2"><center><input type="submit"></center></td> </tr>
+      </table>
+    </form>
+    </center>
+
+{% endblock %}

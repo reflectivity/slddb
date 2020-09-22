@@ -9,6 +9,7 @@ from slddb.material import Material, Formula
 from .api import calc_api, select_api, search_api
 from .querydb import search_db
 from .calcsld import calculate_selection, calculate_user
+from .inputdb import input_form, input_material
 
 app=Flask("ORSO SLD Data Base", template_folder='flaskr/templates',
           static_folder='flaskr/static')
@@ -20,6 +21,15 @@ def start_page():
 @app.route('/about')
 def about_page():
     return render_template('about.html')
+
+@app.route('/input')
+def input_page():
+    return input_form()
+
+@app.route('/input', methods=['POST'])
+def eval_input():
+    return input_material(request.form)
+
 
 @app.route('/search', methods=['POST'])
 def search_query():

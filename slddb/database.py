@@ -34,6 +34,13 @@ class SLDDB():
         din['formula']=db_lookup['formula'][1].convert(formula)
 
         c=self.db.cursor()
+        # check if entry already exists
+        qstr="SELECT * FROM %s WHERE %s"%(
+            DB_MATERIALS_NAME, ' AND '.join(["%s=?"%key for key in din.keys()]))
+        c.execute(qstr, tuple(din.values()))
+        if len(c.fetchall())!=0:
+            raise ValueError("Entry with this data already exists")
+
         qstr="INSERT INTO %s (%s) VALUES (%s)"%(
             DB_MATERIALS_NAME, ", ".join(din.keys()),
             ', '.join(["?" for key in din.keys()]))

@@ -10,32 +10,36 @@ class TestMaterialDB(unittest.TestCase):
         cls.db.create_database()
 
     def test_add_item(self):
-        self.db.add_material('Iron Oxide', 'Fe2O3', density=5.24)
+        self.db.add_material('Iron Oxide 1', 'Fe2O3', density=5.24)
         self.db.add_material('Nickel', 'Ni', density="8.9")
 
         with self.assertRaises(KeyError):
-            self.db.add_material('TestMaterial', 'Fe2O3', beer='beer', density=2.0)
+            self.db.add_material('TestMaterial 1', 'Fe2O3', beer='beer', density=2.0)
         with self.assertRaises(ValueError):
-            self.db.add_material('TestMaterial', 'Fe2O3')
+            self.db.add_material('TestMaterial 2', 'Fe2O3')
 
     def test_search(self):
-        self.db.add_material('Iron Oxide', 'Fe2O3', density=5.24)
-        self.db.add_material('Nickel', 'Ni', density="8.9")
+        self.db.add_material('Iron Oxide 2', 'Fe2O3', density=5.24)
+        self.db.add_material('Nickel 1', 'Ni', density="8.9")
 
-        res=self.db.search_material(name='iron')[0]
+        res=self.db.search_material(name='oxide 2')[0]
         self.assertEqual(res['density'], 5.24)
-        self.assertEqual(res['name'], 'Iron Oxide')
+        self.assertEqual(res['name'], 'Iron Oxide 2')
         self.assertEqual(res['formula'], 'Fe2O3')
         self.assertIsNone(res['FU_volume'])
 
     def test_serializable_search(self):
-        self.db.add_material('Iron Oxide', 'Fe2O3', density=5.24)
+        self.db.add_material('Iron Oxide 3', 'Fe2O3', density=5.24)
         res=self.db.search_material(name='iron', serializable=True)[0]
         json.dumps(res)
 
     def test_search_fail(self):
         with self.assertRaises(KeyError):
             self.db.search_material(beer='beer')
+        self.db.add_material('Iron Oxide 4', 'Fe2O3', density=5.24)
+        with self.assertRaises(ValueError):
+            self.db.add_material('Iron Oxide 4', 'Fe2O3', density=5.24)
+
 
     def test_search_empty(self):
         res=self.db.search_material()
@@ -58,7 +62,7 @@ class TestMaterialDB(unittest.TestCase):
 
 
     def test_access_counter(self):
-        self.db.add_material('Iron Oxide', 'Fe2O3', density=5.24)
+        self.db.add_material('Iron Oxide 5', 'Fe2O3', density=5.24)
         r1=self.db.search_material(name='iron')[0]['accessed']
         r2=self.db.search_material(name='iron')[0]['accessed']
         r3=self.db.search_material(name='iron')[0]['accessed']
