@@ -40,7 +40,7 @@ def calculate_selection(ID):
     E, delta=material.delta_vs_E()
     script=get_script(E, delta.real, delta.imag)
     return render_template('sldcalc.html', result_table=out, script=script,
-                           formula=str(material), density=material.dens, mu=material.mu)
+                           formula=res[0]['formula'], density=material.dens, mu=material.mu)
 
 def calculate_user(formula, density, is_density, mu):
     db=SLDDB(DB_FILE)
