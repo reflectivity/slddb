@@ -99,7 +99,8 @@ class SLDDB():
                    dens=result['density'],
                    fu_volume=result['FU_volume'],
                    rho_n=result['SLD_n'],
-                   xsld=result['SLD_x'], xE=result['E_x'])
+                   xsld=result['SLD_x'], xE=result['E_x'],
+                   mu=result['mu'])
 
         ustr='UPDATE %s SET selected = selected + 1 WHERE ID == ?'%DB_MATERIALS_NAME
         c=self.db.cursor()

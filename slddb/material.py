@@ -6,7 +6,7 @@ of x-ray and neutron SLDs for different applications.
 import re
 from numpy import array
 from collections import OrderedDict
-from .constants import u2g, r_e
+from .constants import u2g, r_e, muB, rho_of_M
 
 SUBSCRIPT_DIGITS="₀₁₂₃₄₅₆₇₈₉"
 
@@ -99,12 +99,13 @@ class Material():
     """
     Units used:
     b: fm
-    fu_volume: nm³
-    fu_dens: 1/nm³
+    fu_volume: Å³
+    fu_dens: 1/Å³
     dens: g/cm³
     roh_n: Å^{-2}
     roh_m: Å^{-2}
     mu: muB/FU
+    M: kA/m = emu/cm³
     """
 
     def __init__(self, elements, dens=None, fu_volume=None, rho_n=None, mu=0., xsld=None, xE=None):
@@ -113,11 +114,11 @@ class Material():
         if fu_volume is not None:
             self.fu_dens=1./fu_volume
         elif dens is not None:
-            self.fu_dens=dens/self.fu_mass/u2g*1e-21
+            self.fu_dens=dens/self.fu_mass/u2g*1e-24
         elif rho_n is not None:
-            self.fu_dens=abs(rho_n/self.fu_b)*1e8
+            self.fu_dens=abs(rho_n/self.fu_b)*1e5
         elif xsld is not None and xE is not None:
-            self.fu_dens=abs(xsld/self.f_of_E(xE))*(1e8/r_e)
+            self.fu_dens=abs(xsld/self.f_of_E(xE))*(1e5/r_e)
         else:
             raise ValueError(
                 "Need to provide means to calculate density, {dens, fu_volume, rho_n, xsld+xE}")
@@ -125,15 +126,15 @@ class Material():
 
     @property
     def rho_n(self):
-        return self.fu_b*self.fu_dens*1e-8 # Å^-1
+        return self.fu_b*self.fu_dens*1e-5 # Å^-1
 
     @property
     def rho_m(self):
-        return self.mu*self.fu_dens*1e-8 # TODO: add right conversion factor
+        return self.M*rho_of_M
 
     @property
     def M(self):
-        return self.mu # TODO: add right conversion factor
+        return self.mu*muB*self.fu_dens
 
     def f_of_E(self, E):
         f=0.
@@ -143,7 +144,7 @@ class Material():
 
     def delta_of_E(self, E):
         f=self.f_of_E(E)
-        return f*r_e*self.fu_dens*1e-8 # Å^-1
+        return f*r_e*self.fu_dens*1e-5 # Å^-1
 
     def delta_vs_E(self):
         # generate full energy range data
@@ -155,7 +156,7 @@ class Material():
 
     @property
     def dens(self):
-        return self.fu_mass*u2g*self.fu_dens*1e21 # g/cm³
+        return self.fu_mass*u2g*self.fu_dens*1e24 # g/cm³
 
     @property
     def fu_mass(self):

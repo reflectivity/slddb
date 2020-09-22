@@ -5,8 +5,8 @@
     <form action="{{ url_for('calculate_sld') }}" method="get">
       <table class="withborder">
         <tr><td>Field</td><td>value for calculation</td></tr>
-        <tr><td>Formula</td><td><input name="formula" id="compound formula" value="{{ request.args['formula'] }}"></td></tr>
-        <tr><td>Density (g/cm³)</td><td><input name="density" id="compound density" value="{{ request.args['density'] }}"></td></tr>
+        <tr><td>Formula</td><td><input name="formula" id="compound formula" value="{{ request.args['formula'] or formula }}"></td></tr>
+        <tr><td>Density (g/cm³)</td><td><input name="density" id="compound density" value="{{ request.args['density'] or density }}"></td></tr>
         <tr><td colspan="2"><center><input type="submit"></center></td> </tr>
       </table>
     </form>
@@ -29,6 +29,8 @@
   </center></p>
   {% endif %}
 
+  <center>
   {{script|safe}}
+  </center>
 
 {% endblock %}

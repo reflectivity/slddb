@@ -18,9 +18,9 @@ class TestMaterial(unittest.TestCase):
         self.assertAlmostEqual(m2.dens, 5.24)
 
     def test_volume(self):
-        m1=Material([(Element(self.db.db, 'Ni'), 1.0)], fu_volume=0.010950864)
+        m1=Material([(Element(self.db.db, 'Ni'), 1.0)], fu_volume=10.950864)
         m2=Material([(Element(self.db.db, 'Fe'), 2.0),
-                     (Element(self.db.db, 'O'), 3.0)], fu_volume=0.050604676)
+                     (Element(self.db.db, 'O'), 3.0)], fu_volume=50.604676)
         self.assertAlmostEqual(m1.dens, 8.9, places=6)
         self.assertAlmostEqual(m2.dens, 5.24, places=6)
 

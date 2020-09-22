@@ -10,3 +10,5 @@ sigma_to_b= 0.00027808676 # fm/barn absorption at 1.798Å (sigma=4*pi*b/k)
 Cu_kalpha=8.047823 # keV
 Mo_kalpha=17.4794 # keV
 
+muB=9.2740101e3 # kA/m Å³ - Bohr Magneton scaled to get kA/m from Ä³ FU volume
+rho_of_M=2.853e-9 # Å^-2 from kA/m
