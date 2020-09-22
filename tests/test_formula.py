@@ -16,6 +16,12 @@ class TestFormula(unittest.TestCase):
         Formula('H12 C5O8')
         Formula('H2O')
 
+    def test_isotopes(self):
+        Formula('B[10]4C')
+        Formula('H[2]2O')
+        Formula('OH[2]2')
+        Formula('D2O')
+
     def test_invalid(self):
         with self.assertRaises(ValueError):
             f=Formula('z')

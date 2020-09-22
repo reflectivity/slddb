@@ -14,10 +14,15 @@ class Formula(list):
     """
     Evaluate strings for element chemical fomula.
     """
-    elements=(r"A[cglmrstu]|B[aehikr]?|C[adeflmorsu]?|D[bsy]|E[rsu]|F[emr]?|"
+    elements=(r"A[cglmrstu]|B[aehikr]?|C[adeflmorsu]?|D[bsy]{0,1}|E[rsu]|F[emr]?|"
                "G[ade]|H[efgos]?|I[nr]?|Kr?|L[airu]|M[dgnot]|N[abdeiop]?|"
                "Os?|P[abdmortu]?|R[abefghnu]|S[bcegimnr]?|T[abcehilm]|"
                "Uu[bhopqst]|U|V|W|Xe|Yb?|Z[nr]")
+    isotopes=(r"(A[cglmrstu]|B[aehikr]?|C[adeflmorsu]?|D[bsy]{0,1}|E[rsu]|F[emr]?|"
+               "G[ade]|H[efgos]?|I[nr]?|Kr?|L[airu]|M[dgnot]|N[abdeiop]?|"
+               "Os?|P[abdmortu]?|R[abefghnu]|S[bcegimnr]?|T[abcehilm]|"
+               "Uu[bhopqst]|U|V|W|Xe|Yb?|Z[nr])"
+               "\[[1-9][0-9]{0,2}\]")
 
     def __init__(self, string, sort=True):
         self._do_sort=sort
@@ -37,12 +42,22 @@ class Formula(list):
 
     def parse_group(self, group):
         out=[]
-        prev=re.search(self.elements, group, flags=re.IGNORECASE)
+        mele=re.search(self.elements, group, flags=re.IGNORECASE)
+        miso=re.search(self.isotopes, group, flags=re.IGNORECASE)
+        if miso is not None and miso.start()==mele.start():
+            prev=miso
+        else:
+            prev=mele
         if prev is None or prev.start()!=0:
             raise ValueError('Did not find any valid elemnt in string')
         pos=prev.end()
         while pos<len(group):
-            next=re.search(self.elements, group[pos:], flags=re.IGNORECASE)
+            mele=re.search(self.elements, group[pos:], flags=re.IGNORECASE)
+            miso=re.search(self.isotopes, group[pos:], flags=re.IGNORECASE)
+            if miso is not None and miso.start()==mele.start():
+                next=miso
+            else:
+                next=mele
             if next is None:
                 break
             if next.start()==0:

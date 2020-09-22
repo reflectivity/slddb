@@ -5,19 +5,27 @@ from numpy import array
 from .dbconfig import DB_ELEMENTS_CONVERTERS, DB_ELEMENTS_FIELDS, \
     DB_ELEMENTS_NAME, DB_ISOTOPES_CONVERTERS, DB_ISOTOPES_FIELDS, \
     DB_ISOTOPES_NAME, DB_SLDATA_CONVERTERS, DB_SLDATA_FIELDS, DB_SLDATA_NAME
+from .constants import sigma_to_b
 
 class Element():
     def __init__(self, db, symbol=None, Z=None):
         # get element from database
+        N=None
         if Z is None and symbol is None:
             raise ValueError("Provide either Symbol or Z")
         elif Z is None:
             self.symbol=symbol
+            if symbol == 'D':
+                symb, N='H', 2
+            elif '[' in symbol:
+                symb, N=symbol.rstrip(']').split('[', 1)
+            else:
+                symb=symbol
             c=db.cursor()
             c.execute("SELECT %s FROM %s WHERE %s = ?"%(
                 ', '.join(DB_ELEMENTS_FIELDS),
                 DB_ELEMENTS_NAME,
-                DB_ELEMENTS_FIELDS[1]), (symbol,))
+                DB_ELEMENTS_FIELDS[1]), (symb,))
             qres=c.fetchone()
             self.Z=DB_ELEMENTS_CONVERTERS[0].revert(qres[0])
         else:
@@ -31,16 +39,26 @@ class Element():
             self.symbol=DB_ELEMENTS_CONVERTERS[1].revert(qres[1])
 
         self.name=qres[2]
-        self.mass=qres[3]
-
-        nid=qres[5]
         xid=qres[6]
-
-        self.b=self.get_sldata(nid, c)[0]
         self._xdata=self.get_sldata(xid, c)
 
+        if N is None:
+            self.mass=qres[3]
+            nid=qres[5]
+            self.b=self.get_sldata(nid, c)[0]
+        else:
+            c.execute("SELECT %s FROM %s WHERE %s = ? AND %s = ?"%(
+                ', '.join(DB_ISOTOPES_FIELDS),
+                DB_ISOTOPES_NAME,
+                DB_ISOTOPES_FIELDS[1],
+                DB_ISOTOPES_FIELDS[2],), (self.Z,N))
+            qres=c.fetchone()
+            self.mass=qres[3]
+            nid=qres[4]
+            self.b=self.get_sldata(nid, c)[0]
+
     def get_sldata(self, id, c):
-        c.execute("SELECT %s from %s WHERE %s = ?"%(DB_SLDATA_FIELDS[1],
+        c.execute("SELECT %s FROM %s WHERE %s = ?"%(DB_SLDATA_FIELDS[1],
                                                     DB_SLDATA_NAME,
                                                     DB_SLDATA_FIELDS[0]), (id,))
         res=c.fetchone()
@@ -120,7 +138,8 @@ class Elements():
                     isotopes.append((Z, isotope, abundance))
 
             if element.neutron.b_c is not None:
-                b=array([element.neutron.b_c+1j*(element.neutron.b_c_i or 0.)])
+                b=array([element.neutron.b_c-
+                         1j*(element.neutron.absorption*sigma_to_b or 0.)])
                 nid=self.add_sldata(b)
             else:
                 nid=-1
@@ -153,7 +172,8 @@ class Elements():
         for Z,N,abundance in isotopes:
             isotope=element[N]
             mass=isotope.mass
-            b=array([(isotope.neutron.b_c or 0.)-1j*(isotope.neutron.b_c_i or 0.)])
+            b=array([(isotope.neutron.b_c or 0.)-
+                     1j*(isotope.neutron.absorption*sigma_to_b or 0.)])
             nid=self.add_sldata(b)
 
             data=[convs[i].convert(pi) for i, pi

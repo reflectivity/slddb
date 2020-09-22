@@ -49,6 +49,17 @@ class TestMaterial(unittest.TestCase):
         self.assertAlmostEqual(m1.rho_n.real, 9.4057e-06)
         self.assertAlmostEqual(m1.rho_n.imag, -1.1402e-09)
 
+    def test_neutron_d2o(self):
+        m1=Material([(Element(self.db.db, 'D'), 2.0),
+                     (Element(self.db.db, 'O'), 1.0)], dens=1.11)
+        m2=Material([(Element(self.db.db, 'H[2]'), 2.0),
+                     (Element(self.db.db, 'O'), 1.0)], dens=1.11)
+
+        # compare with value from sld-calculator.appspot.com
+        self.assertAlmostEqual(m1.rho_n.real, 6.3927e-06)
+        self.assertAlmostEqual(m1.rho_n.imag, -1.1398e-13)
+        self.assertEqual(m1.rho_n, m2.rho_n)
+
     def test_neutron_fe2o3(self):
         m2=Material([(Element(self.db.db, 'Fe'), 2.0),
                      (Element(self.db.db, 'O'), 3.0)], dens=5.24)
