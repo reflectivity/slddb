@@ -70,7 +70,16 @@ class Element():
         if not fltr.any():
             return 0.-0j
         else:
-            return fp[fltr][0]-1j*fpp[fltr][0]
+            # linear interpolation between two nearest points
+            E1=E[fltr][0]
+            try:
+                E2=E[fltr][1]
+            except IndexError:
+                return fp[fltr][0]-1j*fpp[fltr][0]
+            else:
+                f1=fp[fltr][0]-1j*fpp[fltr][0]
+                f2=fp[fltr][1]-1j*fpp[fltr][1]
+                return ((E2-Ei)*f1+(Ei-E1)*f2)/(E2-E1)
 
     @property
     def E(self):
