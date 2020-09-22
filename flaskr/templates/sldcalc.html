@@ -6,7 +6,11 @@
       <table class="withborder">
         <tr><td>Field</td><td>value for calculation</td></tr>
         <tr><td>Formula</td><td><input name="formula" id="compound formula" value="{{ request.args['formula'] or formula }}"></td></tr>
-        <tr><td>Density (g/cm³)</td><td><input name="density" id="compound density" value="{{ request.args['density'] or density }}"></td></tr>
+        <tr><td><select id="densinput" name="densinput">
+          <option value="density">Density (g/cm³)</option>
+          <option value="volume">FU Volume (Å³)</option>
+        </select></td><td><input name="density" id="compound density" value="{{ request.args['density'] or density }}"></td></tr>
+        <tr><td>Magnetisation (µB/FU)</td><td><input name="mu" id="compound mu" value="{{ request.args['mu'] or mu }}"></td></tr>
         <tr><td colspan="2"><center><input type="submit"></center></td> </tr>
       </table>
     </form>

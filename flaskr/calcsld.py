@@ -40,13 +40,17 @@ def calculate_selection(ID):
     E, delta=material.delta_vs_E()
     script=get_script(E, delta.real, delta.imag)
     return render_template('sldcalc.html', result_table=out, script=script,
-                           formula=str(material), density=material.dens)
+                           formula=str(material), density=material.dens, mu=material.mu)
 
-def calculate_user(formula, density):
+def calculate_user(formula, density, is_density, mu):
     db=SLDDB(DB_FILE)
     try:
-        m=Material([(db.elements.get_element(element), amount) for element, amount in formula],
-               dens=density)
+        if is_density:
+            m=Material([(db.elements.get_element(element), amount) for element, amount in formula],
+                   dens=density, mu=mu)
+        else:
+            m=Material([(db.elements.get_element(element), amount) for element, amount in formula],
+                       fu_volume=density, mu=mu)
     except Exception as e:
         return render_template('sldcalc.html', result_table=repr(e)+'<br/>'+str(f))
     else:

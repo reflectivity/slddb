@@ -46,7 +46,9 @@ def select_material():
 def calculate_sld():
     if 'formula' in request.args and 'density' in request.args:
         f=Formula(request.args['formula'], sort=False)
-        return calculate_user(f, float(request.args['density']))
+        return calculate_user(f, float(request.args['density']),
+                              request.args['densinput']=='density',
+                              float(request.args['mu']))
     else:
         return render_template('sldcalc.html')
 
