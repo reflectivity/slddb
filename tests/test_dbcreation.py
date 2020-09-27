@@ -62,3 +62,47 @@ class TestCreateDB(unittest.TestCase):
             self.assertEqual(s1.mass, s2.mass)
             self.assertEqual(s1.b, s2.b)
             testing.assert_array_equal(s1._xdata, s2._xdata)
+
+    def test_add_field(self):
+        global dbconfig
+        # call without changes
+        self.db.update_fields()
+
+        # call with appending column
+        dbconfig.DB_MATERIALS_FIELDS.append('testadd')
+        dbconfig.DB_MATERIALS_CONVERTERS.append(dbconfig.DB_MATERIALS_CONVERTERS[-1])
+        dbconfig.DB_MATERIALS_FIELD_DEFAULTS.append(dbconfig.DB_MATERIALS_FIELD_DEFAULTS[-1])
+        dbconfig.db_lookup=dict([(field, (i, converter, default))
+                for i, (field, converter, default) in
+                enumerate(zip(dbconfig.DB_MATERIALS_FIELDS,
+                              dbconfig.DB_MATERIALS_CONVERTERS,
+                              dbconfig.DB_MATERIALS_FIELD_DEFAULTS))])
+
+        self.db.update_fields()
+
+        # call with inserted column
+        with self.assertRaises(ValueError):
+            dbconfig.DB_MATERIALS_FIELDS.insert(5, 'testadd2')
+            dbconfig.DB_MATERIALS_CONVERTERS.insert(5, dbconfig.DB_MATERIALS_CONVERTERS[-1])
+            dbconfig.DB_MATERIALS_FIELD_DEFAULTS.insert(5, dbconfig.DB_MATERIALS_FIELD_DEFAULTS[-1])
+            dbconfig.db_lookup=dict([(field, (i, converter, default))
+                for i, (field, converter, default) in
+                enumerate(zip(dbconfig.DB_MATERIALS_FIELDS,
+                              dbconfig.DB_MATERIALS_CONVERTERS,
+                              dbconfig.DB_MATERIALS_FIELD_DEFAULTS))])
+            self.db.update_fields()
+
+        #reset database
+        dbconfig.DB_MATERIALS_FIELDS.pop(-1)
+        dbconfig.DB_MATERIALS_FIELDS.pop(5)
+        dbconfig.DB_MATERIALS_CONVERTERS.pop(-1)
+        dbconfig.DB_MATERIALS_CONVERTERS.pop(5)
+        dbconfig.DB_MATERIALS_FIELD_DEFAULTS.pop(-1)
+        dbconfig.DB_MATERIALS_FIELD_DEFAULTS.pop(5)
+        dbconfig.db_lookup=dict([(field, (i, converter, default))
+            for i, (field, converter, default) in
+            enumerate(zip(dbconfig.DB_MATERIALS_FIELDS,
+                          dbconfig.DB_MATERIALS_CONVERTERS,
+                          dbconfig.DB_MATERIALS_FIELD_DEFAULTS))])
+        self.db=SLDDB(':memory:')
+        self.db.create_database()

@@ -1,7 +1,7 @@
 import unittest
 import json
 from datetime import datetime
-from slddb.converters import CType, CLimited, CArray, CFormula, CComplex, Converter, CDate
+from slddb.converters import CType, CLimited, CArray, CFormula, CComplex, Converter, CDate, CSelect, CMultiSelect
 from slddb.material import Formula
 from numpy import array, ndarray, testing
 
@@ -85,6 +85,21 @@ class TestConverter(unittest.TestCase):
         now=datetime.strptime(now.strftime('%Y-%m-%d %H:%M:%S'), '%Y-%m-%d %H:%M:%S')
         self.assertEqual(now, conv.revert(conv.convert(now)))
         self.assertEqual(now, conv.revert(conv.convert(now.strftime('%Y-%m-%d %H:%M:%S'))))
+
+    def test_select(self):
+        conv=CSelect(['o1', 'o2', 'o3'])
+
+        self.assertEqual('o1', conv.revert(conv.convert('o1')))
+        with self.assertRaises(ValueError):
+            conv.convert("o4")
+
+    def test_multiselect(self):
+        conv=CMultiSelect(['o1', 'o2', 'o3'])
+
+        self.assertEqual(['o1'], conv.revert(conv.convert(['o1'])))
+        self.assertEqual(['o2', 'o1'], conv.revert(conv.convert(['o2', 'o1'])))
+        with self.assertRaises(ValueError):
+            conv.convert(["o4"])
 
     def test_non_sqtype(self):
         with self.assertRaises(TypeError):
@@ -185,3 +200,13 @@ class TestConverter(unittest.TestCase):
         json.dumps(conv.revert_serializable(None))
         json.dumps(conv.revert_serializable(conv.convert(a)))
         json.dumps(conv.revert_serializable(conv.convert(c)))
+
+    def test_html(self):
+        for conv in [CType(float, float),
+                     CFormula(),
+                     CLimited(float, float, 0.0, 3.4),
+                     CComplex(),
+                     CSelect(['abc', 'def', 'ghi']),
+                     CMultiSelect(['abc', 'def', 'ghi']),
+                     CDate()]:
+            conv.html_input()%{'field': 'abc', 'value': 'def'}

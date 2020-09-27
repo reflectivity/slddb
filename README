@@ -5,6 +5,7 @@ This is the development version for the SLD Database. To test on you local machi
     - PYTHONPATH to directory of repository
 	- FLASK_APP = flaskr
 3. Create database with "python3 create_database.py"
+3b Expand database by materials from Christy "python3 testdata_christy.py"
 4. Run "flask run" and visit http://127.0.0.1:5000/
 
 The database is already filled with all elements and the densities for those. SLD calculation should therefore work. 

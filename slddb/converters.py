@@ -39,6 +39,11 @@ class Converter():
         # generage json serialisable value, default is the normal value
         return self.revert(db_data)
 
+    def html_input(self):
+        # return a string containing the input key for html entry template
+        return '<input name="%(field)s" id="compound %(field)s" value="%(value)s">'
+
+
 class CType(Converter):
     # converts between a python type and SQLite type
 
@@ -90,6 +95,9 @@ class CDate(Converter):
     def revert_serializable(self, db_data):
         return db_data
 
+    def html_input(self):
+        return '<input name="%(field)s" id="compound %(field)s" value="%(value)s"'\
+               ' placeholder="date: {year}-{month}-{day} {hours}:{minutes}:{seconds}"/>'
 
 class CFormula(Converter):
     def __init__(self):
@@ -101,6 +109,10 @@ class CFormula(Converter):
 
     def revert(self, db_data):
         return db_data
+
+    def html_input(self):
+        return '<input name="%(field)s" id="compound %(field)s" value="%(value)s"'\
+               ' placeholder="exmpl: Fe2O3 / H[2]2O"/>'
 
 class CArray(Converter):
     # convert numpy array to string representation and back
@@ -172,10 +184,22 @@ class CLimited(CType):
         else:
             return False
 
+    def convert(self, data):
+        value=CType.convert(self, data)
+        if (self._low_lim is None or self._low_lim<=value) and (
+                    self._up_lim is None or self._up_lim>=value):
+            return value
+        else:
+            raise ValueError("Value out of range, has to be %s<value<%s"%(
+                self._low_lim, self._up_lim))
+
+    def html_input(self):
+        return '<input name="%%(field)s" id="compound %%(field)s" value="%%(value)s"'\
+               ' placeholder="%s<value<%s"/>'%(self._low_lim, self._up_lim)
+
 class CComplex(CArray):
     def __init__(self):
-        self._shape=(1,)
-        self._ndim=1
+        CArray.__init__(self, shape=(1,), ndim=1)
 
     def convert(self, data):
         if type(data) is str:
@@ -195,3 +219,50 @@ class CComplex(CArray):
             return None
         else:
             return str(self.revert(db_data))
+
+    def html_input(self):
+        return '<input name="%(field)s" id="compound %(field)s" value="%(value)s"'\
+               ' placeholder="complex: (real)+(imag)j"/>'
+
+
+class CSelect(CType):
+    def __init__(self, options):
+        self.options=options
+        CType.__init__(self, str, str)
+
+    def convert(self, data):
+        value=CType.convert(self, data)
+        if not value in self.options:
+            raise ValueError("Value has to be in selection %s"%repr(self.options))
+        return value
+
+    def html_input(self):
+        output='<select name="%(field)s" id="compound %(field)s">'
+        for selection in self.options:
+            output+='<option value="%s">%s</option>'%(selection, selection)
+        output+='</select>'
+        return output
+
+class CMultiSelect(CType):
+    def __init__(self, options):
+        self.options=options
+        CType.__init__(self, list, str)
+
+    def convert(self, data):
+        data=list(data)
+        for value in data:
+            if not value in self.options:
+                raise ValueError("Item have to be in selection %s"%repr(self.options))
+        return repr(data)
+
+    def revert(self, db_data):
+        if db_data is None:
+            return []
+        return eval(db_data)
+
+    def html_input(self):
+        output='<select name="%(field)s" id="compound %(field)s" multiple>'
+        for selection in self.options:
+            output+='<option value="%s">%s</option>'%(selection, selection)
+        output+='</select>'
+        return output

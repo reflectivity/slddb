@@ -79,7 +79,7 @@ class SLDDB():
                     qstr+='  OR '
             qstr=qstr[:-5]
         c=self.db.cursor()
-        c.execute(sstr+qstr+' ORDER BY accessed DESC LIMIT 100', qlst)
+        c.execute(sstr+qstr+' ORDER BY selected DESC, accessed DESC LIMIT 100', qlst)
         results=c.fetchall()
         keys=[key for key, *ignore in c.description]
         # update access counter
@@ -122,6 +122,7 @@ class SLDDB():
                    for fi, ci, di in zip(DB_MATERIALS_FIELDS, DB_MATERIALS_CONVERTERS,
                                      DB_MATERIALS_FIELD_DEFAULTS)]
         qstr='CREATE TABLE %s (%s)'%(DB_MATERIALS_NAME, ", ".join(name_type))
+        print(qstr)
         c.execute(qstr)
         c.close()
         self.db.commit()
@@ -138,12 +139,37 @@ class SLDDB():
         for element in periodictable.elements:
             if element is periodictable.n or element.density is None:
                 continue
+            state='solid'
+            if 'T=' in element.density_caveat:
+                state='liquid'
             self.add_material(element.name.capitalize(),
                               element.symbol,
                               commit=False,
                               description=element.density_caveat,
-                              density=element.density)
+                              density=element.density,
+                              physical_state=state)
         self.db.commit()
+
+    def update_fields(self):
+        # add columns not currently available
+        c=self.db.cursor()
+        c.execute('SELECT * FROM %s LIMIT 1'%DB_MATERIALS_NAME)
+        res=c.fetchall()
+        fields=[col[0] for col in c.description]
+        if len(fields)>=len(DB_MATERIALS_FIELDS):
+            return
+        if DB_MATERIALS_FIELDS[:len(fields)]!=fields:
+            raise ValueError("Can only append fields at the end")
+        # append new columns
+        start=len(fields)
+        name_type=['%s %s %s'%(fi, ci.sql_type, (di is not None) and "DEFAULT %s"%di or "")
+                   for fi, ci, di in zip(DB_MATERIALS_FIELDS[start:], DB_MATERIALS_CONVERTERS[start:],
+                                         DB_MATERIALS_FIELD_DEFAULTS[start:])]
+        c.execute('ALTER TABLE %s ADD %s'%(DB_MATERIALS_NAME,
+            ", ".join(name_type)))
+        c.close()
+        self.db.commit()
+
 
     def __del__(self):
         self.db.close()

@@ -2,7 +2,7 @@
 Configure the database file as well as parameters for DB tables used.
 """
 
-from .converters import CType, CLimited, CArray, CDate, CComplex, CFormula
+from .converters import CType, CLimited, CArray, CDate, CComplex, CFormula, CSelect, CMultiSelect
 
 cstr=CType(str, str)
 cint=CType(int, int)
@@ -21,15 +21,17 @@ DB_MATERIALS_NAME='materials'
 DB_MATERIALS_FIELDS=         ['ID', 'created', 'updated', 'accessed', 'selected',
                               'name', 'description', 'formula', 'HR_fomula',
                               'density', 'FU_volume', 'SLD_n', 'SLD_x', 'E_x',
-                              'mu']
+                              'mu', 'physical_state', 'tags']
 DB_MATERIALS_CONVERTERS=     [pint, cdate,         cdate, cint,       cint,
                               cstr,   cstr,          cformula,      cstr,
                               cposfloat, cposfloat, ccomplex, ccomplex, cfloat,
-                              cfloat]
+                              cfloat, CSelect(['solid', 'liquid', 'gas']),
+                              CMultiSelect(['magnetic', 'polymer', 'biology',
+                                            'membrane', 'lipid'])]
 DB_MATERIALS_FIELD_DEFAULTS= [None, 'CURRENT_TIMESTAMP',       None, 0,     0,
                               None,     None,   None, None,
                               None, None, None, None, None,
-                              0.0]
+                              0.0, 'solid', None]
 DB_MATERIALS_HIDDEN_DATA=    ['created', 'updated', 'accessed', 'selected']
 db_lookup=dict([(field, (i, converter, default))
                 for i, (field, converter, default) in
