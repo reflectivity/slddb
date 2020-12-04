@@ -40,7 +40,7 @@ def select_api(args):
         return repr(e)+'<br >'+"Raised when tried to parse material = %s"%res[0]
 
     out={}
-    out['ID']=res[0]['name']
+    out['ID']=args['ID']
     out['name']=res[0]['name']
     out['formula']=str(material)
     out['density']=material.dens

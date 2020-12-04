@@ -13,10 +13,10 @@
           <td width="" style="background-color: #fafafa"><center><h1>SLD Database</h1>alpha</center>
           <br/>
             <ul>
-              <li><a href="{{ url_for('start_page') }}">Query Database</a></li>
-              <li><a href="{{ url_for('calculate_sld') }}">Calculate SLD</a></li>
-              <li><a href="{{ url_for('input_page') }}">Enter Material</a></li>
-              <li class="about"><a href="{{ url_for('about_page') }}">About</a></li>
+              <li class="{% block nav_start_page %}{% endblock %}"><a href="{{ url_for('start_page') }}">Query Database</a></li>
+              <li class="{% block nav_calculate_sld %}{% endblock %}"><a href="{{ url_for('calculate_sld') }}">Calculate SLD</a></li>
+              <li class="{% block nav_input_page %}{% endblock %}"><a href="{{ url_for('input_page') }}">Enter Material</a></li>
+              <li  class="{% block nav_about %}about{% endblock %}"><a href="{{ url_for('about_page') }}">About</a></li>
             </ul>
           </td>
           <td width="240" />

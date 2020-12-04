@@ -29,6 +29,26 @@ li a {
   text-decoration: none;
 }
 
+li.active a {
+  display: block;
+  color: #000;
+  background-color: #bbb;
+  padding: 8px 16px;
+  text-decoration: none;
+}
+
+li.active_about{
+  float:right;
+}
+
+li.active_about a {
+  display: block;
+  color: #000;
+  background-color: #bbb;
+  padding: 8px 16px;
+  text-decoration: none;
+}
+
 li.about{
   float:right;
 }
