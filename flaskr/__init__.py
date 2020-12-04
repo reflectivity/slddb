@@ -1,7 +1,12 @@
 import json
+import zipfile
+import os
+from io import BytesIO
 from flask import Flask
-from flask import request, render_template
+from flask import request, render_template, send_file
+from werkzeug import FileWrapper
 
+import slddb
 from slddb import SLDDB, DB_FILE, __version__
 from slddb.dbconfig import DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA, db_lookup
 from slddb.material import Material, Formula
@@ -78,6 +83,27 @@ def api_query():
     else:
         return search_api(request.args)
 
+@app.route('/download_db')
+def download_database():
+    result=send_file(DB_FILE, mimetype='application/x-sqlite3', as_attachment=True,
+                     attachment_filename=os.path.basename(DB_FILE), conditional=False)
+    return result
+
+@app.route('/download_api')
+def download_api():
+    # craete a zip file with the python package used on this server
+    mem_zip=BytesIO()
+    package_path=os.path.dirname(slddb.__file__)
+    files=[n for n in os.listdir(package_path) if n.endswith('.py')]
+
+    with zipfile.ZipFile(mem_zip, mode='w', compression=zipfile.ZIP_DEFLATED) as zf:
+        for fi in files:
+            zf.writestr(os.path.join('slddb', fi),
+                        open(os.path.join(package_path, fi), 'rb').read())
+    mem_zip.seek(0)
+    result=send_file(mem_zip, mimetype='application/zip', as_attachment=True,
+                     attachment_filename='slddb.zip', conditional=False)
+    return result
 
 @app.route('/admin/')
 def admin_page():

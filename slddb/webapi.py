@@ -1,4 +1,6 @@
 import json
+import os, pathlib
+import datetime
 
 from urllib import request, parse
 from . import SLDDB, DB_FILE
@@ -40,16 +42,34 @@ class SLD_API():
     def check(self):
         # make sure the local database file is up to date, if not try to download newest version
         if self.first_access:
-            # TODO: Supply local databse file to download and check date here.
+            now=datetime.datetime.now()
+            try:
+                stat=pathlib.Path(DB_FILE).stat()
+            except FileNotFoundError:
+                self.download_db()
+            else:
+                mtime=datetime.datetime.fromtimestamp(stat.st_ctime)
+                if (now-mtime).days>1:
+                    self.download_db()
             self.db=SLDDB(DB_FILE) # after potential update, make connection with local database
             self.first_access=False
         else:
             return
 
+    def download_db(self):
+        res=request.urlopen(WEBAPI_URL+'download_db')
+        data=res.read()
+        if not data.startswith(b'SQLite format 3'):
+            raise ValueError('Error when downloading new database')
+        if os.path.isfile(DB_FILE):
+            os.remove(DB_FILE)
+        with open(DB_FILE, 'wb') as fh:
+            fh.write(data)
+
     def webquery(self, dict):
         data=parse.urlencode(dict)
         #req=request.Request(WEBAPI_URL, data=data, method='GET')  # this will make the method "POST"
-        webdata=request.urlopen(WEBAPI_URL+'?'+data)
+        webdata=request.urlopen(WEBAPI_URL+'api?'+data)
         return json.loads(webdata.read()) # return decoded data
 
     def search(self, **opts):
