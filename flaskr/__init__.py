@@ -2,7 +2,7 @@ import json
 from flask import Flask
 from flask import request, render_template
 
-from slddb import SLDDB, DB_FILE
+from slddb import SLDDB, DB_FILE, __version__
 from slddb.dbconfig import DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA, db_lookup
 from slddb.material import Material, Formula
 
@@ -13,6 +13,10 @@ from .inputdb import input_form, input_material
 
 app=Flask("ORSO SLD Data Base", template_folder='flaskr/templates',
           static_folder='flaskr/static')
+
+@app.context_processor
+def inject_version():
+    return dict(slddb_version=__version__)
 
 @app.route('/')
 def start_page():

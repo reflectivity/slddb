@@ -9,5 +9,10 @@ Contributers:
     Artur Glavic <artur.glavic@psi.ch>
 """
 
+__version__='1.0 alpha'
+
 from .database import SLDDB
 from .dbconfig import DB_FILE
+from .webapi import SLD_API
+
+api=SLD_API()

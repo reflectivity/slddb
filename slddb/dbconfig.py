@@ -14,7 +14,7 @@ cformula=CFormula()
 ccomplex=CComplex()
 carray=CArray()
 
-
+WEBAPI_URL='http://127.0.0.1:5000/api'
 DB_FILE='slddb.db'
 
 DB_MATERIALS_NAME='materials'

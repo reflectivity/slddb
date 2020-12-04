@@ -6,7 +6,7 @@ of x-ray and neutron SLDs for different applications.
 import re
 from numpy import array
 from collections import OrderedDict
-from .constants import u2g, r_e, muB, rho_of_M
+from .constants import u2g, r_e, muB, rho_of_M, Cu_kalpha
 
 SUBSCRIPT_DIGITS="₀₁₂₃₄₅₆₇₈₉"
 
@@ -136,7 +136,7 @@ class Material():
     def M(self):
         return self.mu*muB*self.fu_dens
 
-    def f_of_E(self, E):
+    def f_of_E(self, E=Cu_kalpha):
         f=0.
         for element, number in self.elements:
             f+=number*element.f_of_E(E)
