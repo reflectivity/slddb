@@ -15,7 +15,7 @@ ccomplex=CComplex()
 carray=CArray()
 
 
-DB_FILE='slddb.db'
+DB_FILE='/var/www/html/slddb/slddb.db'
 
 DB_MATERIALS_NAME='materials'
 DB_MATERIALS_FIELDS=         ['ID', 'created', 'updated', 'accessed', 'selected',

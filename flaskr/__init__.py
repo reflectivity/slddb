@@ -11,8 +11,8 @@ from .querydb import search_db
 from .calcsld import calculate_selection, calculate_user
 from .inputdb import input_form, input_material
 
-app=Flask("ORSO SLD Data Base", template_folder='slddb/flaskr/templates',
-          static_folder='slddb/flaskr/static')
+app=Flask("ORSO SLD Data Base", template_folder='/var/www/html/slddb/flaskr/templates',
+          static_folder='/var/www/html/slddb/flaskr/static')
 
 @app.route('/')
 def start_page():
