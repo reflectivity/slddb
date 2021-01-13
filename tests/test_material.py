@@ -112,3 +112,11 @@ class TestMaterial(unittest.TestCase):
         self.assertEqual(e.E.shape, e.f.shape)
         self.assertEqual(e.E.shape, e.fp.shape)
         self.assertEqual(e.E.shape, e.fpp.shape)
+
+    def test_element_strings(self):
+        e=Element(self.db.db, 'H')
+        str(e)
+        repr(e)
+        e=Element(self.db.db, 'H[2]')
+        str(e)
+        repr(e)
