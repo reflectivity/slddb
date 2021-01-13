@@ -4,12 +4,17 @@ import os
 from io import BytesIO
 from flask import Flask
 from flask import request, render_template, send_file
-from werkzeug import FileWrapper
+try:
+    from werkzeug import FileWrapper
+except ImportError:
+    from wsgiref.util import FileWrapper
 
 import slddb
-from slddb import SLDDB, DB_FILE, __version__
+from slddb import __version__, dbconfig
+# for flask use database file in startup folder
+DB_FILE='slddb.db';dbconfig.DB_FILE=DB_FILE;slddb.DB_FILE=DB_FILE
 from slddb.dbconfig import DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA, db_lookup
-from slddb.material import Material, Formula
+from slddb.material import Formula
 
 from .api import calc_api, select_api, search_api
 from .querydb import search_db

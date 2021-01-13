@@ -35,6 +35,8 @@ class SLD_API():
         sldx: Å^{-2}
         fu_volume: Å³
     """
+    db_suburl='download_db'
+    max_age=1
 
     def __init__(self):
         self.first_access=True
@@ -49,7 +51,7 @@ class SLD_API():
                 self.download_db()
             else:
                 mtime=datetime.datetime.fromtimestamp(stat.st_ctime)
-                if (now-mtime).days>1:
+                if (now-mtime).days>self.max_age:
                     self.download_db()
             self.db=SLDDB(DB_FILE) # after potential update, make connection with local database
             self.first_access=False
@@ -57,7 +59,7 @@ class SLD_API():
             return
 
     def download_db(self):
-        res=request.urlopen(WEBAPI_URL+'download_db')
+        res=request.urlopen(WEBAPI_URL+self.db_suburl)
         data=res.read()
         if not data.startswith(b'SQLite format 3'):
             raise ValueError('Error when downloading new database')

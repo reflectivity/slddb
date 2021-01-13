@@ -15,14 +15,14 @@ class Formula(list):
     Evaluate strings for element chemical fomula.
     """
     elements=(r"A[cglmrstu]|B[aehikr]?|C[adeflmorsu]?|D[bsy]{0,1}|E[rsu]|F[emr]?|"
-               "G[ade]|H[efgos]?|I[nr]?|Kr?|L[airu]|M[dgnot]|N[abdeiop]?|"
-               "Os?|P[abdmortu]?|R[abefghnu]|S[bcegimnr]?|T[abcehilm]|"
-               "Uu[bhopqst]|U|V|W|Xe|Yb?|Z[nr]")
+              r"G[ade]|H[efgos]?|I[nr]?|Kr?|L[airu]|M[dgnot]|N[abdeiop]?|"
+              r"Os?|P[abdmortu]?|R[abefghnu]|S[bcegimnr]?|T[abcehilm]|"
+              r"Uu[bhopqst]|U|V|W|Xe|Yb?|Z[nr]")
     isotopes=(r"(A[cglmrstu]|B[aehikr]?|C[adeflmorsu]?|D[bsy]{0,1}|E[rsu]|F[emr]?|"
-               "G[ade]|H[efgos]?|I[nr]?|Kr?|L[airu]|M[dgnot]|N[abdeiop]?|"
-               "Os?|P[abdmortu]?|R[abefghnu]|S[bcegimnr]?|T[abcehilm]|"
-               "Uu[bhopqst]|U|V|W|Xe|Yb?|Z[nr])"
-               "\[[1-9][0-9]{0,2}\]")
+              r"G[ade]|H[efgos]?|I[nr]?|Kr?|L[airu]|M[dgnot]|N[abdeiop]?|"
+              r"Os?|P[abdmortu]?|R[abefghnu]|S[bcegimnr]?|T[abcehilm]|"
+              r"Uu[bhopqst]|U|V|W|Xe|Yb?|Z[nr])"
+              r"\[[1-9][0-9]{0,2}\]")
 
     def __init__(self, string, sort=True):
         self._do_sort=sort

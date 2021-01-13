@@ -2,6 +2,18 @@
 Configure the database file as well as parameters for DB tables used.
 """
 
+import os
+
+if 'APPDATA' in os.environ:
+    confighome = os.environ['APPDATA']
+elif 'XDG_CONFIG_HOME' in os.environ:
+    confighome = os.environ['XDG_CONFIG_HOME']
+else:
+    confighome = os.path.join(os.environ['HOME'], '.config')
+configpath = os.path.join(confighome, 'slddb')
+if not os.path.exists(configpath):
+    os.makedirs(configpath)
+
 from .converters import CType, CLimited, CArray, CDate, CComplex, CFormula, CSelect, CMultiSelect
 
 cstr=CType(str, str)
@@ -15,7 +27,7 @@ ccomplex=CComplex()
 carray=CArray()
 
 WEBAPI_URL='http://127.0.0.1:5000/'
-DB_FILE='slddb.db'
+DB_FILE=os.path.join(configpath, 'local_database.db')
 
 DB_MATERIALS_NAME='materials'
 DB_MATERIALS_FIELDS=         ['ID', 'created', 'updated', 'accessed', 'selected',
