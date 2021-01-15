@@ -16,10 +16,22 @@
     </center>
   </p>
 
-  {% if result_table %}
+  {% if query_result %}
   <p><center>
   <form method="post" action="{{ url_for('select_material') }}">
-      {{ result_table|safe }}
+    <table class="withborder">
+      <tr>
+        <th></th>{%for name in flt_fields_names%}<th>{{ name }}</th>{%endfor%}
+      </tr>
+      {%for row in query_result%}
+        <tr>
+          <td><button type="submit" name="ID" id="ID" value="{{row['ID']}}">select</button></td>
+          {%for field in flt_fields%}
+          <td>{{row[field]}}</td>
+          {%endfor%}
+        </tr>
+      {%endfor%}
+    </table>
   </form>
   </center></p>
   {% endif %}

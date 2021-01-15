@@ -26,11 +26,26 @@
     </center>
   </p>
 
-  {% if result_table %}
+  {% if material %}
   <p><center>
   <h2>Result of SLD calculation:</h2>
   <form method="post" action="{{ url_for('select_material') }}">
-      {{ result_table|safe }}
+    <table class="withborder">
+        <tr><td>Compound</td><td colspan=2>{{material_name}}</td></tr>
+        <tr><td>Description</td><td colspan=2 syle="word-wrap;">{{material_description}}</td></tr>
+        <tr><td>Chemical Formula</td><td colspan=2>{{material}}</td></tr>
+        <tr><td>Density (g/cm³)</td><td colspan=2>{{"%.4f"%material.dens}}</td></tr>
+        <tr><td>Neutron nuclear SLD (10⁻⁶ Å⁻²)</td>
+          <td>{{"%.6f"%(1000000*material.rho_n.real)}}</td>
+          <td>{{"%.6f"%(1000000*material.rho_n.imag)}}</td></tr>
+        <tr><td>Neutron magnetic SLD (10⁻⁶ Å⁻²)</td><td colspan=2>{{"%.6f"%(1000000*material.rho_m)}}</td>
+        <tr><td>Cu-Kɑ SLD (10⁻⁶ Å⁻²)</td>
+          <td>{{"%.6f"%(1000000*material.delta_of_E(Cu_kalpha).real)}}</td>
+          <td>{{"%.6f"%(1000000*material.delta_of_E(Cu_kalpha).imag)}}</td></tr>
+        <tr><td>Mo-Kɑ SLD (10⁻⁶ Å⁻²)</td>
+          <td>{{"%.6f"%(1000000*material.delta_of_E(Mo_kalpha).real)}}</td>
+          <td>{{"%.6f"%(1000000*material.delta_of_E(Mo_kalpha).imag)}}</td></tr>
+    </table>
   </form>
   </center></p>
   {% endif %}

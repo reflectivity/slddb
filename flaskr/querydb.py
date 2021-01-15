@@ -11,18 +11,8 @@ def search_db(query):
         for i, field in enumerate(DB_MATERIALS_FIELDS):
             if row[field] is not None and field not in DB_MATERIALS_HIDDEN_DATA:
                 hidden_columns[i]=False
-    flt_fields=[item for item in enumerate(DB_MATERIALS_FIELDS) if not hidden_columns[item[0]]]
-    out='<table class="withborder">\n    <tr>\n        '
-    out+='<th></th>'
-    for i, field in flt_fields:
-        out+='<th>%s</th>'%field.capitalize()
-    out+='    </tr>\n'
-    for row in res:
-        out+='        <tr>'
-        out+='<td><button type="submit" name="ID" id="ID" value="%i">select</button></td>'%row['ID']
-        for i, field in flt_fields:
-            out+='<td>%s</td>'%row[field]
-        out+='</tr>\n'
-    out+='</table>'
-    return render_template('search.html', result_table=out)
+    flt_fields=[item[1] for item in enumerate(DB_MATERIALS_FIELDS) if not hidden_columns[item[0]]]
+    flt_fields_names=[item[1].capitalize() for item in enumerate(DB_MATERIALS_FIELDS) if not hidden_columns[item[0]]]
+    return render_template('search.html', flt_fields=flt_fields, flt_fields_names=flt_fields_names,
+                           query_result=res)
 
