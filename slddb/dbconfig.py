@@ -14,7 +14,7 @@ configpath = os.path.join(confighome, 'slddb')
 if not os.path.exists(configpath):
     os.makedirs(configpath)
 
-from .converters import CType, CLimited, CArray, CDate, CComplex, CFormula, CSelect, CMultiSelect
+from .converters import CType, CLimited, CArray, CDate, CComplex, CFormula, CSelect, CMultiSelect, CUrl
 
 cstr=CType(str, str)
 cint=CType(int, int)
@@ -25,26 +25,54 @@ cdate=CDate()
 cformula=CFormula()
 ccomplex=CComplex()
 carray=CArray()
+curl=CUrl()
 
 WEBAPI_URL='http://127.0.0.1:5000/'
 DB_FILE=os.path.join(configpath, 'local_database.db')
 
 DB_MATERIALS_NAME='materials'
-DB_MATERIALS_FIELDS=         ['ID', 'created', 'updated', 'accessed', 'selected',
-                              'name', 'description', 'formula', 'HR_fomula',
-                              'density', 'FU_volume', 'SLD_n', 'SLD_x', 'E_x',
-                              'mu', 'physical_state', 'tags']
-DB_MATERIALS_CONVERTERS=     [pint, cdate,         cdate, cint,       cint,
-                              cstr,   cstr,          cformula,      cstr,
-                              cposfloat, cposfloat, ccomplex, ccomplex, cfloat,
-                              cfloat, CSelect(['solid', 'liquid', 'gas']),
-                              CMultiSelect(['magnetic', 'polymer', 'biology',
-                                            'membrane', 'lipid'])]
-DB_MATERIALS_FIELD_DEFAULTS= [None, 'CURRENT_TIMESTAMP',       None, 0,     0,
-                              None,     None,   None, None,
-                              None, None, None, None, None,
-                              0.0, 'solid', None]
-DB_MATERIALS_HIDDEN_DATA=    ['created', 'updated', 'accessed', 'selected']
+DB_MATERIALS_COLUMNS=[
+   #(Name,           converter, default)
+    ('ID',           pint,      None),
+    ('created',      cdate,     'CURRENT_TIMESTAMP'),
+    ('updated',      cdate,     None),
+    ('validated',    cdate,     None),
+    ('validated_by', cstr,      None),
+    ('accessed',     cint,      0),
+    ('selected',     cint,      0),
+    ('name',         cstr,      None),
+    ('description',  cstr,      None),
+    ('formula',      cformula,  None),
+    ('HR_fomula',    cstr,      None),
+    ('density',      cposfloat, None),
+    ('FU_volume',    cposfloat, None),
+    ('SLD_n',        ccomplex,  None),
+    ('SLD_x',        ccomplex,  None),
+    ('E_x',          cfloat,    None),
+    ('mu',           cfloat,    0.0),
+    ('physical_state', CSelect(['solid', 'liquid', 'gas', 'solution',
+                                'micellar aggregate', 'assembled monolayer/bilayer',
+                                'nanoparticle']), 'solid'),
+    ('tags', CMultiSelect(['magnetic', 'polymer', 'biology', 'membrane', 'lipid',
+                           'metal', 'metal alloy', 'inorganic', 'small organic',
+                           'surfactant', 'lipid', 'synthetic polymer', 'proteins']), None),
+    ('ref_website',  curl,      None),
+    ('reference',    cstr,      None),
+    ('doi',          cstr,      None),
+    ('purity',       cstr,      None),
+    ('CAS_No',       cstr,      None),
+    ('crystal_data', cstr,      None),
+    ('temperature',  cposfloat, None),
+    ('data_origin',  CSelect(['unspecified', 'text book',
+                              'x-ray reflectivity', 'neutron reflectivity',
+                              'mass density', 'diffraction', 'interferometry',
+                              'SANS', 'SAXS', ]), 'unspecified'),
+    ('comments',     cstr,      None),
+    ]
+DB_MATERIALS_FIELDS=[fi[0] for fi in DB_MATERIALS_COLUMNS]
+DB_MATERIALS_CONVERTERS=[fi[1] for fi in DB_MATERIALS_COLUMNS]
+DB_MATERIALS_FIELD_DEFAULTS=[fi[2] for fi in DB_MATERIALS_COLUMNS]
+DB_MATERIALS_HIDDEN_DATA=    ['created', 'updated', 'validated', 'validated_by', 'accessed', 'selected']
 db_lookup=dict([(field, (i, converter, default))
                 for i, (field, converter, default) in
                 enumerate(zip(DB_MATERIALS_FIELDS,

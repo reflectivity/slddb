@@ -18,16 +18,28 @@
 
   {% if query_result %}
   <p><center>
+    Results of database query:
+    <div style="background-color: #ddd; padding: 5px; border: 1px; width: 150px; display:inline;">Never Selected</div>
+    <div style="background-color: #dfd; padding: 5px; border: 1px; width: 150px; display:inline;`">ORSO validated</div>
+  </center></p>
+  <p>
+  <center>
   <form method="post" action="{{ url_for('select_material') }}">
     <table class="withborder">
       <tr>
-        <th></th>{%for name in flt_fields_names%}<th>{{ name }}</th>{%endfor%}
+        <th></th>{%for name in flt_fields_names%}<th>{{ name.replace("_", " ") }}</th>{%endfor%}
       </tr>
       {%for row in query_result%}
-        <tr>
+        <tr style="background-color: {{row['color']}}">
           <td><button type="submit" name="ID" id="ID" value="{{row['ID']}}">select</button></td>
           {%for field in flt_fields%}
-          <td>{{row[field]}}</td>
+            {% if ("%s"%row[field]).startswith('http://') or ("%s"%row[field]).startswith('https://') %}
+              <td><a href="{{row[field]}}" target="_blank">link</a></td>
+            {% elif row[field] is none %}
+              <td />
+            {% else %}
+              <td>{{row[field]}}</td>
+            {% endif %}
           {%endfor%}
         </tr>
       {%endfor%}

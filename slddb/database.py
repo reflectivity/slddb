@@ -147,7 +147,10 @@ class SLDDB():
                               commit=False,
                               description=element.density_caveat,
                               density=element.density,
-                              physical_state=state)
+                              physical_state=state,
+                              data_origin='text book',
+                              ref_website='https://github.com/pkienzle/periodictable',
+                              reference='Python module periodictable, \ndata source: ILL Neutron Data Booklet')
         self.db.commit()
 
     def update_fields(self):

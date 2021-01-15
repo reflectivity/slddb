@@ -1,7 +1,7 @@
 """
 Classes for conversion of specific data into sqlite types and back.
 """
-
+import re
 from numpy import array, frombuffer
 from datetime import datetime
 from .material import Formula
@@ -113,6 +113,31 @@ class CFormula(Converter):
     def html_input(self):
         return '<input name="%(field)s" id="compound %(field)s" value="%(value)s"'\
                ' placeholder="exmpl: Fe2O3 / H[2]2O"/>'
+
+class CUrl(Converter):
+    regex=re.compile(
+        r'^(?:http)s?://'  # http:// or https://
+        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'  # domain...
+        r'localhost|'  # localhost...
+        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
+        r'(?::\d+)?'  # optional port
+        r'(?:/?|[/?]\S+)$', re.IGNORECASE)
+
+    def __init__(self):
+        pass
+
+    def convert(self, data):
+        if re.match(self.regex, data) is not None:
+            return str(data)
+        else:
+            raise ValueError("Not a valid website URL: %s"%data)
+
+    def revert(self, db_data):
+        return db_data
+
+    def html_input(self):
+        return '<input name="%(field)s" id="compound %(field)s" value="%(value)s"'\
+               ' placeholder="exmpl: http://www.google.com"/>'
 
 class CArray(Converter):
     # convert numpy array to string representation and back
