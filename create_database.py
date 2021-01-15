@@ -1,3 +1,7 @@
+import slddb
+from slddb import __version__, dbconfig
+# for flask use database file in startup folder
+DB_FILE='slddb.db';dbconfig.DB_FILE=DB_FILE;slddb.DB_FILE=DB_FILE
 from slddb import SLDDB
 from slddb.dbconfig import DB_FILE
 import sqlite3

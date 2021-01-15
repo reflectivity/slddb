@@ -2,6 +2,10 @@
 Material Data from Christy Kinane's table for testing database.
 """
 
+import slddb
+from slddb import __version__, dbconfig
+# for flask use database file in startup folder
+DB_FILE='slddb.db';dbconfig.DB_FILE=DB_FILE;slddb.DB_FILE=DB_FILE
 from slddb import SLDDB
 from slddb.dbconfig import DB_FILE
 
@@ -147,11 +151,12 @@ if __name__=="__main__":
         print(item)
         if len(item)>3:
             db.add_material(item[0], item[0],
-                            description="Christy Kinane - %s"%item[3],
+                            description=item[3],
+                            reference="Christy Kinane",
                             density=item[1],
                             mu=item[2])
         else:
             db.add_material(item[0], item[0],
-                            description="Christy Kinane",
+                            reference="Christy Kinane",
                             density=item[1],
                             mu=item[2])
