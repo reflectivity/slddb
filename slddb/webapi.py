@@ -1,8 +1,10 @@
 import json
 import os, pathlib
 import datetime
+import warnings
 
 from urllib import request, parse
+from urllib.error import URLError
 from . import SLDDB, DB_FILE
 from .dbconfig import WEBAPI_URL
 from .material import Material, Formula
@@ -40,6 +42,7 @@ class SLD_API():
 
     def __init__(self):
         self.first_access=True
+        self.use_webquery=True # only try webquery once, if error occures switch to local database
 
     def check(self):
         # make sure the local database file is up to date, if not try to download newest version
@@ -52,7 +55,11 @@ class SLD_API():
             else:
                 mtime=datetime.datetime.fromtimestamp(stat.st_ctime)
                 if (now-mtime).days>self.max_age:
-                    self.download_db()
+                    try:
+                        self.download_db()
+                    except URLError as err:
+                        warnings.warn("Can't download new version of databse; "+str(err))
+                        return
             self.db=SLDDB(DB_FILE) # after potential update, make connection with local database
             self.first_access=False
         else:
@@ -74,6 +81,13 @@ class SLD_API():
         webdata=request.urlopen(WEBAPI_URL+'api?'+data)
         return json.loads(webdata.read()) # return decoded data
 
+    def localquery(self, dict):
+         return self.db.search_material(**dict)
+
+    def localmaterial(self, ID):
+        res=self.db.search_material(ID=ID)
+        return self.db.select_material(res[0])
+
     def search(self, **opts):
         '''
         Search for a particular material using a combination of provided search keys.
@@ -83,9 +97,15 @@ class SLD_API():
              api.search(density=5.242)
              api.search(name='iron')
         '''
+        if not self.use_webquery:
+            return self.localquery(opts)
+
         self.check()
-        # TODO: add some validation to the search query.
-        res=self.webquery(opts)
+        try:
+            res=self.webquery(opts)
+        except URLError:
+            self.use_webquery=False
+            res=self.localquery(opts)
         return res
 
     def material(self, ID):
@@ -97,13 +117,20 @@ class SLD_API():
             material=api.material(res[0]['ID'])
             print(material.dens, material.rho_n, material.f_of_E(8.0))
         """
-        self.check()
-        res=self.webquery({'ID': int(ID)})
+        if not self.use_webquery:
+            return self.localmaterial(ID)
 
-        f=Formula(res['formula'], sort=False)
-        out=Material([(self.db.elements.get_element(element), amount) for element, amount in f],
-                   dens=float(res['density']))
-        return out
+        self.check()
+        try:
+            res=self.webquery({'ID': int(ID)})
+        except URLError:
+            self.use_webquery=False
+            return self.localmaterial(ID)
+        else:
+            f=Formula(res['formula'], sort=False)
+            out=Material([(self.db.elements.get_element(element), amount) for element, amount in f],
+                       dens=float(res['density']))
+            return out
 
     def custom(self, formula, dens=None, fu_volume=None, rho_n=None, mu=0., xsld=None, xE=None):
         """

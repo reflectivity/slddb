@@ -117,6 +117,20 @@ class TestWebAPI(unittest.TestCase):
         api.max_age=-1
         api.check()
         api.max_age=1
+        # check warning if download url doesn't work during update
+        api.db.db.close()
+        del(api.db)
+        api.first_access=True
+        api.max_age=-1
+
+        from slddb import webapi, dbconfig
+        webapi.WEBAPI_URL='http://doesnot.exist/'
+        with self.assertWarns(UserWarning):
+            api.check()
+        api.max_age=1
+        webapi.WEBAPI_URL=dbconfig.WEBAPI_URL
+        api.check()
+
 
     def test_c_query(self):
         if not self.server_available:
@@ -136,3 +150,27 @@ class TestWebAPI(unittest.TestCase):
             return
         mat=api.custom(formula='Au', dens=19.3)
         self.assertEqual(mat.__class__.__name__, 'Material')
+
+    def test_d_local(self):
+        if not self.server_available:
+            return
+        # test database access if server is unavailable
+        from slddb import webapi, dbconfig
+        webapi.WEBAPI_URL='http://doesnot.exist/'
+
+        with self.subTest(msg='local search', i=0):
+            # first search drop connection
+            api.use_webquery=True
+            api.search(formula='Fe2O3')
+            self.assertFalse(api.use_webquery)
+            res=api.search(formula='Fe2O3')
+            self.assertGreater(len(res), 0)
+            self.assertIn('density', res[0])
+        with self.subTest(msg='local material', i=0):
+            api.use_webquery=True
+            mat=api.material(1)
+            self.assertFalse(api.use_webquery)
+            mat=api.material(1)
+            self.assertEqual(mat.__class__.__name__, 'Material')
+        webapi.WEBAPI_URL=dbconfig.WEBAPI_URL
+
