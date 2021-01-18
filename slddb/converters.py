@@ -114,7 +114,7 @@ class CFormula(Converter):
         return '<input name="%(field)s" id="compound %(field)s" value="%(value)s"'\
                ' placeholder="exmpl: Fe2O3 / H[2]2O"/>'
 
-class CUrl(Converter):
+class CUrl(CType):
     regex=re.compile(
         r'^(?:http)s?://'  # http:// or https://
         r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'  # domain...
@@ -124,16 +124,13 @@ class CUrl(Converter):
         r'(?:/?|[/?]\S+)$', re.IGNORECASE)
 
     def __init__(self):
-        pass
+        CType.__init__(self, str, str)
 
     def convert(self, data):
         if re.match(self.regex, data) is not None:
-            return str(data)
+            return CType.convert(self, data)
         else:
             raise ValueError("Not a valid website URL: %s"%data)
-
-    def revert(self, db_data):
-        return db_data
 
     def html_input(self):
         return '<input name="%(field)s" id="compound %(field)s" value="%(value)s"'\

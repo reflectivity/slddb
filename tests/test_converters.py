@@ -1,7 +1,8 @@
 import unittest
 import json
 from datetime import datetime
-from slddb.converters import CType, CLimited, CArray, CFormula, CComplex, Converter, CDate, CSelect, CMultiSelect
+from slddb.converters import CType, CLimited, CArray, CFormula, CComplex, Converter, \
+    CDate, CSelect, CMultiSelect, CUrl
 from slddb.material import Formula
 from numpy import array, ndarray, testing
 
@@ -77,6 +78,28 @@ class TestConverter(unittest.TestCase):
         self.assertEqual(start_formula, conv.revert(conv.convert(start_formula)))
         with self.assertRaises(ValueError):
             conv.convert("z1o")
+
+    def test_url(self):
+        conv=CUrl()
+        self.assertEqual("http://www.abc.de", conv.revert(conv.convert("http://www.abc.de")))
+        self.assertEqual("https://www.abc.de", conv.revert(conv.convert("https://www.abc.de")))
+        self.assertEqual(conv.sql_type, "TEXT")
+
+        self.assertTrue(type(conv.convert("http://www.abc.de")) is str)
+        self.assertTrue(type(conv.revert("http://www.abc.de")) is str)
+
+        with self.assertRaises(ValueError):
+            conv.convert("abc")
+        with self.assertRaises(ValueError):
+            conv.revert(14)
+        with self.assertRaises(ValueError):
+            conv.convert("https://abc")
+        with self.assertRaises(ValueError):
+            conv.convert("ftp://www.abc.de")
+        with self.assertRaises(ValueError):
+            conv.convert("ssh://www.abc.de")
+        with self.assertRaises(ValueError):
+            conv.revert(b"abc")
 
     def test_date(self):
         conv=CDate()
@@ -208,5 +231,6 @@ class TestConverter(unittest.TestCase):
                      CComplex(),
                      CSelect(['abc', 'def', 'ghi']),
                      CMultiSelect(['abc', 'def', 'ghi']),
-                     CDate()]:
+                     CDate(),
+                     CUrl()]:
             conv.html_input()%{'field': 'abc', 'value': 'def'}
