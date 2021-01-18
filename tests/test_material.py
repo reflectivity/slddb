@@ -38,6 +38,10 @@ class TestMaterial(unittest.TestCase):
         self.assertAlmostEqual(m1.dens, 8.9, places=3)
         self.assertAlmostEqual(m2.dens, 5.24, places=3)
 
+    def test_formula(self):
+        m1=Material([(Element(self.db.db, 'Ni'), 1.0)], xsld=7.2969e-05-2.8945e-06j, xE=Mo_kalpha)
+        self.assertAlmostEqual(str(m1.formula), 'Ni')
+
     def test_fail(self):
         with self.assertRaises(ValueError):
             m1=Material([(Element(self.db.db, 'Ni'), 1.0)])

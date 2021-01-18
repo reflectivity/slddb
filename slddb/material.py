@@ -172,6 +172,13 @@ class Material():
             b+=number*element.b
         return b
 
+    @property
+    def formula(self):
+        output=''
+        for element, number in self.elements:
+            output+=element.symbol+str(number)
+        return Formula(output)
+
     def convert_subscript(self, number):
         if number == 1.0:
             return ''

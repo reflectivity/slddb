@@ -19,7 +19,7 @@ def calc_api(args):
             out={}
             out['ID']=None
             out['name']='User Query'
-            out['formula']=str(material)
+            out['formula']=str(material.formula)
             out['density']=material.dens
             out['rho_n']=repr(material.rho_n)
             out['rho_n_mag']=repr(material.rho_m)
@@ -42,7 +42,7 @@ def select_api(args):
     out={}
     out['ID']=args['ID']
     out['name']=res[0]['name']
-    out['formula']=str(material)
+    out['formula']=str(material.formula)
     out['density']=material.dens
     out['rho_n']=repr(material.rho_n)
     out['rho_n_mag']=repr(material.rho_m)
