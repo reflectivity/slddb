@@ -116,6 +116,13 @@ class SLDDB():
         self.db.commit()
         return m
 
+    def validate_material(self, ID, user):
+        ustr='UPDATE %s SET validated = CURRENT_TIMESTAMP, validated_by = ? WHERE ID == ?'%DB_MATERIALS_NAME
+        c=self.db.cursor()
+        c.execute(ustr, (user, ID,))
+        c.close()
+        self.db.commit()
+
     def create_table(self):
         c=self.db.cursor()
         name_type=['%s %s %s'%(fi, ci.sql_type, (di is not None) and "DEFAULT %s"%di or "")
@@ -147,7 +154,10 @@ class SLDDB():
                               commit=False,
                               description=element.density_caveat,
                               density=element.density,
-                              physical_state=state)
+                              physical_state=state,
+                              data_origin='text book',
+                              ref_website='https://github.com/pkienzle/periodictable',
+                              reference='Python module periodictable, \ndata source: ILL Neutron Data Booklet')
         self.db.commit()
 
     def update_fields(self):
