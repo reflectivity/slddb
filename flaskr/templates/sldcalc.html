@@ -3,6 +3,28 @@
 {% block nav_calculate_sld %}active{% endblock %}
 
 {% block content %}
+  {% if material %}
+    <script>
+    var material_energies = {{ xray_E }};
+    var material_delta_real = {{ xray_delta_real }};
+    var material_delta_imag = {{ xray_delta_imag }};
+
+    function updateSlider(slideAmount) {
+        var idx = material_energies.findIndex(ele => ele >= parseFloat(slideAmount)/1000.0);
+        document.getElementById("value_real").innerHTML = (material_delta_real[idx]*1e6).toFixed(6);
+        document.getElementById("value_imag").innerHTML = (material_delta_imag[idx]*1e6).toFixed(6);
+
+        document.getElementById("xray_energy_value").value = slideAmount;
+    }
+
+    function updateValue() {
+        var value = document.getElementById("xray_energy_value").value;
+        document.getElementById("xray_energy").value = value;
+        updateSlider(value);
+    }
+    </script>
+  {% endif %}
+
   <p><center>
     <form action="{{ url_for('calculate_sld') }}" method="get">
       <table class="withborder">
@@ -11,8 +33,8 @@
         <tr><td><select id="densinput" name="densinput">
           <option value="density">Density (g/cm³)</option>
           <option value="volume">FU Volume (Å³)</option>
-        </select></td><td><input name="density" id="compound density" value="{{ request.args['density'] or density }}"></td></tr>
-        <tr><td>Magnetisation (µB/FU)</td><td><input name="mu" id="compound mu" value="{{ request.args['mu'] or mu }}"></td></tr>
+        </select></td><td><input type='number' step="0.00001" name="density" id="compound density" value="{{ request.args['density'] or density }}"></td></tr>
+        <tr><td>Magnetisation (µB/FU)</td><td><input type='number' step="0.00001" name="mu" id="compound mu" value="{{ request.args['mu'] or mu }}"></td></tr>
         <tr><td colspan="2"><center><input type="submit"></center></td> </tr>
       </table>
     </form>
@@ -26,12 +48,36 @@
     </center>
   </p>
 
-  {% if result_table %}
+  {% if material %}
   <p><center>
   <h2>Result of SLD calculation:</h2>
-  <form method="post" action="{{ url_for('select_material') }}">
-      {{ result_table|safe }}
-  </form>
+    <table class="withborder"{% if validated %} style="background-color: #dfd"{% endif %}>
+        <tr><td>Compound</td><td colspan=2>{{material_name}}</td></tr>
+        <tr><td>Description</td><td colspan=2 syle="word-wrap;">{{material_description}}</td></tr>
+        <tr><td>Chemical Formula</td><td colspan=2>{{material}}</td></tr>
+        <tr><td>Density (g/cm³)</td><td colspan=2>{{"%.4f"%material.dens}}</td></tr>
+        <tr><td>Neutron nuclear SLD (10⁻⁶ Å⁻²)</td>
+          <td>{{"%.6f"%(1000000*material.rho_n.real)}}</td>
+          <td>{{"%.6f"%(1000000*material.rho_n.imag)}}</td></tr>
+        <tr><td>Neutron magnetic SLD (10⁻⁶ Å⁻²)</td><td colspan=2>{{"%.6f"%(1000000*material.rho_m)}}</td>
+        <tr><td>Cu-Kɑ SLD (10⁻⁶ Å⁻²)</td>
+          <td>{{"%.6f"%(1000000*material.delta_of_E(Cu_kalpha).real)}}</td>
+          <td>{{"%.6f"%(1000000*material.delta_of_E(Cu_kalpha).imag)}}</td></tr>
+        <tr><td>Mo-Kɑ SLD (10⁻⁶ Å⁻²)</td>
+          <td>{{"%.6f"%(1000000*material.delta_of_E(Mo_kalpha).real)}}</td>
+          <td>{{"%.6f"%(1000000*material.delta_of_E(Mo_kalpha).imag)}}</td></tr>
+        <tr><td>Custom Energy (eV)</td>
+          <td colspan="2">SLD (10⁻⁶ Å⁻²)</td></tr>
+        <tr><td><form action="" onsubmit="return false;">
+            <input type="range" min="100" max="30000" value="8040" class="slider" id="xray_energy" step="20" onchange="updateSlider(this.value)">
+            <input type="number" min="100" max="30000" value="8040" class="slider_value" id="xray_energy_value" onchange="updateValue(this.value)">
+            </form></td>
+            <td><div id="value_real"></div></td>
+            <td><div id="value_imag"></div></td></tr>
+        {% if validated %}
+        <tr><td colspan="3">This entry was validated by ORSO<br />({{ validated }} by {{ validated_by }})</td></tr>
+        {% endif %}
+    </table>
   </center></p>
   {% endif %}
 

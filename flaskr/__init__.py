@@ -3,17 +3,22 @@ import zipfile
 import os
 from io import BytesIO
 from flask import Flask
-from flask import request, render_template, send_file
-from werkzeug import FileWrapper
+from flask import request, render_template, send_file, make_response
+try:
+    from werkzeug import FileWrapper
+except ImportError:
+    from wsgiref.util import FileWrapper
 
 import slddb
-from slddb import SLDDB, DB_FILE, __version__
+from slddb import __version__, dbconfig
+# for flask use database file in startup folder
+DB_FILE='slddb.db';dbconfig.DB_FILE=DB_FILE;slddb.DB_FILE=DB_FILE
 from slddb.dbconfig import DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA, db_lookup
-from slddb.material import Material, Formula
+from slddb.material import Formula
 
 from .api import calc_api, select_api, search_api
 from .querydb import search_db
-from .calcsld import calculate_selection, calculate_user
+from .calcsld import calculate_selection, calculate_user, validate_selection
 from .inputdb import input_form, input_material
 
 app=Flask("ORSO SLD Data Base", template_folder='flaskr/templates',
@@ -39,6 +44,13 @@ def input_page():
 def eval_input():
     return input_material(request.form)
 
+@app.route('/admin', methods=['GET'])
+def admin_page():
+    user=request.args['user']
+    resp=make_response(render_template('about.html'))
+    resp.set_cookie('userID', user)
+    return resp
+
 
 @app.route('/search', methods=['POST'])
 def search_query():
@@ -50,12 +62,14 @@ def search_query():
             try:
                 query[key]=db_lookup[key][1].convert(value)
             except Exception as e:
-                return render_template('search.html', result_table=repr(e)+'<br >'+
+                return render_template('search.html', error=repr(e)+'<br >'+
                                     "Raised when tried to parse %s = %s"%(key, value))
     return search_db(query)
 
 @app.route('/material', methods=['POST'])
 def select_material():
+    if 'Validate' in request.form:
+        return validate_selection(int(request.form['Validate'].split('-')[1]), request.form['Validate'].split('-')[0])
     if not 'ID' in request.form:
         return render_template('base.html')
     return calculate_selection(int(request.form['ID']))
@@ -64,10 +78,15 @@ def select_material():
 @app.route('/material', methods=['GET'])
 def calculate_sld():
     if 'formula' in request.args and 'density' in request.args:
-        f=Formula(request.args['formula'], sort=False)
-        return calculate_user(f, float(request.args['density']),
-                              request.args['densinput']=='density',
-                              float(request.args['mu']))
+        try:
+            f=Formula(request.args['formula'], sort=False)
+        except Exception as e:
+            return render_template('sldcalc.html',
+                                   error=repr(e)+'<br >'+"Raised when tried to parse formula = %s"%request.args['formula'])
+        else:
+            return calculate_user(f, float(request.args['density'] or 0),
+                                  request.args['densinput']=='density',
+                                  float(request.args['mu'] or 0))
     else:
         return render_template('sldcalc.html')
 
@@ -105,6 +124,6 @@ def download_api():
                      attachment_filename='slddb.zip', conditional=False)
     return result
 
-@app.route('/admin/')
-def admin_page():
-    return 'abc'
+# @app.route('/admin/')
+# def admin_page():
+#     return 'abc'

@@ -25,5 +25,10 @@
           <tr><td></td><td style="background-color: #fafafa">
    {% block content %} {% endblock %}
       </td><td></td></tr></table>
+        {% if error %}
+        <center><div style="background-color: red; color: white; font-weight: bold;">
+          {{error|safe}}
+        </div></center>
+       {% endif %}
 </section>
 </html>
