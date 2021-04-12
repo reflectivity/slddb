@@ -17,6 +17,12 @@
               <li class="{% block nav_calculate_sld %}{% endblock %}"><a href="{{ url_for('calculate_sld') }}">Calculate SLD</a></li>
               <li class="{% block nav_input_page %}{% endblock %}"><a href="{{ url_for('input_page') }}">Enter Material</a></li>
               <li  class="{% block nav_about %}about{% endblock %}"><a href="{{ url_for('about_page') }}">About</a></li>
+              {% if current_user.is_authenticated %}
+              <li  class="login"><a href="{{ url_for('logout') }}">{{current_user.name}} - Logout</a></li>
+              {% endif %}
+              {% if not current_user.is_authenticated %}
+              <li  class="{% block nav_login %}login{% endblock %}"><a href="{{ url_for('login') }}">Login</a></li>
+              {% endif %}
             </ul>
           </td>
           <td width="240" />
@@ -25,6 +31,16 @@
           <tr><td></td><td style="background-color: #fafafa">
    {% block content %} {% endblock %}
       </td><td></td></tr></table>
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <center>
+            <ul>
+            {% for message in messages %}
+              <li>{{ message }}</li>
+            {% endfor %}
+            </ul></center>
+          {% endif %}
+        {% endwith %}
         {% if error %}
         <center><div style="background-color: red; color: white; font-weight: bold;">
           {{error|safe}}

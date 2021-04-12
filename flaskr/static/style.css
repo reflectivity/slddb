@@ -49,6 +49,10 @@ li.active_about a {
   text-decoration: none;
 }
 
+li.login{
+  float:right;
+}
+
 li.about{
   float:right;
 }

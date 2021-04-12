@@ -1,4 +1,5 @@
 from flask import request, render_template
+from flask_login import current_user
 
 from slddb import SLDDB, DB_FILE
 from slddb.dbconfig import DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA, db_lookup
@@ -16,8 +17,12 @@ def search_db(query):
         for i, field in enumerate(DB_MATERIALS_FIELDS):
             if row[field] is not None and field not in DB_MATERIALS_HIDDEN_DATA:
                 hidden_columns[i]=False
+    if current_user.is_authenticated:
+        user="%s <%s>"%(current_user.name, current_user.email)
+    else:
+        user=None
     flt_fields=[item[1] for item in enumerate(DB_MATERIALS_FIELDS) if not hidden_columns[item[0]]]
     flt_fields_names=[item[1].capitalize() for item in enumerate(DB_MATERIALS_FIELDS) if not hidden_columns[item[0]]]
     return render_template('search.html', flt_fields=flt_fields, flt_fields_names=flt_fields_names,
-                           query_result=res, orso_user=request.cookies.get('userID'))
+                           query_result=res, orso_user=user)
 

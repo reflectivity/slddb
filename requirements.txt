@@ -1,2 +1,4 @@
 periodictable
 flask
+flask-login
+flask-sqlalchemy

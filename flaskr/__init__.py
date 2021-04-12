@@ -3,7 +3,10 @@ import zipfile
 import os
 from io import BytesIO
 from flask import Flask
-from flask import request, render_template, send_file, make_response
+from flask import request, render_template, send_file, flash, redirect, url_for
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user
+from werkzeug.security import check_password_hash
 try:
     from werkzeug import FileWrapper
 except ImportError:
@@ -24,6 +27,18 @@ from .inputdb import input_form, input_material
 app=Flask("ORSO SLD Data Base", template_folder='flaskr/templates',
           static_folder='flaskr/static')
 
+try:
+    app.config['SECRET_KEY']=open('flaskr/secret.key', 'rb').read()
+except IOError:
+    pass
+app.config['SQLALCHEMY_DATABASE_URI']='sqlite:///flaskr/db.sqlite'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=True
+db=SQLAlchemy()
+db.init_app(app)
+
+login_manager=LoginManager()
+login_manager.init_app(app)
+
 @app.context_processor
 def inject_version():
     return dict(slddb_version=__version__)
@@ -43,14 +58,6 @@ def input_page():
 @app.route('/input', methods=['POST'])
 def eval_input():
     return input_material(request.form)
-
-@app.route('/admin', methods=['GET'])
-def admin_page():
-    user=request.args['user']
-    resp=make_response(render_template('about.html'))
-    resp.set_cookie('userID', user)
-    return resp
-
 
 @app.route('/search', methods=['POST'])
 def search_query():
@@ -124,6 +131,41 @@ def download_api():
                      attachment_filename='slddb.zip', conditional=False)
     return result
 
-# @app.route('/admin/')
-# def admin_page():
-#     return 'abc'
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True) # primary keys are required by SQLAlchemy
+    email = db.Column(db.String(100), unique=True)
+    password = db.Column(db.String(100))
+    name = db.Column(db.String(100))
+
+@login_manager.user_loader
+def load_user(ID):
+    return User.query.get(ID)
+
+
+@app.route('/login')
+def login():
+    return render_template('login.html')
+
+@app.route('/login', methods=['POST'])
+def login_post():
+    email = request.form.get('email')
+    password = request.form.get('password')
+    remember = True if request.form.get('remember') else False
+
+    user = User.query.filter_by(email=email).first()
+
+    # check if user actually exists
+    # take the user supplied password, hash it, and compare it to the hashed password in database
+    if not user or not check_password_hash(user.password, password):
+        flash('Please check your login details and try again.')
+        return redirect(url_for('login')) # if user doesn't exist or password is wrong, reload the page
+
+    # if the above check passes, then we know the user has the right credentials
+    login_user(user, remember=remember)
+    return redirect(url_for('start_page'))
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('start_page'))
