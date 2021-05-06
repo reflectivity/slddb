@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block nav_input_page %}active{% endblock %}
+{% block nav_login_page %}active{% endblock %}
 
 {% block content %}
     <center>
@@ -13,9 +13,9 @@
 
     <form method="POST">
       <table class="withborder">
-    {%for field in fields%}
-          <tr><td>{{field}}</td><td>{{ get_input(field)|safe }}</td></tr>
-    {%endfor%}
+          <tr><td>User Email:</td><td><input name="email" id="email" value=""></td></tr>
+          <tr><td>Password:</td><td><input type="password" name="password" id="password" value=""></td></tr>
+          <tr><td colspan="2"><input type="checkbox" name="remember" id="remember">Remember me</td></tr>
         <tr><td colspan="2"><center><input type="submit"></center></td> </tr>
       </table>
     </form>

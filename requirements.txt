@@ -1,3 +1,4 @@
 periodictable
 flask
-bokeh
+flask-login
+flask-sqlalchemy

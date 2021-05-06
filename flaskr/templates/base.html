@@ -10,13 +10,19 @@
       <table width="100%">
         <tr>
           <td width="240"><img src="https://github.com/reflectivity/logo/raw/master/aglavic/ORSO_Logo_clean.png" width="200"></td>
-          <td width="" style="background-color: #fafafa"><center><h1>SLD Database</h1>alpha</center>
+          <td width="" style="background-color: #fafafa"><center><h1>SLD Database</h1>{{ slddb_version }}</center>
           <br/>
             <ul>
-              <li><a href="{{ url_for('start_page') }}">Query Database</a></li>
-              <li><a href="{{ url_for('calculate_sld') }}">Calculate SLD</a></li>
-              <li><a href="{{ url_for('input_page') }}">Enter Material</a></li>
-              <li class="about"><a href="{{ url_for('about_page') }}">About</a></li>
+              <li class="{% block nav_start_page %}{% endblock %}"><a href="{{ url_for('start_page') }}">Query Database</a></li>
+              <li class="{% block nav_calculate_sld %}{% endblock %}"><a href="{{ url_for('calculate_sld') }}">Calculate SLD</a></li>
+              <li class="{% block nav_input_page %}{% endblock %}"><a href="{{ url_for('input_page') }}">Enter Material</a></li>
+              <li  class="{% block nav_about %}about{% endblock %}"><a href="{{ url_for('about_page') }}">About</a></li>
+              {% if current_user.is_authenticated %}
+              <li  class="login"><a href="{{ url_for('logout') }}">{{current_user.name}} - Logout</a></li>
+              {% endif %}
+              {% if not current_user.is_authenticated %}
+              <li  class="{% block nav_login %}login{% endblock %}"><a href="{{ url_for('login') }}">Login</a></li>
+              {% endif %}
             </ul>
           </td>
           <td width="240" />
@@ -25,5 +31,20 @@
           <tr><td></td><td style="background-color: #fafafa">
    {% block content %} {% endblock %}
       </td><td></td></tr></table>
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <center>
+            <ul>
+            {% for message in messages %}
+              <li>{{ message }}</li>
+            {% endfor %}
+            </ul></center>
+          {% endif %}
+        {% endwith %}
+        {% if error %}
+        <center><div style="background-color: red; color: white; font-weight: bold;">
+          {{error|safe}}
+        </div></center>
+       {% endif %}
 </section>
 </html>

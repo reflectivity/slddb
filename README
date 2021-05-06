@@ -8,6 +8,12 @@ This is the development version for the SLD Database. To test on you local machi
 3b Expand database by materials from Christy "python3 testdata_christy.py"
 4. Run "flask run" and visit http://127.0.0.1:5000/
 
+5. To setup authentication for ORSO users, open python console and run the following commands:
+    $ from flaskr import authentication as auth
+    $ auth.generate_secret() # create unique key for cookies, requires flask restart
+    $ auth.create_database() # build database for users
+    $ auth.add_user('{user name}', '{email}') # can be repeated later for more users, password is requested
+
 The database is already filled with all elements and the densities for those. SLD calculation should therefore work. 
 Up to now there is no interface to enter data, yet. This can, however, be done through the python interface manually:
 	$ from slddb import *
@@ -18,3 +24,9 @@ You can also add additional fields to that entry, currently limited to: E_x, FU_
 Database queary from python is done using db.search_material(field=value).
 
 There is also a simple Qt5 interface that can be started with "slddbqt.py".
+
+
+Tests and code coverage:
+   $ coverage run -m pytest
+   $ coverage report # just show code coverage percentage per file
+   $ coverage html -d coverage_html # render html page with details of coverage lines

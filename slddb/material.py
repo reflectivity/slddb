@@ -6,7 +6,7 @@ of x-ray and neutron SLDs for different applications.
 import re
 from numpy import array
 from collections import OrderedDict
-from .constants import u2g, r_e, muB, rho_of_M
+from .constants import u2g, r_e, muB, rho_of_M, Cu_kalpha
 
 SUBSCRIPT_DIGITS="₀₁₂₃₄₅₆₇₈₉"
 
@@ -15,14 +15,14 @@ class Formula(list):
     Evaluate strings for element chemical fomula.
     """
     elements=(r"A[cglmrstu]|B[aehikr]?|C[adeflmorsu]?|D[bsy]{0,1}|E[rsu]|F[emr]?|"
-               "G[ade]|H[efgos]?|I[nr]?|Kr?|L[airu]|M[dgnot]|N[abdeiop]?|"
-               "Os?|P[abdmortu]?|R[abefghnu]|S[bcegimnr]?|T[abcehilm]|"
-               "Uu[bhopqst]|U|V|W|Xe|Yb?|Z[nr]")
+              r"G[ade]|H[efgos]?|I[nr]?|Kr?|L[airu]|M[dgnot]|N[abdeiop]?|"
+              r"Os?|P[abdmortu]?|R[abefghnu]|S[bcegimnr]?|T[abcehilm]|"
+              r"Uu[bhopqst]|U|V|W|Xe|Yb?|Z[nr]")
     isotopes=(r"(A[cglmrstu]|B[aehikr]?|C[adeflmorsu]?|D[bsy]{0,1}|E[rsu]|F[emr]?|"
-               "G[ade]|H[efgos]?|I[nr]?|Kr?|L[airu]|M[dgnot]|N[abdeiop]?|"
-               "Os?|P[abdmortu]?|R[abefghnu]|S[bcegimnr]?|T[abcehilm]|"
-               "Uu[bhopqst]|U|V|W|Xe|Yb?|Z[nr])"
-               "\[[1-9][0-9]{0,2}\]")
+              r"G[ade]|H[efgos]?|I[nr]?|Kr?|L[airu]|M[dgnot]|N[abdeiop]?|"
+              r"Os?|P[abdmortu]?|R[abefghnu]|S[bcegimnr]?|T[abcehilm]|"
+              r"Uu[bhopqst]|U|V|W|Xe|Yb?|Z[nr])"
+              r"\[[1-9][0-9]{0,2}\]")
 
     def __init__(self, string, sort=True):
         self._do_sort=sort
@@ -136,7 +136,7 @@ class Material():
     def M(self):
         return self.mu*muB*self.fu_dens
 
-    def f_of_E(self, E):
+    def f_of_E(self, E=Cu_kalpha):
         f=0.
         for element, number in self.elements:
             f+=number*element.f_of_E(E)
@@ -171,6 +171,13 @@ class Material():
         for element, number in self.elements:
             b+=number*element.b
         return b
+
+    @property
+    def formula(self):
+        output=''
+        for element, number in self.elements:
+            output+=element.symbol+str(number)
+        return Formula(output)
 
     def convert_subscript(self, number):
         if number == 1.0:

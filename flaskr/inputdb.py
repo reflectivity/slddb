@@ -21,27 +21,35 @@ def input_form():
 def input_material(args):
     db=SLDDB(DB_FILE)
 
+    def fill_input(field):
+        conv=db_lookup[field][1]
+        if field in args:
+            value=args[field]
+        else:
+            value=""
+        return conv.html_input()%{'field': field, 'value': value}
+
     if args['name']=='' or args['formula' ]=='':
-        return render_template('input.html', fields=input_fields, get_input=get_input,
+        return render_template('input.html', fields=input_fields, get_input=fill_input,
                                comment="You have to supply a name and Formula!")
 
+
+    useargs=dict(args.items())
     name=args['name']
     formula=args['formula']
+    del(useargs['name'])
+    del(useargs['formula'])
 
-    args=dict(args.items())
-    del(args['name'])
-    del(args['formula'])
-
-    for key, value in list(args.items()):
+    for key, value in list(useargs.items()):
         if db_lookup[key][1].__class__.__name__ is 'CMultiSelect':
-            args[key]=request.form.getlist(key)
-            print(repr(args[key]))
+            useargs[key]=request.form.getlist(key)
+            print(repr(useargs[key]))
         if value == '':
-            del(args[key])
+            del(useargs[key])
     try:
-        db.add_material(name, formula, **args)
+        db.add_material(name, formula, **useargs)
     except Exception as e:
-        return render_template('input.html', fields=input_fields, get_input=get_input,
-                               comment="Error when trying to insert data:\n"+
-                               repr(e))
-    return search_db(args)
+        return render_template('input.html', fields=input_fields,
+                               get_input=fill_input,
+                               comment="Error when trying to insert data:\n"+repr(e))
+    return search_db(useargs)

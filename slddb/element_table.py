@@ -8,6 +8,8 @@ from .dbconfig import DB_ELEMENTS_CONVERTERS, DB_ELEMENTS_FIELDS, \
 from .constants import sigma_to_b
 
 class Element():
+    N=None
+
     def __init__(self, db, symbol=None, Z=None):
         # get element from database
         N=None
@@ -38,6 +40,7 @@ class Element():
             qres=c.fetchone()
             self.symbol=DB_ELEMENTS_CONVERTERS[1].revert(qres[1])
 
+        self.N=N
         self.name=qres[2]
         xid=qres[6]
         self._xdata=self.get_sldata(xid, c)
@@ -96,6 +99,19 @@ class Element():
     @property
     def fpp(self):
         return self._xdata[2]
+
+    def __str__(self):
+        if self.N is None:
+            return self.symbol
+        else:
+            return "%s[%s]"%(self.symbol, self.N)
+
+    def __repr__(self):
+        if self.N is None:
+            symb=self.symbol
+        else:
+            symb="%s[%s]"%(self.symbol, self.N)
+        return 'Element(db, symbol="%s")'%symb
 
 
 class Elements():
