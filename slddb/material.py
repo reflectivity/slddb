@@ -125,6 +125,10 @@ class Material():
         self.mu=mu
 
     @property
+    def fu_volume(self):
+        return 1./self.fu_dens
+
+    @property
     def rho_n(self):
         return self.fu_b*self.fu_dens*1e-5 # Å^-1
 
