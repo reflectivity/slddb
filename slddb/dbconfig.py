@@ -69,12 +69,15 @@ DB_MATERIALS_COLUMNS=[
                               'mass density', 'diffraction', 'interferometry',
                               'SANS', 'SAXS', ]), 'unspecified'),
     ('comments',     cstr,      None),
+    ('invalid',      cdate,     None),
+    ('invalid_by',   cstr,      None),
     ]
 DB_MATERIALS_FIELDS=[fi[0] for fi in DB_MATERIALS_COLUMNS]
 DB_MATERIALS_CONVERTERS=[fi[1] for fi in DB_MATERIALS_COLUMNS]
 DB_MATERIALS_FIELD_DEFAULTS=[fi[2] for fi in DB_MATERIALS_COLUMNS]
 DB_MATERIALS_HIDDEN_DATA=    ['created', 'created_by', 'updated',
-                              'validated', 'validated_by', 'accessed', 'selected']
+                              'validated', 'validated_by', 'accessed', 'selected',
+                              'invalid', 'invalid_by']
 db_lookup=dict([(field, (i, converter, default))
                 for i, (field, converter, default) in
                 enumerate(zip(DB_MATERIALS_FIELDS,

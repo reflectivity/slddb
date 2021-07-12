@@ -49,18 +49,22 @@ class SLDDB():
         if commit:
             self.db.commit()
 
-    def search_material(self, join_and=True, serializable=False, **data):
+    def search_material(self, join_and=True, serializable=False, filter_invalid=True, **data):
         for key, value in data.items():
             if not key in DB_MATERIALS_FIELDS:
                 raise KeyError('%s is not a valid data field'%key)
 
         if len(data)==0:
             sstr='SELECT * FROM %s'%DB_MATERIALS_NAME
+            if filter_invalid:
+                sstr+=' WHERE invalid IS NULL'
             qstr=''
             qlst=[]
             ustr=''
         else:
             sstr='SELECT * FROM %s WHERE '%DB_MATERIALS_NAME
+            if filter_invalid:
+                sstr+='invalid IS NULL AND '
             ustr='UPDATE %s SET accessed = accessed + 1 WHERE '%DB_MATERIALS_NAME
             qstr=''
             qlst=[]
