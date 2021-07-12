@@ -27,7 +27,7 @@ ccomplex=CComplex()
 carray=CArray()
 curl=CUrl()
 
-WEBAPI_URL='http://127.0.0.1:5000/'
+WEBAPI_URL='https://slddb.esss.dk/slddb/'
 DB_FILE=os.path.join(configpath, 'local_database.db')
 
 DB_MATERIALS_NAME='materials'

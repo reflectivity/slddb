@@ -4,7 +4,6 @@ import tempfile
 import zipfile
 import shutil
 from urllib import request
-from slddb.dbconfig import WEBAPI_URL
 
 
 class TestWebAPI(unittest.TestCase):
@@ -20,7 +19,7 @@ class TestWebAPI(unittest.TestCase):
 
         # try to download the module from website
         try:
-            res=request.urlopen(WEBAPI_URL+'download_api', timeout=500)
+            res=request.urlopen('http://127.0.0.1:5000/download_api', timeout=500)
         except:
             cls.server_available=False
             print("Server unreachable to download python api")
@@ -32,23 +31,26 @@ class TestWebAPI(unittest.TestCase):
                 cls.server_available=False
                 print("Server unreachable to download python api")
                 return
-
         # clear all modules of slddb
         for key in list(sys.modules.keys()):
             if key.startswith('slddb'):
                 del sys.modules[key]
 
         # make sure the temporary directory is the first search path for new modules
-        #sys.path.insert(0, cls.path)
+        sys.path.insert(0, cls.path)
         with zipfile.ZipFile(os.path.join(cls.path, 'slddb.zip')) as zf:
             zf.extractall(cls.path)
 
         global api, slddb
         import slddb
-        from slddb import api, dbconfig, webapi
+        from slddb import api, webapi, dbconfig
+        # overwrite local server URL
+        cls._api_url=dbconfig.WEBAPI_URL
+        dbconfig.WEBAPI_URL='http://127.0.0.1:5000/'
+        webapi.WEBAPI_URL=dbconfig.WEBAPI_URL
         # set a temporary database file
-        slddb.DB_FILE=os.path.join(cls.path, 'slddb.db')
-        dbconfig.DB_FILE=slddb.DB_FILE
+        dbconfig.DB_FILE=os.path.join(cls.path, 'slddb.db')
+        slddb.DB_FILE=dbconfig.DB_FILE
         webapi.DB_FILE=slddb.DB_FILE
 
     @classmethod
