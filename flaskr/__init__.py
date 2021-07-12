@@ -18,6 +18,7 @@ from slddb import __version__, dbconfig
 DB_FILE='slddb.db';dbconfig.DB_FILE=DB_FILE;slddb.DB_FILE=DB_FILE
 from slddb.dbconfig import DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA, db_lookup
 from slddb.material import Formula
+from slddb import constants
 
 from .api import calc_api, select_api, search_api
 from .querydb import search_db, show_search
@@ -43,6 +44,10 @@ login_manager.init_app(app)
 @app.context_processor
 def inject_version():
     return dict(slddb_version=__version__)
+
+@app.context_processor
+def inject_constants():
+    return constants.__dict__
 
 @app.route('/')
 def start_page():

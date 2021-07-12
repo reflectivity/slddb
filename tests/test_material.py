@@ -23,6 +23,8 @@ class TestMaterial(unittest.TestCase):
                      (Element(self.db.db, 'O'), 3.0)], fu_volume=50.604676)
         self.assertAlmostEqual(m1.dens, 8.9, places=6)
         self.assertAlmostEqual(m2.dens, 5.24, places=6)
+        self.assertAlmostEqual(m1.fu_volume, 10.950864, places=10)
+        self.assertAlmostEqual(m2.fu_volume, 50.604676, places=10)
 
     def test_rho_n(self):
         m1=Material([(Element(self.db.db, 'Ni'), 1.0)], rho_n=9.4057e-06-1.1402e-09j)

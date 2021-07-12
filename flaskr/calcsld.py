@@ -1,6 +1,6 @@
 from flask import render_template
 
-from slddb.constants import Cu_kalpha, Mo_kalpha
+from slddb.constants import Cu_kalpha, Mo_kalpha, r_e
 from slddb import SLDDB, DB_FILE
 from slddb.material import Material, Formula
 
@@ -13,11 +13,16 @@ def get_graph(E, real, imag, name='Iron'):
     # Generate the figure **without using pyplot**.
     fig = Figure()
     ax = fig.subplots()
-    ax.plot(E, real, label='real')
-    ax.plot(E, imag, label='imaginary')
+    ax.plot(E, 1e5/r_e*real, label='real')
+    ax.plot(E, 1e5/r_e*imag, label='imaginary')
+    ax.set_xscale('log')
     ax.set_xlabel('E (keV)')
-    ax.set_ylabel('SLD (Å⁻²)')
+    ax.set_ylabel('electron density (rₑ/Å³)')
     ax.set_title('X-Ray optical parameters for %s'%name)
+    twin=ax.twinx()
+    ymin, ymax=ax.get_ylim()
+    twin.set_ylim(ymin*r_e*10., ymax*r_e*10)
+    twin.set_ylabel('SLD (10⁻⁶ Å⁻²)')
     # Save it to a temporary buffer.
     buf = BytesIO()
     fig.savefig(buf, format="png")
