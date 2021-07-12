@@ -33,13 +33,18 @@ def calc_api(args):
 
 def select_api(args):
     db=SLDDB(DB_FILE)
-    res=db.search_material(ID=int(args['ID']))
+    res=db.search_material(filter_invalid=False, ID=int(args['ID']))
     try:
         material=db.select_material(res[0])
+    except IndexError:
+        return '## ID not found in database'
     except Exception as e:
         return repr(e)+'<br >'+"Raised when tried to parse material = %s"%res[0]
 
     out={}
+    if res[0]['invalid'] is not None:
+        out['WARNING']='This entry has been invalidated by ORSO on %s, please contact %s for more information.'%(
+            res[0]['invalid'], res[0]['invalid_by'])
     out['ID']=args['ID']
     out['name']=res[0]['name']
     out['formula']=str(material.formula)

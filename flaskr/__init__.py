@@ -20,12 +20,13 @@ from slddb.dbconfig import DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA, db_loo
 from slddb.material import Formula
 
 from .api import calc_api, select_api, search_api
-from .querydb import search_db
+from .querydb import search_db, show_search
 from .calcsld import calculate_selection, calculate_user, validate_selection
 from .inputdb import input_form, input_material
 
 app=Flask("ORSO SLD Data Base", template_folder='flaskr/templates',
           static_folder='flaskr/static')
+app.config['TEMPLATES_AUTO_RELOAD']=True
 
 try:
     app.config['SECRET_KEY']=open('flaskr/secret.key', 'rb').read()
@@ -45,7 +46,7 @@ def inject_version():
 
 @app.route('/')
 def start_page():
-    return render_template('search.html')
+    return show_search()
 
 @app.route('/about')
 def about_page():
@@ -59,18 +60,27 @@ def input_page():
 def eval_input():
     return input_material(request.form)
 
+@app.route('/search', methods=['GET'])
+def search_query_post():
+    return start_page()
+
 @app.route('/search', methods=['POST'])
 def search_query():
     query={}
+
     for key, value in request.form.items():
         if value.strip() == '':
             continue
         if key in DB_MATERIALS_FIELDS:
+            if db_lookup[key][1].__class__.__name__=='CMultiSelect':
+                value=request.form.getlist(key)
             try:
-                query[key]=db_lookup[key][1].convert(value)
+                db_lookup[key][1].convert(value)
             except Exception as e:
                 return render_template('search.html', error=repr(e)+'<br >'+
                                     "Raised when tried to parse %s = %s"%(key, value))
+            else:
+                query[key]=value
     return search_db(query)
 
 @app.route('/material', methods=['POST'])

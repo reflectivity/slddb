@@ -260,6 +260,7 @@ class CSelect(CType):
 
     def html_input(self):
         output='<select name="%(field)s" id="compound %(field)s">'
+        output+='<option value="">any</option>'
         for selection in self.options:
             output+='<option value="%s">%s</option>'%(selection, selection)
         output+='</select>'

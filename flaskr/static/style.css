@@ -70,3 +70,24 @@ li a:hover {
   background-color: #555;
   color: white;
 }
+
+.collapsible {
+  background-color: #fff;
+  color: #aaa;
+  cursor: pointer;
+  width: 100%;
+  border: none;
+  text-align: center;
+  outline: none;
+}
+.active, .collapsible:hover {
+  color: #444;
+}
+
+/* Style the collapsible content. Note: hidden by default */
+.collapsed {
+  background-color: #fff;
+  color: #444;
+  display: none;
+  overflow: hidden;
+}

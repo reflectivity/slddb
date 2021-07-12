@@ -41,9 +41,8 @@ def input_material(args):
     del(useargs['formula'])
 
     for key, value in list(useargs.items()):
-        if db_lookup[key][1].__class__.__name__ is 'CMultiSelect':
+        if db_lookup[key][1].__class__.__name__ == 'CMultiSelect':
             useargs[key]=request.form.getlist(key)
-            print(repr(useargs[key]))
         if value == '':
             del(useargs[key])
     try:
