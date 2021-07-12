@@ -4,7 +4,7 @@ import tempfile
 import zipfile
 import shutil
 from urllib import request
-
+from importlib import reload
 
 class TestWebAPI(unittest.TestCase):
     server_available=True
@@ -176,3 +176,61 @@ class TestWebAPI(unittest.TestCase):
             self.assertEqual(mat.__class__.__name__, 'Material')
         webapi.WEBAPI_URL=dbconfig.WEBAPI_URL
 
+class TestConfigPaths(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        # create a temporary fold to download python api and store database file
+        cls.path=os.path.join(tempfile.gettempdir(), 'slddb_testconfig')
+        if os.path.exists(cls.path):
+            shutil.rmtree(cls.path) # cleanup possible earlier runs
+        os.makedirs(cls.path)
+
+        cls.old_environ=dict(os.environ)
+        if 'APPDATA' in os.environ:
+            del os.environ['APPDATA']
+        if 'XDG_CONFIG_HOME' in os.environ:
+            del os.environ['XDG_CONFIG_HOME']
+        if 'HOME' in os.environ:
+            del os.environ['HOME']
+
+    @classmethod
+    def tearDownClass(cls):
+        # delete temporary folder with all files and reset environment variables
+        shutil.rmtree(cls.path)
+        os.environ=cls.old_environ
+
+    def test_macpath(self):
+        # mac version of config path
+        os.environ['APPDATA']=self.path
+        from slddb import dbconfig
+        reload(dbconfig)
+        del os.environ['APPDATA']
+
+        res_path=os.path.join(self.path, 'slddb')
+
+        self.assertEqual(dbconfig.configpath, res_path)
+        self.assertTrue(os.path.exists(res_path))
+
+    def test_linux(self):
+        # mac version of config path
+        os.environ['XDG_CONFIG_HOME']=self.path
+        from slddb import dbconfig
+        reload(dbconfig)
+        del os.environ['XDG_CONFIG_HOME']
+
+        res_path=os.path.join(self.path, 'slddb')
+
+        self.assertEqual(dbconfig.configpath, res_path)
+        self.assertTrue(os.path.exists(res_path))
+
+    def test_rest(self):
+        # mac version of config path
+        os.environ['HOME']=self.path
+        from slddb import dbconfig
+        reload(dbconfig)
+        del os.environ['HOME']
+
+        res_path=os.path.join(self.path, '.config', 'slddb')
+
+        self.assertEqual(dbconfig.configpath, res_path)
+        self.assertTrue(os.path.exists(res_path))
