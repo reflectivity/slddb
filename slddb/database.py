@@ -66,7 +66,17 @@ class SLDDB():
             qlst=[]
             for key, value in data.items():
                 cval=db_lookup[key][1].convert(value)
-                if type(cval) is str:
+                if type(value) in (list, tuple):
+                    if len(value)==0:
+                        continue
+                    qstr+='('
+                    for itm in value:
+                        qstr+='%s LIKE ?'%key
+                        qstr+=' AND '
+                        qlst.append('%%%s%%'%repr(itm))
+                    cval=qlst.pop(-1)
+                    qstr=qstr[:-5]+')'
+                elif type(cval) is str:
                     qstr+='%s LIKE ?'%key
                     cval='%%%s%%'%cval
                 else:

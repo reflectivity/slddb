@@ -35,6 +35,7 @@ DB_MATERIALS_COLUMNS=[
    #(Name,           converter, default)
     ('ID',           pint,      None),
     ('created',      cdate,     'CURRENT_TIMESTAMP'),
+    ('created_by',   cstr,      None),
     ('updated',      cdate,     None),
     ('validated',    cdate,     None),
     ('validated_by', cstr,      None),
@@ -72,7 +73,8 @@ DB_MATERIALS_COLUMNS=[
 DB_MATERIALS_FIELDS=[fi[0] for fi in DB_MATERIALS_COLUMNS]
 DB_MATERIALS_CONVERTERS=[fi[1] for fi in DB_MATERIALS_COLUMNS]
 DB_MATERIALS_FIELD_DEFAULTS=[fi[2] for fi in DB_MATERIALS_COLUMNS]
-DB_MATERIALS_HIDDEN_DATA=    ['created', 'updated', 'validated', 'validated_by', 'accessed', 'selected']
+DB_MATERIALS_HIDDEN_DATA=    ['created', 'created_by', 'updated',
+                              'validated', 'validated_by', 'accessed', 'selected']
 db_lookup=dict([(field, (i, converter, default))
                 for i, (field, converter, default) in
                 enumerate(zip(DB_MATERIALS_FIELDS,

@@ -65,6 +65,26 @@ class TestMaterialDB(unittest.TestCase):
         res2=self.db.search_material(ID=res[0]['ID'])
         self.assertIsNotNone(res2[0]['validated'])
 
+    def test_tags(self):
+        self.db.add_material('Tag it', 'Pb', density=11.4, tags=['magnetic', 'metal'])
+        res=self.db.search_material(name='Tag it')
+        del res[0]['accessed']
+        res2=self.db.search_material(tags=['magnetic'])
+        del res2[0]['accessed']
+        self.assertEqual(res, res2)
+        res2=self.db.search_material(tags=['metal'])
+        del res2[0]['accessed']
+        self.assertEqual(res, res2)
+        res2=self.db.search_material(tags=['magnetic', 'metal'])
+        del res2[0]['accessed']
+        self.assertEqual(res, res2)
+        res2=self.db.search_material(tags=['metal alloy'])
+        self.assertEqual(len(res2), 0)
+        res2=self.db.search_material(name='Tag it', tags=[])
+        self.assertNotEqual(len(res2), 0)
+        del res2[0]['accessed']
+        self.assertEqual(res, res2)
+
     def test_access_counter(self):
         self.db.add_material('Iron Oxide 5', 'Fe2O3', density=5.24)
         r1=self.db.search_material(name='iron')[0]['accessed']
