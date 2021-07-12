@@ -36,11 +36,11 @@ class TestWebAPI(unittest.TestCase):
             if key.startswith('slddb'):
                 del sys.modules[key]
 
-        # make sure the temporary directory is the first search path for new modules
-        sys.path.insert(0, cls.path)
+        # try extracting the zip file
         with zipfile.ZipFile(os.path.join(cls.path, 'slddb.zip')) as zf:
             zf.extractall(cls.path)
 
+        # use the local api version to make sure test coverage works
         global api, slddb
         import slddb
         from slddb import api, webapi, dbconfig

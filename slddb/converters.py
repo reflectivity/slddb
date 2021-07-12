@@ -137,7 +137,7 @@ class CUrl(CType):
                ' placeholder="exmpl: http://www.google.com"/>'
 
 class CArray(Converter):
-    # convert numpy array to string representation and back
+    # convert numpy array to bytest representation and back
     sql_type='BLOB'
 
     def __init__(self, shape=None, ndim=None):
@@ -160,7 +160,7 @@ class CArray(Converter):
             shapestr=str(data.shape).encode('ascii')
             shapelen=("%06i"%len(shapestr)).encode('ascii')
             pre_chars+=shapelen+shapestr
-        str_data=adata.tostring()
+        str_data=adata.tobytes()
         return pre_chars+str_data
 
     def revert(self, db_data):

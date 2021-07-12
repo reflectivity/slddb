@@ -129,7 +129,6 @@ class SLDDB():
                    for fi, ci, di in zip(DB_MATERIALS_FIELDS, DB_MATERIALS_CONVERTERS,
                                      DB_MATERIALS_FIELD_DEFAULTS)]
         qstr='CREATE TABLE %s (%s)'%(DB_MATERIALS_NAME, ", ".join(name_type))
-        print(qstr)
         c.execute(qstr)
         c.close()
         self.db.commit()

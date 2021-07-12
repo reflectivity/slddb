@@ -40,7 +40,6 @@ class TestMaterialDB(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.db.add_material('Iron Oxide 4', 'Fe2O3', density=5.24)
 
-
     def test_search_empty(self):
         res=self.db.search_material()
         res2=self.db.search_material()
@@ -53,13 +52,18 @@ class TestMaterialDB(unittest.TestCase):
         res2=self.db.search_material(name='iron', density=5.0, join_and=False)
         self.assertNotEqual(res1, res2)
 
-
     def test_selection(self):
         self.db.add_material('To Select', 'Pb', density=11.4)
         res=self.db.search_material(density=11.4)
         mat=self.db.select_material(res[0])
         self.assertAlmostEqual(mat.dens, 11.4)
 
+    def test_validate_item(self):
+        self.db.add_material('To Validate', 'Pb', density=11.4)
+        res=self.db.search_material(name='To Validate', density=11.4)
+        self.db.validate_material(res[0]['ID'], 'testuser')
+        res2=self.db.search_material(ID=res[0]['ID'])
+        self.assertIsNotNone(res2[0]['validated'])
 
     def test_access_counter(self):
         self.db.add_material('Iron Oxide 5', 'Fe2O3', density=5.24)
