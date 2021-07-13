@@ -16,16 +16,20 @@ def get_input(field):
     return conv.html_input()%{'field': field, 'value': value}
 
 def show_search():
-    return render_template('search.html', main_fields=main_fields,
+    if current_user.is_authenticated:
+        user="%s <%s>"%(current_user.name, current_user.email)
+    else:
+        user=None
+    return render_template('search.html', main_fields=main_fields, orso_user=user,
                            advanced_fields=advanced_fields, get_input=get_input)
 
-def search_db(query):
+def search_db(query, invalids=False):
     db=SLDDB(DB_FILE)
     if current_user.is_authenticated:
         user="%s <%s>"%(current_user.name, current_user.email)
     else:
         user=None
-    res=db.search_material(filter_invalid=user is None, **query)
+    res=db.search_material(filter_invalid=not invalids, **query)
     hidden_columns=[True for field in DB_MATERIALS_FIELDS]
     advanced_search=any([key in advanced_fields for key in query.keys()])
     for row in res:

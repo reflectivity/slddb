@@ -73,6 +73,7 @@ def search_query_post():
 def search_query():
     query={}
 
+    invalids=False
     for key, value in request.form.items():
         if value.strip() == '':
             continue
@@ -86,7 +87,9 @@ def search_query():
                                     "Raised when tried to parse %s = %s"%(key, value))
             else:
                 query[key]=value
-    return search_db(query)
+        if key=='show_invalid' and value:
+            invalids=True
+    return search_db(query, invalids=invalids)
 
 @app.route('/material', methods=['POST'])
 def select_material():

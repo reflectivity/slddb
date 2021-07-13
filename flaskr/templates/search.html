@@ -15,6 +15,10 @@
           <tr><td class="collapsed">{{field.capitalize()}}</td><td class="collapsed">{{ get_input(field)|safe }}</td></tr>
         {%endfor%}
         <tr><td colspan="2"><center><input type="submit"></center></td> </tr>
+    {% if orso_user %}
+        <tr><td colspan="2"><center><input type="checkbox" id="show_invalid" name="show_invalid" {% if request.form['show_invalid'] %} checked {% endif %}>
+          <label for="show_invalid">Show Invalid</label></center></td> </tr>
+    {% endif %}
       </table>
     </center></form>
 
