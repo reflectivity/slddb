@@ -13,8 +13,9 @@ def get_graph(E, real, imag, name='Iron'):
     # Generate the figure **without using pyplot**.
     fig = Figure()
     ax = fig.subplots()
-    ax.plot(E, 1e5/r_e*real, label='real')
-    ax.plot(E, 1e5/r_e*imag, label='imaginary')
+    ax.plot(E,  1e5/r_e*real, label='Re')
+    ax.plot(E, -1e5/r_e*imag, label='-Im')
+    ax.legend()
     ax.set_xscale('log')
     ax.set_xlabel('E (keV)')
     ax.set_ylabel('electron density (rₑ/Å³)')
@@ -38,13 +39,16 @@ def calculate_selection(ID):
         material=db.select_material(res[0])
     except Exception as e:
         return render_template('base.html', error=repr(e)+'<br >'+"Raised when tried to parse material = %s"%res[0])
-    E, delta=material.delta_vs_E()
-    script=get_graph(E, delta.real, delta.imag, res[0]['name'])
+    E, rho_x=material.rho_vs_E()
+    _, delta=material.delta_vs_E()
+    _, beta=material.beta_vs_E()
+    script=get_graph(E, rho_x.real, rho_x.imag, res[0]['name'])
     return render_template('sldcalc.html', material=material, material_name=res[0]['name'],
                            material_description=res[0]['description'], Cu_kalpha=Cu_kalpha,
                            Mo_kalpha=Mo_kalpha, script=script, xray_E=E.tolist(),
-                           xray_delta_real=nan_to_num(delta.real).tolist(),
-                           xray_delta_imag=nan_to_num(delta.imag).tolist(),
+                           xray_rho_real=nan_to_num(rho_x.real).tolist(),
+                           xray_rho_imag=nan_to_num(rho_x.imag).tolist(),
+                           xray_delta=nan_to_num(delta).tolist(), xray_beta=nan_to_num(beta).tolist(),
                            validated=res[0]['validated'], validated_by=res[0]['validated_by'],
                            formula=res[0]['formula'], density=material.dens, mu=material.mu)
 
@@ -60,13 +64,16 @@ def calculate_user(formula, density, is_density, mu):
     except Exception as e:
         return render_template('sldcalc.html', error=repr(e)+'<br/>'+str(e))
     else:
-        E, delta=m.delta_vs_E()
+        E, delta=m.rho_vs_E()
+        _, delta=m.delta_vs_E()
+        _, beta=m.beta_vs_E()
         script=get_graph(E, delta.real, delta.imag, str(formula))
         return render_template('sldcalc.html', material=m, material_name="User input",
                            material_description="", Cu_kalpha=Cu_kalpha,
                            Mo_kalpha=Mo_kalpha, script=script, xray_E=E.tolist(),
-                           xray_delta_real=nan_to_num(delta.real).tolist(),
-                           xray_delta_imag=nan_to_num(delta.imag).tolist())
+                           xray_rho_real=nan_to_num(delta.real).tolist(),
+                           xray_rho_imag=nan_to_num(delta.imag).tolist(),
+                           xray_delta=nan_to_num(delta).tolist(), xray_beta=nan_to_num(beta).tolist())
 
 def validate_selection(ID, user):
     db=SLDDB(DB_FILE)

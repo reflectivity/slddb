@@ -79,18 +79,18 @@ class TestMaterial(unittest.TestCase):
                      (Element(self.db.db, 'O'), 3.0)], dens=5.24)
 
         with self.subTest('Cu', i=0):
-            sld=m2.delta_of_E(Cu_kalpha)
+            sld=m2.rho_of_E(Cu_kalpha)
             self.assertAlmostEqual(sld.real,  4.1125e-05)
             self.assertAlmostEqual(sld.imag, -3.6347e-06)
         with self.subTest('Mo', i=1):
-            sld=m2.delta_of_E(Mo_kalpha)
+            sld=m2.rho_of_E(Mo_kalpha)
             self.assertAlmostEqual(sld.real,  4.274e-05)
             self.assertAlmostEqual(sld.imag, -9.5604e-07)
 
     def test_xray_all(self):
         m2=Material([(Element(self.db.db, 'Fe'), 2.0),
                      (Element(self.db.db, 'O'), 3.0)], dens=5.24)
-        E,delta=m2.delta_vs_E()
+        E,delta=m2.rho_vs_E()
 
     def test_magnetic(self):
         m2=Material([(Element(self.db.db, 'Fe'), 2.0),

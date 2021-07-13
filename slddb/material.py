@@ -4,9 +4,9 @@ of x-ray and neutron SLDs for different applications.
 """
 
 import re
-from numpy import array
+from numpy import array, pi
 from collections import OrderedDict
-from .constants import u2g, r_e, muB, rho_of_M, Cu_kalpha
+from .constants import u2g, r_e, muB, rho_of_M, Cu_kalpha, E_to_lambda
 
 SUBSCRIPT_DIGITS="₀₁₂₃₄₅₆₇₈₉"
 
@@ -146,17 +146,47 @@ class Material():
             f+=number*element.f_of_E(E)
         return f
 
-    def delta_of_E(self, E):
+    def rho_of_E(self, E):
         f=self.f_of_E(E)
         return f*r_e*self.fu_dens*1e-5 # Å^-1
 
-    def delta_vs_E(self):
-        # generate full energy range data
+    def delta_of_E(self, E):
+        rho=self.rho_of_E(E)
+        lamda=E_to_lambda/E
+        return lamda**2/2./pi*rho.real
+
+    def beta_of_E(self, E):
+        rho=self.rho_of_E(E)
+        lamda=E_to_lambda/E
+        return -lamda**2/2./pi*rho.imag
+
+    def mu_of_E(self, E):
+        rho=self.rho_of_E(E)
+        lamda=E_to_lambda/E
+        return -lamda*2.*rho.imag
+
+    def rho_vs_E(self):
+        # generate full energy range data for E,SLD
         E=self.elements[0][0].E
         for element, number in self.elements:
             E=E[(E>=element.E.min())&(E<=element.E.max())]
-        delta=array([self.delta_of_E(Ei) for Ei in E])
-        return E,delta
+        rho=array([self.rho_of_E(Ei) for Ei in E])
+        return E,rho
+
+    def delta_vs_E(self):
+        E,rho=self.rho_vs_E()
+        lamda=E_to_lambda/E
+        return E,lamda**2/2./pi*rho.real
+
+    def beta_vs_E(self):
+        E,rho=self.rho_vs_E()
+        lamda=E_to_lambda/E
+        return E,-lamda**2/2./pi*rho.imag
+
+    def mu_vs_E(self):
+        E,rho=self.rho_vs_E()
+        lamda=E_to_lambda/E
+        return E,-lamda*2.*rho.imag
 
     @property
     def dens(self):
