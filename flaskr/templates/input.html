@@ -13,6 +13,9 @@
 
     <form method="POST">
       <table class="withborder">
+          <tr><td>Your email (recommended)</td>
+              <td>{{ get_input("created_by")|safe }}</td></tr>
+          <tr><td>Compound field:</td><td>Value:</td></tr>
     {%for field in fields%}
           <tr><td>{{field}}</td><td>{{ get_input(field)|safe }}</td></tr>
     {%endfor%}

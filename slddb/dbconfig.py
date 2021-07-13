@@ -14,7 +14,7 @@ configpath = os.path.join(confighome, 'slddb')
 if not os.path.exists(configpath):
     os.makedirs(configpath)
 
-from .converters import CType, CLimited, CArray, CDate, CComplex, CFormula, CSelect, CMultiSelect, CUrl
+from .converters import CType, CLimited, CArray, CDate, CComplex, CFormula, CSelect, CMultiSelect, CUrl, CMail
 
 cstr=CType(str, str)
 cint=CType(int, int)
@@ -26,6 +26,7 @@ cformula=CFormula()
 ccomplex=CComplex()
 carray=CArray()
 curl=CUrl()
+cmail=CMail()
 
 WEBAPI_URL='https://slddb.esss.dk/slddb/'
 DB_FILE=os.path.join(configpath, 'local_database.db')
@@ -35,7 +36,7 @@ DB_MATERIALS_COLUMNS=[
    #(Name,           converter, default)
     ('ID',           pint,      None),
     ('created',      cdate,     'CURRENT_TIMESTAMP'),
-    ('created_by',   cstr,      None),
+    ('created_by',   cmail,     None),
     ('updated',      cdate,     None),
     ('validated',    cdate,     None),
     ('validated_by', cstr,      None),

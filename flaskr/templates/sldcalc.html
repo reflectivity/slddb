@@ -93,9 +93,10 @@
 
         out=out.concat('', '\t', 'real', '\t', 'imag', '\n');
         out=out.concat('Neutron nuclear SLD (10⁻⁶ Å⁻²)',
-                        '\t', '{{"%.6f"%(1e6*material.rho_n.real)}}',
-                        '\t', '{{"%.6f"%(1e6*material.rho_n.imag)}}i', '\n');
-        out=out.concat('Neutron magnetic SLD (10⁻⁶ Å⁻²)', '\t', '{{"%.6f"%(1e6*material.rho_m)}}', '\n');
+                        '\t', material_neutron_real,
+                        '\t', material_neutron_imag, '\n');
+        var magn_select=document.getElementById("magnresult")
+        out=out.concat(magn_select.options[magn_select.selectedIndex].text, '\t', material_neutron_magn, '\n');
 
         var xray_select=document.getElementById("cu_select");
         var xray_unit=xray_select.options[xray_select.selectedIndex].text
@@ -162,10 +163,10 @@
 
     function switch_density() {
         var selection = document.getElementById("densresult").value;
-        if (selection == 'density') {document.getElementById("density_value").innerHTML = '{{"%.4f"%material.dens}}';}
-        if (selection == 'FUdens') {document.getElementById("density_value").innerHTML = '{{"%.4f"%material.fu_dens}}';}
-        if (selection == 'FUdnm') {document.getElementById("density_value").innerHTML = '{{"%.4f"%(material.fu_dens*1e3)}}';}
-        if (selection == 'volume') {document.getElementById("density_value").innerHTML = '{{"%.4f"%material.fu_volume}}';}
+        if (selection == 'density') {document.getElementById("density_value").innerHTML = '{{"%.6f"%material.dens}}';}
+        if (selection == 'FUdens') {document.getElementById("density_value").innerHTML = '{{"%.6e"%material.fu_dens}}';}
+        if (selection == 'FUdnm') {document.getElementById("density_value").innerHTML = '{{"%.7f"%(material.fu_dens*1e3)}}';}
+        if (selection == 'volume') {document.getElementById("density_value").innerHTML = '{{"%.3f"%material.fu_volume}}';}
     }
 
     function switch_sld_cu(selection) {
@@ -209,37 +210,54 @@
             can_switch=true;
         }
     }
+
+    function switch_magn() {
+        var selection = document.getElementById("magnresult").value;
+        if (selection == 'msld') {material_neutron_magn={{1e6*material.rho_m}};}
+        if (selection == 'muB') {material_neutron_magn={{material.mu}};}
+        if (selection == 'magn') {material_neutron_magn={{material.M}};}
+        document.getElementById("magn_value").innerHTML = material_neutron_magn.toFixed(6);
+    }
     </script>
   {% endif %}
 
-  <p><center>
-    <form action="{{ url_for('calculate_sld') }}" method="get">
+    <p></p>
+    <form action="{{ url_for('calculate_sld') }}" method="get"><center>
       <table class="withborder">
         <tr><td>Field</td><td>value for calculation</td></tr>
         <tr><td>Formula</td><td><input name="formula" id="compound formula" value="{{ request.args['formula'] or formula }}"></td></tr>
         <tr><td><select id="densinput" name="densinput">
           <option value="density">Density (g/cm³)</option>
-          <option value="volume">FU Volume (Å³)</option>
+          <option value="FUdens" {% if request.args['densinput']=='FUdens' %} selected {% endif %}>Density (FU/Å³)</option>
+          <option value="FUdnm" {% if request.args['densinput']=='FUdnm' %} selected {% endif %}>Density (FU/nm³)</option>
+          <option value="volume" {% if request.args['densinput']=='volume' %} selected {% endif %}>FU Volume (Å³)</option>
         </select></td><td><input type='number' step="0.00001" name="density" id="compound density" value="{{ request.args['density'] or density }}"></td></tr>
-        <tr><td>Magnetisation (µB/FU)</td><td><input type='number' step="0.00001" name="mu" id="compound mu" value="{{ request.args['mu'] or mu }}"></td></tr>
+        <tr><td><select id="magninput" name="magninput">
+            <option value="muB">Magnetisation (µB/FU)</option>
+            <option value="magn" {% if request.args['magninput']=='magn' %} selected {% endif %}>Magnetisation (kA/m = emu/cm³)</option>
+            </select></td>
+            <td><input type='number' step="0.00001" name="mu" id="compound mu" value="{{ request.args['mu'] or mu }}"></td></tr>
         <tr><td colspan="2"><center><input type="submit"></center></td> </tr>
       </table>
-    </form>
-    </center>
-  </p>
+    </center></form>
 
-  <p><center>
-    <form action="{{ url_for('start_page') }}">
+    <p></p>
+    <form action="{{ url_for('start_page') }}"><center>
       <button type="submit" >back to database query</button>
-    </form>
-    </center>
-  </p>
+    </center></form>
+
 
   {% if material %}
-  <p><center>
+  <center><p>
   <h2>Result of SLD calculation:</h2>
-    <table class="withborder"{% if validated %} style="background-color: #dfd"{% endif %}>
-        <tr><td>Compound</td><td colspan=3>{{material_name}}</td></tr>
+    <table class="withborder"{% if validated %} style="background-color: #dfd"{% endif %}{% if invalid %} style="background-color: #fdd"{% endif %}>
+        {% if material.ID %}
+        <tr><td>Compound (ORSO ID={{material.ID}})</td><td colspan=2>{{material_name}}</td>
+            <td><a href="{{url_for('calculate_sld')}}?ID={{material.ID}}" target="_blank">direct link</a></td></tr>
+        {% else %}
+        <tr><td>Compound</td><td colspan=2>{{material_name}}</td>
+            <td><a href="{{url_for('calculate_sld')}}?formula={{material.formula}}&density={{material.dens}}&mu={{material.mu}}&densinput=density&magninput=magn" target="_blank">direct link</a></td></tr>
+        {% endif %}
         <tr><td>Description</td><td colspan=2 syle="word-wrap;">{{material_description}}</td>
             <td rowspan="3"><center><button type="button" onclick="copy_all()">Copy to<br />Clipboard</button></center></td></tr>
         <tr><td>Chemical Formula</td><td colspan=2>{{material}}</td></tr>
@@ -250,10 +268,14 @@
           <option value="volume">FU Volume (Å³)</option>
         </select></td><td colspan=2 id="density_value">{{"%.4f"%material.dens}}</td></tr>
         <tr><td>Neutron nuclear SLD (10⁻⁶ Å⁻²)</td>
-          <td>{{"%.6f"%(1000000*material.rho_n.real)}}</td>
-          <td>{{"%.6f"%(1000000*material.rho_n.imag)}}i</td>
+          <td>{{"%.6f"%(1e6*material.rho_n.real)}}</td>
+          <td>{{"%.6f"%(1e6*material.rho_n.imag)}}i</td>
           <td><button type="button" onclick="copy_NSLD()">as Complex</button></td></tr>
-        <tr><td>Neutron magnetic SLD (10⁻⁶ Å⁻²)</td><td colspan=2>{{"%.6f"%(1000000*material.rho_m)}}</td>
+        <tr><td><select id="magnresult" name="magnresult" onchange="switch_magn()">
+            <option value="msld">Neutron magnetic SLD (10⁻⁶ Å⁻²)</option>
+            <option value="muB">Magnetisation (µB/FU)</option>
+            <option value="magn">Magnetisation (kA/m = emu/cm³)</option>
+            </select></td><td colspan=2 id="magn_value">{{"%.6f"%(1000000*material.rho_m)}}</td>
             <td><button type="button" onclick="copy_Nmag()">as Float</button></td></tr>
         <tr><td>Cu-Kɑ <select id="cu_select" name="cu_select" onchange="switch_sld_cu(this.value)">
                 <option value="electron">e-density (rₑ/Å³)</option>
@@ -285,10 +307,13 @@
             <td><div id="value_imag">{{"%.6f"%(1e5/r_e*material.rho_of_E(Cu_kalpha).imag)}}i</div></td>
             <td><button type="button" onclick="copy_xray()">as Complex</button></td></tr>
         {% if validated %}
-        <tr><td colspan="3">This entry was validated by ORSO<br />({{ validated }} by {{ validated_by }})</td></tr>
+        <tr><td colspan="4">This entry was validated by ORSO<br />({{ validated }} by {{ validated_by }})</td></tr>
+        {% endif %}
+        {% if invalid %}
+        <tr><td colspan="4">This entry was removed by ORSO because it was invalid<br />({{ invalid }} by {{ invalid_by }})</td></tr>
         {% endif %}
     </table>
-  </center></p>
+  </p></center>
   {% endif %}
 
   <center>

@@ -71,6 +71,13 @@ li a:hover {
   color: white;
 }
 
+/* special buttons to be aware of */
+.danger {
+  background-color: #fdd;
+  color: #d00;
+}
+
+
 .collapsible {
   background-color: #fff;
   color: #aaa;

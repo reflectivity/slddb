@@ -108,13 +108,21 @@ class Material():
     M: kA/m = emu/cm³
     """
 
-    def __init__(self, elements, dens=None, fu_volume=None, rho_n=None, mu=0., xsld=None, xE=None):
+    def __init__(self, elements, dens=None, fu_volume=None, rho_n=None, mu=0., xsld=None, xE=None,
+                 fu_dens=None, M=None,
+                 ID=None):
         self.elements=elements
         # generate formula unit density using different priority of possible inputs
         if fu_volume is not None:
+            if dens is not None or fu_dens is not None:
+                raise ValueError("fu_volume can't be supplied together with a density value")
             self.fu_dens=1./fu_volume
         elif dens is not None:
+            if fu_dens is not None:
+                raise ValueError("dens and fu_dens can't be provided at the same time")
             self.fu_dens=dens/self.fu_mass/u2g*1e-24
+        elif fu_dens is not None:
+            self.fu_dens=fu_dens
         elif rho_n is not None:
             self.fu_dens=abs(rho_n/self.fu_b)*1e5
         elif xsld is not None and xE is not None:
@@ -122,7 +130,13 @@ class Material():
         else:
             raise ValueError(
                 "Need to provide means to calculate density, {dens, fu_volume, rho_n, xsld+xE}")
-        self.mu=mu
+        if M is not None:
+            if mu!=0.:
+                raise ValueError("M and mu can't be provided at the same time")
+            self.M=M
+        else:
+            self.mu=mu
+        self.ID=ID
 
     @property
     def fu_volume(self):
@@ -139,6 +153,10 @@ class Material():
     @property
     def M(self):
         return self.mu*muB*self.fu_dens
+
+    @M.setter
+    def M(self, value):
+        self.mu=value/self.fu_dens/muB
 
     def f_of_E(self, E=Cu_kalpha):
         f=0.
@@ -238,5 +256,7 @@ class Material():
         output='Material('
         output+=str([(ei.symbol, num) for ei, num in self.elements])
         output+=', fu_volume=%s'%(1./self.fu_dens)
+        if self.ID:
+            output+=', ID=%i'%self.ID
         output+=')'
         return output

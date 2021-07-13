@@ -22,7 +22,7 @@ from slddb import constants
 
 from .api import calc_api, select_api, search_api
 from .querydb import search_db, show_search
-from .calcsld import calculate_selection, calculate_user, validate_selection
+from .calcsld import calculate_selection, calculate_user, validate_selection, invalidate_selection
 from .inputdb import input_form, input_material
 
 app=Flask("ORSO SLD Data Base", template_folder='flaskr/templates',
@@ -92,6 +92,8 @@ def search_query():
 def select_material():
     if 'Validate' in request.form:
         return validate_selection(int(request.form['Validate'].split('-')[1]), request.form['Validate'].split('-')[0])
+    if 'Invalidate' in request.form:
+        return invalidate_selection(int(request.form['Invalidate'].split('-')[1]), request.form['Invalidate'].split('-')[0])
     if not 'ID' in request.form:
         return render_template('base.html')
     return calculate_selection(int(request.form['ID']))
@@ -99,16 +101,17 @@ def select_material():
 
 @app.route('/material', methods=['GET'])
 def calculate_sld():
-    if 'formula' in request.args and 'density' in request.args:
+    if 'ID' in request.args:
+        return calculate_selection(int(request.args['ID']))
+    elif 'formula' in request.args and 'density' in request.args:
         try:
             f=Formula(request.args['formula'], sort=False)
         except Exception as e:
             return render_template('sldcalc.html',
                                    error=repr(e)+'<br >'+"Raised when tried to parse formula = %s"%request.args['formula'])
         else:
-            return calculate_user(f, float(request.args['density'] or 0),
-                                  request.args['densinput']=='density',
-                                  float(request.args['mu'] or 0))
+            return calculate_user(f, float(request.args['density'] or 1.0), float(request.args['mu'] or 0),
+                                  request.args['densinput'], request.args['magninput'])
     else:
         return render_template('sldcalc.html')
 

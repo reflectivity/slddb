@@ -114,14 +114,9 @@ class CFormula(Converter):
         return '<input name="%(field)s" id="compound %(field)s" value="%(value)s"'\
                ' placeholder="exmpl: Fe2O3 / H[2]2O"/>'
 
-class CUrl(CType):
-    regex=re.compile(
-        r'^(?:http)s?://'  # http:// or https://
-        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'  # domain...
-        r'localhost|'  # localhost...
-        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
-        r'(?::\d+)?'  # optional port
-        r'(?:/?|[/?]\S+)$', re.IGNORECASE)
+class ValidatedString(CType):
+    regex=None
+    placeholder=''
 
     def __init__(self):
         CType.__init__(self, str, str)
@@ -130,11 +125,25 @@ class CUrl(CType):
         if re.match(self.regex, data) is not None:
             return CType.convert(self, data)
         else:
-            raise ValueError("Not a valid website URL: %s"%data)
+            raise ValueError("Not a valid %s: %s"%(self.__class__.__name__[1:], data))
 
     def html_input(self):
         return '<input name="%(field)s" id="compound %(field)s" value="%(value)s"'\
-               ' placeholder="exmpl: http://www.google.com"/>'
+               ' placeholder="'+self.placeholder+'"/>'
+
+class CUrl(ValidatedString):
+    regex=re.compile(
+        r'^(?:http)s?://'  # http:// or https://
+        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'  # domain...
+        r'localhost|'  # localhost...
+        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
+        r'(?::\d+)?'  # optional port
+        r'(?:/?|[/?]\S+)$', re.IGNORECASE)
+    placeholder='http://www.your_website.net'
+
+class CMail(ValidatedString):
+    regex=re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', re.IGNORECASE)
+    placeholder='your.name@domain.net'
 
 class CArray(Converter):
     # convert numpy array to bytest representation and back

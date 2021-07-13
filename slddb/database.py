@@ -93,7 +93,7 @@ class SLDDB():
                     qstr+='  OR '
             qstr=qstr[:-5]
         c=self.db.cursor()
-        c.execute(sstr+qstr+' ORDER BY selected DESC, accessed DESC LIMIT 100', qlst)
+        c.execute(sstr+qstr+' ORDER BY validated DESC, selected DESC, accessed DESC LIMIT 100', qlst)
         results=c.fetchall()
         keys=[key for key, *ignore in c.description]
         # update access counter
@@ -121,7 +121,8 @@ class SLDDB():
                    fu_volume=result['FU_volume'],
                    rho_n=result['SLD_n'],
                    xsld=result['SLD_x'], xE=result['E_x'],
-                   mu=result['mu'])
+                   mu=result['mu'],
+                   ID=result['ID'])
 
         ustr='UPDATE %s SET selected = selected + 1 WHERE ID == ?'%DB_MATERIALS_NAME
         c=self.db.cursor()
@@ -131,7 +132,16 @@ class SLDDB():
         return m
 
     def validate_material(self, ID, user):
-        ustr='UPDATE %s SET validated = CURRENT_TIMESTAMP, validated_by = ? WHERE ID == ?'%DB_MATERIALS_NAME
+        ustr='UPDATE %s SET validated = CURRENT_TIMESTAMP, validated_by = ?,' \
+             ' invalid = NULL, invalid_by = NULL WHERE ID == ?'%DB_MATERIALS_NAME
+        c=self.db.cursor()
+        c.execute(ustr, (user, ID,))
+        c.close()
+        self.db.commit()
+
+    def invalidate_material(self, ID, user):
+        ustr='UPDATE %s SET invalid = CURRENT_TIMESTAMP, invalid_by = ?, ' \
+             ' validated = NULL, validated_by = NULL WHERE ID == ?'%DB_MATERIALS_NAME
         c=self.db.cursor()
         c.execute(ustr, (user, ID,))
         c.close()
