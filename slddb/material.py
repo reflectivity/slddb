@@ -25,6 +25,8 @@ class Formula(list):
               r"\[[1-9][0-9]{0,2}\]")
 
     def __init__(self, string, sort=True):
+        if isinstance(string, Formula):
+            string=str(string)
         self._do_sort=sort
         self.HR_formula=string
         list.__init__(self, [])

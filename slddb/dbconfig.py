@@ -14,7 +14,8 @@ configpath = os.path.join(confighome, 'slddb')
 if not os.path.exists(configpath):
     os.makedirs(configpath)
 
-from .converters import CType, CLimited, CArray, CDate, CComplex, CFormula, CSelect, CMultiSelect, CUrl, CMail
+from .converters import CType, CLimited, CArray, CDate, CComplex, CFormula, CSelect, CMultiSelect, \
+    CUrl, CMail, Cdoi, Ccas
 
 cstr=CType(str, str)
 cint=CType(int, int)
@@ -60,9 +61,9 @@ DB_MATERIALS_COLUMNS=[
                            'surfactant', 'lipid', 'synthetic polymer', 'proteins']), None),
     ('ref_website',  curl,      None),
     ('reference',    cstr,      None),
-    ('doi',          cstr,      None),
+    ('doi',          Cdoi(),    None),
     ('purity',       cstr,      None),
-    ('CAS_No',       cstr,      None),
+    ('CAS_No',       Ccas(),    None),
     ('crystal_data', cstr,      None),
     ('temperature',  cposfloat, None),
     ('data_origin',  CSelect(['unspecified', 'text book',

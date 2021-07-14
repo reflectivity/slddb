@@ -7,6 +7,7 @@ from .dbconfig import DB_MATERIALS_CONVERTERS, DB_MATERIALS_NAME, \
     DB_MATERIALS_FIELDS, DB_MATERIALS_FIELD_DEFAULTS, db_lookup
 from .element_table import Elements
 from .material import Material, Formula
+from .importers import importers
 
 class SLDDB():
     """
@@ -18,6 +19,19 @@ class SLDDB():
     def __init__(self, dbfile):
         self.db=sqlite3.connect(dbfile)
         self.elements=Elements(self.db)
+
+    def import_material(self, filename, name=None, commit=True):
+        suffix=filename.rsplit('.',1)[1]
+        res=None
+        for importer in importers:
+            if importer.suffix==suffix:
+                res=importer(filename)
+                break
+        if res is None:
+            raise IOError("File import failed for %s, no suitable importer found"%filename)
+        if name is None:
+            name=res.name
+        return self.add_material(name, res.formula, commit=commit, **importer(filename))
 
     def add_material(self, name, formula, commit=True, **data):
         din={}

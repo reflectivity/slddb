@@ -1,8 +1,11 @@
+import tempfile, os
 from flask import request, render_template
+from werkzeug.utils import secure_filename
 
 from .querydb import search_db
 from slddb import SLDDB, DB_FILE
 from slddb.dbconfig import DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA, db_lookup
+from slddb.importers import CifImporter
 
 input_fields=[field for field in DB_MATERIALS_FIELDS[1:]
               if field not in DB_MATERIALS_HIDDEN_DATA]
@@ -13,10 +16,29 @@ def get_input(field):
         value=request.args[field]
     else:
         value=""
-    return conv.html_input()%{'field': field, 'value': value}
+    return conv.html_input(field, value)
 
 def input_form():
     return render_template('input.html', fields=input_fields, get_input=get_input)
+
+def input_fill_cif(file_obj):
+    filename=secure_filename(file_obj.filename)
+    full_path=os.path.join(tempfile.gettempdir(), filename)
+    file_obj.save(full_path)
+    data=CifImporter(full_path)
+    os.remove(full_path)
+    def get_data_input(field):
+        conv=db_lookup[field][1]
+        if field == 'name':
+            value=data.name
+        elif field == 'formula':
+            value=data.formula
+        elif field in data:
+            value=data[field]
+        else:
+            value=""
+        return conv.html_input(field, value)
+    return render_template('input.html', fields=input_fields, get_input=get_data_input)
 
 def input_material(args):
     db=SLDDB(DB_FILE)
@@ -27,7 +49,7 @@ def input_material(args):
             value=args[field]
         else:
             value=""
-        return conv.html_input()%{'field': field, 'value': value}
+        return conv.html_input(field, value)
 
     if args['name']=='' or args['formula' ]=='':
         return render_template('input.html', fields=input_fields, get_input=fill_input,
@@ -37,6 +59,7 @@ def input_material(args):
     useargs=dict(args.items())
     name=args['name']
     formula=args['formula']
+    del(useargs['material'])
     del(useargs['name'])
     del(useargs['formula'])
 

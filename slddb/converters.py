@@ -39,9 +39,9 @@ class Converter():
         # generage json serialisable value, default is the normal value
         return self.revert(db_data)
 
-    def html_input(self):
+    def html_input(self, field, value):
         # return a string containing the input key for html entry template
-        return '<input name="%(field)s" id="compound %(field)s" value="%(value)s">'
+        return f'<input name="{field}" id="compound {field}" value="{value}">'
 
 
 class CType(Converter):
@@ -95,8 +95,8 @@ class CDate(Converter):
     def revert_serializable(self, db_data):
         return db_data
 
-    def html_input(self):
-        return '<input name="%(field)s" id="compound %(field)s" value="%(value)s"'\
+    def html_input(self, field, value):
+        return f'<input name="{field}" id="compound {field}" value="{value}"'\
                ' placeholder="date: {year}-{month}-{day} {hours}:{minutes}:{seconds}"/>'
 
 class CFormula(Converter):
@@ -110,8 +110,8 @@ class CFormula(Converter):
     def revert(self, db_data):
         return db_data
 
-    def html_input(self):
-        return '<input name="%(field)s" id="compound %(field)s" value="%(value)s"'\
+    def html_input(self, field, value):
+        return f'<input name="{field}" id="compound {field}" value="{value}"'\
                ' placeholder="exmpl: Fe2O3 / H[2]2O"/>'
 
 class ValidatedString(CType):
@@ -127,8 +127,8 @@ class ValidatedString(CType):
         else:
             raise ValueError("Not a valid %s: %s"%(self.__class__.__name__[1:], data))
 
-    def html_input(self):
-        return '<input name="%(field)s" id="compound %(field)s" value="%(value)s"'\
+    def html_input(self, field, value):
+        return f'<input name="{field}" id="compound {field}" value="{value}"'\
                ' placeholder="'+self.placeholder+'"/>'
 
 class CUrl(ValidatedString):
@@ -144,6 +144,29 @@ class CUrl(ValidatedString):
 class CMail(ValidatedString):
     regex=re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', re.IGNORECASE)
     placeholder='your.name@domain.net'
+
+class Cdoi(ValidatedString):
+    regex=re.compile(
+        r'^https://doi.org/'  # https://
+        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'  # domain...
+        r'localhost|'  # localhost...
+        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'  # ...or ip
+        r'(?::\d+)?'  # optional port
+        r'(?:/?|[/?]\S+)$', re.IGNORECASE)
+    placeholder='https://doi.org/your/ref'
+
+    def convert(self, data):
+        # if entry is just the doi value it is replaced by the url
+        if data.startswith('http'):
+            return ValidatedString.convert(self, data)
+        else:
+            return ValidatedString.convert(self, 'https://doi.org/'+data)
+
+class Ccas(ValidatedString):
+    regex=re.compile(
+        r'\b[1-9]{1}[0-9]{1, 5}-\d{2}-\d\b', re.IGNORECASE)
+    placeholder='xxxxxxx-yy-z'
+
 
 class CArray(Converter):
     # convert numpy array to bytest representation and back
@@ -224,9 +247,9 @@ class CLimited(CType):
             raise ValueError("Value out of range, has to be %s<value<%s"%(
                 self._low_lim, self._up_lim))
 
-    def html_input(self):
-        return '<input name="%%(field)s" id="compound %%(field)s" value="%%(value)s"'\
-               ' placeholder="%s<value<%s"/>'%(self._low_lim, self._up_lim)
+    def html_input(self, field, value):
+        return f'<input name="{field}" id="compound {field}" value="{value}"'\
+               f' placeholder="{self._low_lim}<value<{self._up_lim}"/>'
 
 class CComplex(CArray):
     def __init__(self):
@@ -251,8 +274,8 @@ class CComplex(CArray):
         else:
             return str(self.revert(db_data))
 
-    def html_input(self):
-        return '<input name="%(field)s" id="compound %(field)s" value="%(value)s"'\
+    def html_input(self, field, value):
+        return f'<input name="{field}" id="compound {field}" value="{value}"'\
                ' placeholder="complex: (real)+(imag)j"/>'
 
 
@@ -267,11 +290,14 @@ class CSelect(CType):
             raise ValueError("Value has to be in selection %s"%repr(self.options))
         return value
 
-    def html_input(self):
-        output='<select name="%(field)s" id="compound %(field)s">'
+    def html_input(self, field, value):
+        output=f'<select name="{field}" id="compound {field}">'
         output+='<option value="">any</option>'
         for selection in self.options:
-            output+='<option value="%s">%s</option>'%(selection, selection)
+            if value==selection:
+                output+=f'<option value="{selection}" selected>{selection}</option>'
+            else:
+                output+=f'<option value="{selection}">{selection}</option>'
         output+='</select>'
         return output
 
@@ -292,9 +318,13 @@ class CMultiSelect(CType):
             return []
         return eval(db_data)
 
-    def html_input(self):
-        output='<select name="%(field)s" id="compound %(field)s" multiple>'
+    def html_input(self, field, value):
+        print(repr(value))
+        output=f'<select name="{field}" id="compound {field}" multiple>'
         for selection in self.options:
-            output+='<option value="%s">%s</option>'%(selection, selection)
+            if selection in value:
+                output+=f'<option value="{selection}" selected>{selection}</option>'
+            else:
+                output+=f'<option value="{selection}">{selection}</option>'
         output+='</select>'
         return output

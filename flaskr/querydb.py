@@ -13,7 +13,7 @@ def get_input(field):
         value=request.form[field]
     else:
         value=""
-    return conv.html_input()%{'field': field, 'value': value}
+    return conv.html_input(field, value)
 
 def show_search():
     if current_user.is_authenticated:

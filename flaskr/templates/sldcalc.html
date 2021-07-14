@@ -256,9 +256,9 @@
             <td><a href="{{url_for('calculate_sld')}}?ID={{material.ID}}" target="_blank">direct link</a></td></tr>
         {% else %}
         <tr><td>Compound</td><td colspan=2>{{material_name}}</td>
-            <td><a href="{{url_for('calculate_sld')}}?formula={{material.formula}}&density={{material.dens}}&mu={{material.mu}}&densinput=density&magninput=magn" target="_blank">direct link</a></td></tr>
+            <td><a href="{{url_for('calculate_sld')}}?formula={{material.formula}}&density={{material.dens}}&mu={{material.mu}}&densinput=density&magninput=muB" target="_blank">direct link</a></td></tr>
         {% endif %}
-        <tr><td>Description</td><td colspan=2 syle="word-wrap;">{{material_description}}</td>
+        <tr><td>Description</td><td colspan=2 style="word-wrap;">{{material_description}}</td>
             <td rowspan="3"><center><button type="button" onclick="copy_all()">Copy to<br />Clipboard</button></center></td></tr>
         <tr><td>Chemical Formula</td><td colspan=2>{{material}}</td></tr>
         <tr><td><select id="densresult" name="densresult" onchange="switch_density()">

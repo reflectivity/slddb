@@ -23,7 +23,7 @@ from slddb import constants
 from .api import calc_api, select_api, search_api
 from .querydb import search_db, show_search
 from .calcsld import calculate_selection, calculate_user, validate_selection, invalidate_selection
-from .inputdb import input_form, input_material
+from .inputdb import input_form, input_fill_cif, input_material
 
 app=Flask("ORSO SLD Data Base", template_folder='flaskr/templates',
           static_folder='flaskr/static')
@@ -63,7 +63,10 @@ def input_page():
 
 @app.route('/input', methods=['POST'])
 def eval_input():
-    return input_material(request.form)
+    if not 'material' in request.form:
+        return input_fill_cif(request.files['cif_file'])
+    else:
+        return input_material(request.form)
 
 @app.route('/search', methods=['GET'])
 def search_query_post():

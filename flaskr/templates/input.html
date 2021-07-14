@@ -11,6 +11,18 @@
         {% endif %}
 
 
+      <div style="width: 30%; float:left; text-align: justify; margin: 10pt;"><div style="height: 100pt;"></div>
+          Here you can enter new materials into the database.
+          Each material will get its unique ID and if relevant will be reviewed by ORSO and than validated.
+          Please provide as much information as possible, especially suitable references to allow us
+          to check the validity of the data.
+      </div>
+      <div style="width: 30%; float:right;text-align: left;"><div style="height: 100pt;"></div>
+      <form method="POST" enctype="multipart/form-data">
+          Upload CIF file<br />
+          <input type="file" accept=".cif" id="cif_file" name="cif_file" onchange="form.submit()">
+      </form></div>
+    <div style="width: 40%;">
     <form method="POST">
       <table class="withborder">
           <tr><td>Your email (hidden)</td>
@@ -19,9 +31,9 @@
     {%for field in fields%}
           <tr><td>{{field}}</td><td>{{ get_input(field)|safe }}</td></tr>
     {%endfor%}
-        <tr><td colspan="2"><center><input type="submit"></center></td> </tr>
+        <tr><td colspan="2"><center><input type="submit" name="material"></center></td> </tr>
       </table>
-    </form>
+    </form></div>
     </center>
 
 {% endblock %}
