@@ -91,10 +91,9 @@
         out=out.concat(dens_select.options[dens_select.selectedIndex].text, '\t',
                         document.getElementById("density_value").innerHTML, '\n');
 
-        out=out.concat('', '\t', 'real', '\t', 'imag', '\n');
         out=out.concat('Neutron nuclear SLD (10⁻⁶ Å⁻²)',
-                        '\t', material_neutron_real,
-                        '\t', material_neutron_imag, '\n');
+                        '\t', '{{"%.6f"%(1e6*material.rho_n.real)}}',
+                        '\t', '{{"%.6f"%(1e6*material.rho_n.imag)}}i', '\n');
         var magn_select=document.getElementById("magnresult")
         out=out.concat(magn_select.options[magn_select.selectedIndex].text, '\t', material_neutron_magn, '\n');
 
@@ -120,14 +119,24 @@
         navigator.clipboard.writeText(`${material_neutron_magn.toFixed(6)}`);
     }
     function copy_Cu() {
-        var value_real=Number(document.getElementById("cu_entry_real").innerHTML);
-        var value_imag=Number(document.getElementById("cu_entry_imag").innerHTML);
-        navigator.clipboard.writeText(`${value_real.toFixed(6)}+${value_real.toFixed(6)}i`.replace('+-', '-'));
+        const value_real=document.getElementById("cu_entry_real").innerHTML;
+        const value_imag=document.getElementById("cu_entry_imag").innerHTML;
+        var unit = document.getElementById("cu_select").value;
+        if (unit == 'n_db') {
+        navigator.clipboard.writeText(`${value_real}\t${value_imag}`);
+        } else {
+        navigator.clipboard.writeText(`${value_real}+${value_imag}`.replace('+-', '-'));
+        }
     }
     function copy_Mo() {
-        var value_real=Number(document.getElementById("mo_entry_real").innerHTML);
-        var value_imag=Number(document.getElementById("mo_entry_imag").innerHTML);
-        navigator.clipboard.writeText(`${value_real.toFixed(6)}+${value_real.toFixed(6)}i`.replace('+-', '-'));
+        const value_real=document.getElementById("mo_entry_real").innerHTML;
+        const value_imag=document.getElementById("mo_entry_imag").innerHTML;
+        var unit = document.getElementById("mo_select").value;
+        if (unit == 'n_db') {
+        navigator.clipboard.writeText(`${value_real}\t${value_imag}`);
+        } else {
+        navigator.clipboard.writeText(`${value_real}+${value_imag}`.replace('+-', '-'));
+        }
     }
     function copy_xE() {
         var unit = document.getElementById("user_select").value;
@@ -158,7 +167,12 @@
     function copy_xray() {
         const SLD_real=document.getElementById("value_real").innerHTML;
         const SLD_imag=document.getElementById("value_imag").innerHTML;
-        navigator.clipboard.writeText(`${SLD_real}+${SLD_imag}i`.replace('+-', '-'));
+        var unit = document.getElementById("user_select").value;
+        if (unit == 'n_db') {
+        navigator.clipboard.writeText(`${SLD_real}\t${SLD_imag}`);
+        } else {
+        navigator.clipboard.writeText(`${SLD_real}+${SLD_imag}`.replace('+-', '-'));
+        }
     }
 
     function switch_density() {
@@ -275,7 +289,7 @@
             <option value="msld">Neutron magnetic SLD (10⁻⁶ Å⁻²)</option>
             <option value="muB">Magnetisation (µB/FU)</option>
             <option value="magn">Magnetisation (kA/m = emu/cm³)</option>
-            </select></td><td colspan=2 id="magn_value">{{"%.6f"%(1000000*material.rho_m)}}</td>
+            </select></td><td colspan=2 id="magn_value">{{"%.6f"%(1e6*material.rho_m)}}</td>
             <td><button type="button" onclick="copy_Nmag()">as Float</button></td></tr>
         <tr><td>Cu-Kɑ <select id="cu_select" name="cu_select" onchange="switch_sld_cu(this.value)">
                 <option value="electron">e-density (rₑ/Å³)</option>

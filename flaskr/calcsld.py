@@ -80,8 +80,8 @@ def calculate_user(formula, density, mu, density_choice, mu_choice):
         script=get_graph(E, rho_x.real, rho_x.imag, str(formula))
         return render_template('sldcalc.html', material=m, material_name="User input",
                            material_description="", script=script, xray_E=E.tolist(),
-                           xray_rho_real=nan_to_num(delta.real).tolist(),
-                           xray_rho_imag=nan_to_num(delta.imag).tolist(),
+                           xray_rho_real=nan_to_num(rho_x.real).tolist(),
+                           xray_rho_imag=nan_to_num(rho_x.imag).tolist(),
                            xray_delta=nan_to_num(delta).tolist(), xray_beta=nan_to_num(beta).tolist())
 
 def validate_selection(ID, user):
