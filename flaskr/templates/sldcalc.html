@@ -81,6 +81,29 @@
         updateSlider(value);
     }
 
+    {% if deuterated %}
+    var deuterated_neutron_real = {{1e6*deuterated.rho_n.real}};
+    var deuterated_neutron_imag = {{1e6*deuterated.rho_n.imag}};
+
+    function deuterateSlider(slideAmount) {
+        frac=slideAmount*0.01;
+
+        var val_real=(1.0-frac)*material_neutron_real+frac*deuterated_neutron_real;
+        var val_imag=(1.0-frac)*material_neutron_imag+frac*deuterated_neutron_imag;
+
+        document.getElementById("neutron_entry_real").innerHTML = (val_real).toFixed(6);
+        document.getElementById("neutron_entry_imag").innerHTML = (val_imag).toFixed(6)+'i';
+
+        document.getElementById("deuteration_amount_value").value = slideAmount;
+    }
+
+    function deuterateValue() {
+        const value = document.getElementById("deuteration_amount_value").value;
+        document.getElementById("deuteration_amount").value = value;
+        deuterateSlider(value);
+    }
+    {% endif %}
+
     function copy_all() {
         var out = '';
         out=out.concat('Compound', '\t', '{{material_name}}', '\n');
@@ -92,8 +115,8 @@
                         document.getElementById("density_value").innerHTML, '\n');
 
         out=out.concat('Neutron nuclear SLD (10⁻⁶ Å⁻²)',
-                        '\t', '{{"%.6f"%(1e6*material.rho_n.real)}}',
-                        '\t', '{{"%.6f"%(1e6*material.rho_n.imag)}}i', '\n');
+                        '\t', document.getElementById("neutron_entry_real").innerHTML,
+                        '\t', document.getElementById("neutron_entry_imag").innerHTML, '\n');
         var magn_select=document.getElementById("magnresult")
         out=out.concat(magn_select.options[magn_select.selectedIndex].text, '\t', material_neutron_magn, '\n');
 
@@ -113,7 +136,10 @@
     }
 
     function copy_NSLD() {
-        navigator.clipboard.writeText(`${material_neutron_real.toFixed(6)}+${material_neutron_imag.toFixed(6)}i`.replace('+-', '-'));
+        const value_real=document.getElementById("neutron_entry_real").innerHTML;
+        const value_imag=document.getElementById("neutron_entry_imag").innerHTML;
+
+        navigator.clipboard.writeText(`${value_real}\t${value_imag}`);
     }
     function copy_Nmag() {
         navigator.clipboard.writeText(`${material_neutron_magn.toFixed(6)}`);
@@ -282,9 +308,15 @@
           <option value="volume">FU Volume (Å³)</option>
         </select></td><td colspan=2 id="density_value">{{"%.4f"%material.dens}}</td></tr>
         <tr><td>Neutron nuclear SLD (10⁻⁶ Å⁻²)</td>
-          <td>{{"%.6f"%(1e6*material.rho_n.real)}}</td>
-          <td>{{"%.6f"%(1e6*material.rho_n.imag)}}i</td>
+          <td id="neutron_entry_real">{{"%.6f"%(1e6*material.rho_n.real)}}</td>
+          <td id="neutron_entry_imag">{{"%.6f"%(1e6*material.rho_n.imag)}}i</td>
           <td><button type="button" onclick="copy_NSLD()">as Complex</button></td></tr>
+        {% if deuterated %}
+        <tr><td>Material Deuteration</td><td>
+            <input type="range" min="0" max="100" value="0" class="slider" id="deuteration_amount" step="1" onchange="deuterateSlider(this.value)" style="width: 50pt;"></td><td>
+            <input type="number" min="0" max="100" value="0" class="slider_value" id="deuteration_amount_value" onchange="deuterateValue(this.value)" style="width: 30pt;">%
+        </td><td></td></tr>
+        {% endif %}
         <tr><td><select id="magnresult" name="magnresult" onchange="switch_magn()">
             <option value="msld">Neutron magnetic SLD (10⁻⁶ Å⁻²)</option>
             <option value="muB">Magnetisation (µB/FU)</option>

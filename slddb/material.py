@@ -26,12 +26,15 @@ class Formula(list):
 
     def __init__(self, string, sort=True):
         if isinstance(string, Formula):
-            string=str(string)
-        self._do_sort=sort
-        self.HR_formula=string
-        list.__init__(self, [])
-        self.parse_string(string)
-        self.merge_same()
+            list.__init__(self, string)
+            self._do_sort=string._do_sort
+            self.HR_formula=string.HR_formula
+        else:
+            self._do_sort=sort
+            self.HR_formula=string
+            list.__init__(self, [])
+            self.parse_string(string)
+            self.merge_same()
 
     def parse_string(self, string):
         # remove gaps and ignored characters
@@ -96,6 +99,13 @@ class Formula(list):
             else:
                 output+=element+str(number)
         return output
+
+    def __contains__(self, item):
+        # check if an element is in the formula
+        return item in [el[0] for el in self]
+
+    def index(self, item):
+        return [el[0] for el in self].index(item)
 
 class Material():
     """

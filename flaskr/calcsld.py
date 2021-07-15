@@ -43,8 +43,16 @@ def calculate_selection(ID):
     _, delta=material.delta_vs_E()
     _, beta=material.beta_vs_E()
     script=get_graph(E, rho_x.real, rho_x.imag, res[0]['name'])
+    if 'H' in material.formula:
+        dformula=Formula(material.formula)
+        Hidx=dformula.index('H')
+        dformula[Hidx]=('D', dformula[Hidx][1])
+        deuterated=Material([(db.elements.get_element(element), amount) for element, amount in dformula],
+                             dens=material.dens)
+    else:
+        deuterated=None
     return render_template('sldcalc.html', material=material, material_name=res[0]['name'],
-                           material_description=res[0]['description'],
+                           material_description=res[0]['description'], deuterated=deuterated,
                            script=script, xray_E=E.tolist(),
                            xray_rho_real=nan_to_num(rho_x.real).tolist(),
                            xray_rho_imag=nan_to_num(rho_x.imag).tolist(),
@@ -78,7 +86,16 @@ def calculate_user(formula, density, mu, density_choice, mu_choice):
         _, delta=m.delta_vs_E()
         _, beta=m.beta_vs_E()
         script=get_graph(E, rho_x.real, rho_x.imag, str(formula))
-        return render_template('sldcalc.html', material=m, material_name="User input",
+        if 'H' in m.formula:
+            dformula=Formula(m.formula)
+            Hidx=dformula.index('H')
+            dformula[Hidx]=('D', dformula[Hidx][1])
+            deuterated=Material([(db.elements.get_element(element), amount) for element, amount in dformula],
+                                **kwrds)
+        else:
+            deuterated=None
+        return render_template('sldcalc.html', material=m, deuterated=deuterated,
+                           material_name="User input",
                            material_description="", script=script, xray_E=E.tolist(),
                            xray_rho_real=nan_to_num(rho_x.real).tolist(),
                            xray_rho_imag=nan_to_num(rho_x.imag).tolist(),
