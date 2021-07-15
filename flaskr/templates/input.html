@@ -11,11 +11,15 @@
         {% endif %}
 
 
-      <div style="width: 30%; float:left; text-align: justify; margin: 10pt;"><div style="height: 100pt;"></div>
+      <div style="width: 30%; float:left; text-align: justify; margin: 20pt;"><div style="height: 60pt;"></div>
           Here you can enter new materials into the database.
-          Each material will get its unique ID and if relevant will be reviewed by ORSO and than validated.
+          Each material will get its unique ID and if relevant will be reviewed by ORSO and then validated.
           Please provide as much information as possible, especially suitable references to allow us
           to check the validity of the data.
+          <br /><br />
+          <small><sup>*</sup>  Is a mendatory field for any material.<br />
+          <sup>**</sup> One way to determine density is required. This can be either <i>density</i>, <i>FU_volume</i>,
+          <i>SLD_n</i> or <i>SLD_x</i> with energy <i>E_x</i>.</small>
       </div>
       <div style="width: 30%; float:right;text-align: left;"><div style="height: 100pt;"></div>
       <form method="POST" enctype="multipart/form-data">
@@ -24,7 +28,7 @@
       </form></div>
     <div style="width: 40%;">
     <form method="POST">
-      <table class="withborder">
+      <table class="withborder" style="width: 75%;">
           <tr><td>Your email (hidden)</td>
               <td>{{ get_input("created_by")|safe }}</td></tr>
           <tr><td>Compound field:</td><td>Value:</td></tr>
