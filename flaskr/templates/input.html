@@ -29,7 +29,7 @@
               <td>{{ get_input("created_by")|safe }}</td></tr>
           <tr><td>Compound field:</td><td>Value:</td></tr>
     {%for field in fields%}
-          <tr><td>{{field}}</td><td>{{ get_input(field)|safe }}</td></tr>
+          <tr><td>{{field}} {{get_unit(field)}}</td><td>{{ get_input(field)|safe }}</td></tr>
     {%endfor%}
         <tr><td colspan="2"><center><input type="submit" name="material"></center></td> </tr>
       </table>

@@ -24,8 +24,15 @@ def fill_input(field, args):
 def get_input(field):
     return fill_input(field, request.args)
 
+def get_unit(field):
+    if db_lookup[field][3] is not None:
+        unit=db_lookup[field][3]
+        return f'({unit})'
+    else:
+        return ''
+
 def input_form():
-    return render_template('input.html', fields=input_fields, get_input=get_input)
+    return render_template('input.html', fields=input_fields, get_input=get_input, get_unit=get_unit)
 
 def input_fill_cif(file_obj):
     filename=secure_filename(file_obj.filename)
@@ -45,7 +52,7 @@ def input_fill_cif(file_obj):
         else:
             return get_input(field)
         return conv.html_input(field, value)
-    return render_template('input.html', fields=input_fields, get_input=get_data_input)
+    return render_template('input.html', fields=input_fields, get_input=get_data_input, get_unit=get_unit)
 
 def input_material(args):
     db=SLDDB(DB_FILE)
@@ -54,7 +61,7 @@ def input_material(args):
         return fill_input(field, args)
 
     if args['name']=='' or args['formula' ]=='':
-        return render_template('input.html', fields=input_fields, get_input=get_input_args,
+        return render_template('input.html', fields=input_fields, get_input=get_input_args, get_unit=get_unit,
                                comment="You have to supply a name and Formula!")
 
 
@@ -74,6 +81,6 @@ def input_material(args):
         db.add_material(name, formula, **useargs)
     except Exception as e:
         return render_template('input.html', fields=input_fields,
-                               get_input=get_input_args,
+                               get_input=get_input_args, get_unit=get_unit,
                                comment="Error when trying to insert data:\n"+repr(e))
     return search_db(useargs)
