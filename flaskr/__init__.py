@@ -78,6 +78,10 @@ def search_query():
 
     invalids=False
     for key, value in request.form.items():
+        if 'offset' in request.form:
+            offset=int(request.form['offset'])
+        else:
+            offset=0
         if value.strip() == '':
             continue
         if key in DB_MATERIALS_FIELDS:
@@ -92,7 +96,13 @@ def search_query():
                 query[key]=value
         if key=='show_invalid' and value:
             invalids=True
-    return search_db(query, invalids=invalids)
+        if request.form.get('next') == 'next':
+            offset+=100
+        if request.form.get('prev') =='prev':
+            offset-=100
+        if request.form.get('Submit') == 'Submit':
+            offset=0
+    return search_db(query, invalids=invalids, offset=offset)
 
 @app.route('/material', methods=['POST'])
 def select_material():

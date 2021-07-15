@@ -13,7 +13,6 @@ input_fields=[field for field in DB_MATERIALS_FIELDS[1:]
 def fill_input(field, args):
     conv=db_lookup[field][1]
     if field in args:
-        print(field, conv.__class__.__name__)
         if conv.__class__.__name__ == 'CMultiSelect':
             value=args.getlist(field)
         else:
@@ -75,6 +74,6 @@ def input_material(args):
         db.add_material(name, formula, **useargs)
     except Exception as e:
         return render_template('input.html', fields=input_fields,
-                               get_input=fill_input,
+                               get_input=get_input_args,
                                comment="Error when trying to insert data:\n"+repr(e))
     return search_db(useargs)

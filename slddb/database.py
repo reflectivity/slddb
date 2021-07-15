@@ -40,7 +40,7 @@ class SLDDB():
                 raise KeyError('%s is not a valid data field'%key)
             din[key]=db_lookup[key][1].convert(value)
 
-        if not ('density' in din or 'FU volume' in din
+        if not ('density' in din or 'FU_volume' in din
                 or 'SLD_n' in din or ('SLD_x' in din and 'E_x' in din)):
             raise ValueError("Not enough information to determine density")
 
@@ -63,7 +63,7 @@ class SLDDB():
         if commit:
             self.db.commit()
 
-    def search_material(self, join_and=True, serializable=False, filter_invalid=True, **data):
+    def search_material(self, join_and=True, serializable=False, filter_invalid=True, limit=100, offset=0, **data):
         for key, value in data.items():
             if not key in DB_MATERIALS_FIELDS:
                 raise KeyError('%s is not a valid data field'%key)
@@ -107,7 +107,7 @@ class SLDDB():
                     qstr+='  OR '
             qstr=qstr[:-5]
         c=self.db.cursor()
-        c.execute(sstr+qstr+' ORDER BY validated DESC, selected DESC, accessed DESC LIMIT 100', qlst)
+        c.execute(sstr+qstr+' ORDER BY validated DESC, selected DESC, accessed DESC LIMIT %i,%i'%(offset, limit), qlst)
         results=c.fetchall()
         keys=[key for key, *ignore in c.description]
         # update access counter
@@ -126,6 +126,55 @@ class SLDDB():
                 rowdict={key: db_lookup[key][1].revert(value) for key,value in zip(keys, row)}
                 output.append(rowdict)
         return output
+
+    def count_material(self, join_and=True, filter_invalid=True, **data):
+        for key, value in data.items():
+            if not key in DB_MATERIALS_FIELDS:
+                raise KeyError('%s is not a valid data field'%key)
+
+        if len(data)==0:
+            sstr='SELECT COUNT(*) FROM %s'%DB_MATERIALS_NAME
+            if filter_invalid:
+                sstr+=' WHERE invalid IS NULL'
+            qstr=''
+            qlst=[]
+        else:
+            sstr='SELECT COUNT(*) FROM %s WHERE '%DB_MATERIALS_NAME
+            if filter_invalid:
+                sstr+='invalid IS NULL AND '
+            qstr=''
+            qlst=[]
+            for key, value in data.items():
+                cval=db_lookup[key][1].convert(value)
+                if type(value) in (list, tuple):
+                    if len(value)==0:
+                        continue
+                    qstr+='('
+                    for itm in value:
+                        qstr+='%s LIKE ?'%key
+                        qstr+=' AND '
+                        qlst.append('%%%s%%'%repr(itm))
+                    cval=qlst.pop(-1)
+                    qstr=qstr[:-5]+')'
+                elif type(cval) is str:
+                    qstr+='%s LIKE ?'%key
+                    cval='%%%s%%'%cval
+                else:
+                    qstr+='%s == ?'%key
+                qlst.append(cval)
+
+                if join_and:
+                    qstr+=' AND '
+                else:
+                    qstr+='  OR '
+            qstr=qstr[:-5]
+        c=self.db.cursor()
+        c.execute(sstr+qstr, qlst)
+        result=c.fetchone()
+        # update access counter
+        c.close()
+        self.db.commit()
+        return result[0]
 
     def select_material(self, result):
         # generate Material object from database entry and increment selection counter
