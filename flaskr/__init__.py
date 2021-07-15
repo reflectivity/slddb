@@ -136,7 +136,7 @@ def api_query():
 @app.route('/download_db')
 def download_database():
     result=send_file(DB_FILE, mimetype='application/x-sqlite3', as_attachment=True,
-                     attachment_filename=os.path.basename(DB_FILE), conditional=False)
+                     attachment_filename=os.path.basename(DB_FILE), conditional=True)
     return result
 
 @app.route('/download_api')
@@ -152,7 +152,7 @@ def download_api():
                         open(os.path.join(package_path, fi), 'rb').read())
     mem_zip.seek(0)
     result=send_file(mem_zip, mimetype='application/zip', as_attachment=True,
-                     attachment_filename='slddb.zip', conditional=False)
+                     attachment_filename='slddb.zip', conditional=True)
     return result
 
 class User(UserMixin, db.Model):

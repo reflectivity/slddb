@@ -10,13 +10,20 @@ from slddb.importers import CifImporter
 input_fields=[field for field in DB_MATERIALS_FIELDS[1:]
               if field not in DB_MATERIALS_HIDDEN_DATA]
 
-def get_input(field):
+def fill_input(field, args):
     conv=db_lookup[field][1]
-    if field in request.args:
-        value=request.args[field]
+    if field in args:
+        print(field, conv.__class__.__name__)
+        if conv.__class__.__name__ == 'CMultiSelect':
+            value=args.getlist(field)
+        else:
+            value=args[field]
     else:
         value=""
     return conv.html_input(field, value)
+
+def get_input(field):
+    return fill_input(field, request.args)
 
 def input_form():
     return render_template('input.html', fields=input_fields, get_input=get_input)
@@ -27,6 +34,7 @@ def input_fill_cif(file_obj):
     file_obj.save(full_path)
     data=CifImporter(full_path)
     os.remove(full_path)
+
     def get_data_input(field):
         conv=db_lookup[field][1]
         if field == 'name':
@@ -36,23 +44,18 @@ def input_fill_cif(file_obj):
         elif field in data:
             value=data[field]
         else:
-            value=""
+            return get_input(field)
         return conv.html_input(field, value)
     return render_template('input.html', fields=input_fields, get_input=get_data_input)
 
 def input_material(args):
     db=SLDDB(DB_FILE)
 
-    def fill_input(field):
-        conv=db_lookup[field][1]
-        if field in args:
-            value=args[field]
-        else:
-            value=""
-        return conv.html_input(field, value)
+    def get_input_args(field):
+        return fill_input(field, args)
 
     if args['name']=='' or args['formula' ]=='':
-        return render_template('input.html', fields=input_fields, get_input=fill_input,
+        return render_template('input.html', fields=input_fields, get_input=get_input_args,
                                comment="You have to supply a name and Formula!")
 
 

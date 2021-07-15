@@ -7,13 +7,20 @@ from slddb.dbconfig import DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA, db_loo
 main_fields=['name', 'formula', 'tags']
 advanced_fields=['physical_state', 'description','reference', 'CAS_No', 'temperature', 'comments', 'data_origin']
 
-def get_input(field):
+def fill_input(field, args):
     conv=db_lookup[field][1]
-    if field in request.form:
-        value=request.form[field]
+    if field in args:
+        print(field, conv.__class__.__name__)
+        if conv.__class__.__name__ == 'CMultiSelect':
+            value=args.getlist(field)
+        else:
+            value=args[field]
     else:
         value=""
     return conv.html_input(field, value)
+
+def get_input(field):
+    return fill_input(field, request.form)
 
 def show_search():
     if current_user.is_authenticated:

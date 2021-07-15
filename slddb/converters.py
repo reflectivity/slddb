@@ -292,7 +292,7 @@ class CSelect(CType):
 
     def html_input(self, field, value):
         output=f'<select name="{field}" id="compound {field}">'
-        output+='<option value="">any</option>'
+        output+='<option value=""></option>'
         for selection in self.options:
             if value==selection:
                 output+=f'<option value="{selection}" selected>{selection}</option>'
@@ -319,12 +319,13 @@ class CMultiSelect(CType):
         return eval(db_data)
 
     def html_input(self, field, value):
-        print(repr(value))
         output=f'<select name="{field}" id="compound {field}" multiple>'
         for selection in self.options:
             if selection in value:
                 output+=f'<option value="{selection}" selected>{selection}</option>'
             else:
                 output+=f'<option value="{selection}">{selection}</option>'
-        output+='</select>'
+        output+='</select><br />'
+        output+=f'<input type="button" id="btnReset {field}" value="clear" onclick="document.getElementById(\'compound {field}\').selectedIndex=-1;" />'
+        output+=' use ctrl+click'
         return output

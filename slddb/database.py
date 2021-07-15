@@ -217,6 +217,12 @@ class SLDDB():
         c.close()
         self.db.commit()
 
+    def backup(self, filename):
+        # make a copy of the open database
+        out=sqlite3.connect(filename)
+        with out:
+            self.db.backup(out)
+        out.close()
 
     def __del__(self):
         self.db.close()

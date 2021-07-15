@@ -251,4 +251,4 @@ class TestConverter(unittest.TestCase):
                      CMultiSelect(['abc', 'def', 'ghi']),
                      CDate(),
                      CUrl()]:
-            conv.html_input()%{'field': 'abc', 'value': 'def'}
+            conv.html_input('abc', 'def')
