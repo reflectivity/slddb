@@ -10,7 +10,7 @@ def create_database():
     with app.app_context():
         db.create_all()
 
-def add_user(name, email):
+def add_user(name, email, admin=False):
     with app.app_context():
         user = User.query.filter_by(email=email).first()
 
@@ -19,7 +19,8 @@ def add_user(name, email):
             return
 
         password=getpass('Password:')
-        new_user = User(email=email, name=name, password=generate_password_hash(password, method='sha256'))
+        new_user = User(email=email, name=name, password=generate_password_hash(password, method='sha256'),
+                        admin=admin)
 
         # add the new user to the database
         db.session.add(new_user)

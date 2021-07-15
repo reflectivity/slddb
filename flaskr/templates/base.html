@@ -18,39 +18,38 @@
               <li class="{% block nav_input_page %}{% endblock %}"><a href="{{ url_for('input_page') }}">Enter Material</a></li>
               <li  class="{% block nav_about %}about{% endblock %}"><a href="{{ url_for('about_page') }}">About</a></li>
               {% if current_user.is_authenticated %}
-              <li  class="login"><a href="{{ url_for('logout') }}">{{current_user.name}} - Logout</a></li>
-              {% endif %}
-              {% if not current_user.is_authenticated %}
-              <li  class="{% block nav_login %}login{% endblock %}"><a href="{{ url_for('login') }}">Login</a></li>
+                  <li  class="login"><a href="{{ url_for('logout') }}">{{current_user.name}} - Logout</a></li>
+                {% if current_user.admin %}
+                    <li  class="{% block nav_admin %}about{% endblock %}"><a href="{{ url_for('admin') }}">Admin</a></li>
+                {% endif %}
+              {% else %}
+                  <li  class="{% block nav_login %}login{% endblock %}"><a href="{{ url_for('login') }}">Login</a></li>
               {% endif %}
             </ul>
           </td>
           <td class="sides"></td>
         </tr>
-        {% with messages = get_flashed_messages() %}
-          {% if messages %}
-        <tr style="height: 100pt;"><td class="sides"></td><td>
-            <center>
-            <ul>
-            {% for message in messages %}
-              <li>{{ message }}</li>
-            {% endfor %}
-            </ul></center>
-        </td><td class="sides"></td></tr>
-          {% endif %}
-        {% endwith %}
-        {% if error %}
-        <tr style="height: 50pt;"><td class="sides"></td><td>
-        <center><div style="background-color: red; color: white; font-weight: bold;">
-          {{error|safe}}
-        </div></center>
-        </td></tr>
-       {% endif %}
           <tr><td></td><td style="vertical-align: text-top;" class="center">
             <div style="width: 100%; height: 100%; overflow: auto;">
    {% block content %} {% endblock %}
             </div>
       </td><td class="sides"></td></tr>
+        {% with messages = get_flashed_messages() %}
+          {% if messages or error %}
+        <tr style="height: 2em; margin: 8pt;"><td class="sides"></td><td class="error">
+            <center>
+            <ul class="error">
+            {% for message in messages %}
+              <li class="error">{{ message }}</li>
+            {% endfor %}
+            </ul>
+            {% if error %}
+              {{error|safe}}
+           {% endif %}
+            </center>
+        </td><td class="sides"></td></tr>
+          {% endif %}
+        {% endwith %}
         <tr style="height: 12pt;"><td></td><td style="background-color: #ddd; text-align: center;">
             Open Reflectometry Standards Organization scattering length density database. Written by <a href="mailto:artur.glavic@psi.ch">Artur Glavic</a> from Paul Scherrer Institut (PSI).</td><td></td></tr>
       </table>

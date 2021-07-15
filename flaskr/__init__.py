@@ -5,8 +5,9 @@ from io import BytesIO
 from flask import Flask
 from flask import request, render_template, send_file, flash, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user
-from werkzeug.security import check_password_hash
+from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
+from flask_mail import Mail, Message
+from werkzeug.security import check_password_hash, generate_password_hash, gen_salt
 try:
     from werkzeug import FileWrapper
 except ImportError:
@@ -38,6 +39,14 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=True
 db=SQLAlchemy()
 db.init_app(app)
 
+app.config['MAIL_SERVER']='smtp.mailtrap.io'
+app.config['MAIL_PORT'] = 2525
+app.config['MAIL_USERNAME'] = '175ffa3adc24f2'
+app.config['MAIL_PASSWORD'] = '31fde10b3694db'
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+mail=Mail(app)
+
 login_manager=LoginManager()
 login_manager.init_app(app)
 
@@ -49,6 +58,9 @@ def inject_version():
 def inject_constants():
     return constants.__dict__
 
+@app.context_processor
+def inject_basics():
+    return dict(len=len, str=str, float=float, int=int, list=list)
 @app.route('/')
 def start_page():
     return show_search()
@@ -170,6 +182,8 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(100), unique=True)
     password = db.Column(db.String(100))
     name = db.Column(db.String(100))
+    admin = db.Column(db.Boolean(False))
+    token_send = db.Column(db.String(100)) # is used for email tokens send to user for password reset
 
 @login_manager.user_loader
 def load_user(ID):
@@ -203,3 +217,93 @@ def login_post():
 def logout():
     logout_user()
     return redirect(url_for('start_page'))
+
+@app.route('/admin')
+@login_required
+def admin():
+    users=User.query.all()
+    return render_template('admin.html', users=users)
+
+@app.route('/admin', methods=['POST'])
+@login_required
+def add_user():
+    if request.form.get('new_user', '')=='Submit' and request.form['user_email']!='' and request.form['user_name']!='':
+        new_user=User(name=request.form['user_name'], email=request.form['user_email'], admin=False)
+        db.session.add(new_user)
+        db.session.commit()
+        reset_password(new_user)
+    users=User.query.all()
+    for ui in users:
+        if request.form.get('toggle_admin_%i'%ui.id, '')=='toggle':
+            if ui.id==current_user.id:
+                flash("You can't make yourself non-admin!")
+            else:
+                User.query.filter_by(id=ui.id).update(dict(admin=not ui.admin))
+                db.session.commit()
+            break
+        if request.form.get('delete_user_%i'%ui.id, '')=='DELETE':
+            if ui.id==current_user.id:
+                flash("You can't delete yourself!")
+            else:
+                User.query.filter_by(id=ui.id).delete()
+                db.session.commit()
+                users=User.query.all()
+            break
+        if request.form.get('reset_password_%i'%ui.id, '')=='reset':
+            if ui.id==current_user.id:
+                flash("You can't reset your own password, you are already logged in!")
+            else:
+                reset_password(ui)
+                users=User.query.all()
+            break
+    return render_template('admin.html', users=users)
+
+def reset_password(user):
+    # create a reset password token and send an email to the user
+    token=gen_salt(20)
+    sha_token=generate_password_hash(token, method='sha256')
+    User.query.filter_by(id=user.id).update(dict(token_send=sha_token, password=None))
+    db.session.commit()
+    url=url_for('user_query_password', _external=True, token=token, user_id=user.id)
+
+    message=Message(subject='Password reset for ORSO SLDDB',
+                    sender=current_user.email,
+                    recipients=[user.email],
+                    body=f"Dear {user.name},\n\nyour account password for the ORSO slddb has been reset. "
+                         f"You can now set a new password with the following link:\n"
+                         f"{url}\n\nKind regards,\nThe ORSO Team",
+                    html=f"Dear {user.name},<br /><br />your account password for the ORSO slddb has been reset. "
+                         f"You can now set a new password with the following link:<br />"
+                         f"<a href='{url}'>{url}</a><br /><br />Kind regards,<br />The ORSO Team")
+    mail.send(message)
+
+@app.route('/reset_password', methods=["GET"])
+def user_query_password():
+    token=request.args.get('token', '')
+    ID=int(request.args.get('user_id', '1'))
+    user=User.query.get(ID)
+    if user.token_send is not None and check_password_hash(user.token_send, token):
+        return render_template('set_password.html', user_id=ID, token=token)
+    else:
+        flash('token is not active for user with id %i'%ID)
+        return show_search()
+
+@app.route('/reset_password', methods=["POST"])
+def user_set_password():
+    token=request.form.get('token', '')
+    ID=int(request.form.get('user_id', '1'))
+    user=User.query.get(ID)
+    if user.token_send is not None and check_password_hash(user.token_send, token):
+        pw=request.form.get('password', '')
+        pw2=request.form.get('password2', '')
+        if pw!='' and pw==pw2:
+            hash=generate_password_hash(pw, method='sha256')
+            User.query.filter_by(id=user.id).update(dict(token_send=None, password=hash))
+            db.session.commit()
+            return redirect(url_for('login'))
+        else:
+            flash('Passwords have to be set and equal!')
+            return render_template('set_password.html', user_id=ID, token=token)
+    else:
+        flash('token is not active for user with id %i'%ID)
+        return show_search()

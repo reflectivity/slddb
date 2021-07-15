@@ -12,7 +12,7 @@ This is the development version for the SLD Database. To test on you local machi
     $ from flaskr import authentication as auth
     $ auth.generate_secret() # create unique key for cookies, requires flask restart
     $ auth.create_database() # build database for users
-    $ auth.add_user('{user name}', '{email}') # can be repeated later for more users, password is requested
+    $ auth.add_user('{user name}', '{email}', admin=True) # can be repeated later for more users, password is requested
 
 The database is already filled with all elements and the densities for those. SLD calculation should therefore work. 
 Up to now there is no interface to enter data, yet. This can, however, be done through the python interface manually:

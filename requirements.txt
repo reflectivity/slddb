@@ -2,4 +2,4 @@ periodictable
 flask
 flask-login
 flask-sqlalchemy
-pycifrw
+flask-mail
