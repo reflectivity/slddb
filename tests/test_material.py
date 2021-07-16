@@ -55,6 +55,8 @@ class TestMaterial(unittest.TestCase):
     def test_fail(self):
         with self.assertRaises(ValueError):
             m1=Material([(Element(self.db.db, 'Ni'), 1.0)])
+        m2=Material([(Element(self.db.db, 'Pu'), 1.0)], dens=20.0)
+        m3=Material([(Element(self.db.db, 'Po'), 1.0)], dens=20.0)
 
     def test_neutron_ni(self):
         m1=Material([(Element(self.db.db, 'Ni'), 1.0)], dens=8.9)
