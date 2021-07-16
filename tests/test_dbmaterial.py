@@ -19,7 +19,7 @@ class TestMaterialDB(unittest.TestCase):
             self.db.add_material('TestMaterial 2', 'Fe2O3')
 
     def test_search(self):
-        self.db.add_material('Iron Oxide 2', 'Fe2O3', density=5.24)
+        self.db.add_material('Iron Oxide 2', 'Fe2O3', density=5.24, tags=['inorganic'])
         self.db.add_material('Nickel 1', 'Ni', density="8.9")
 
         res=self.db.search_material(name='oxide 2')[0]
@@ -27,6 +27,23 @@ class TestMaterialDB(unittest.TestCase):
         self.assertEqual(res['name'], 'Iron Oxide 2')
         self.assertEqual(res['formula'], 'Fe2O3')
         self.assertIsNone(res['FU_volume'])
+        res=self.db.search_material(tags=['inorganic'])[0]
+
+    def test_count(self):
+        self.db.add_material('Iron Oxide Count All', 'Fe2O3', density=5.2411111, tags=['inorganic'])
+        self.db.add_material('Nickel Count All', 'Ni', density="8.9")
+
+        res=self.db.count_material(name='count all')
+        self.assertEqual(2, res)
+        res=self.db.count_material(name='count all', tags=[])
+        self.assertEqual(2, res)
+        res=self.db.count_material(name='count all', density=8.9)
+        self.assertEqual(1, res)
+        res=self.db.count_material(name='count all', density=5.2411111, join_and=False)
+        self.assertEqual(2, res)
+        res=self.db.count_material(name='count all', tags=['inorganic'])
+        self.assertEqual(1, res)
+        res=self.db.count_material()
 
     def test_serializable_search(self):
         self.db.add_material('Iron Oxide 3', 'Fe2O3', density=5.24)
@@ -39,6 +56,10 @@ class TestMaterialDB(unittest.TestCase):
         self.db.add_material('Iron Oxide 4', 'Fe2O3', density=5.24)
         with self.assertRaises(ValueError):
             self.db.add_material('Iron Oxide 4', 'Fe2O3', density=5.24)
+
+    def test_count_fail(self):
+        with self.assertRaises(KeyError):
+            self.db.count_material(beer='beer')
 
     def test_search_empty(self):
         res=self.db.search_material()
@@ -54,9 +75,12 @@ class TestMaterialDB(unittest.TestCase):
 
     def test_selection(self):
         self.db.add_material('To Select', 'Pb', density=11.4)
+        self.db.add_material('Nickel false', 'Ni', FU_volume=10.5)
         res=self.db.search_material(density=11.4)
         mat=self.db.select_material(res[0])
         self.assertAlmostEqual(mat.dens, 11.4)
+        res=self.db.search_material(FU_volume=10.5)
+        mat=self.db.select_material(res[0])
 
     def test_validate_item(self):
         self.db.add_material('To Validate', 'Pb', density=11.4)
@@ -64,6 +88,15 @@ class TestMaterialDB(unittest.TestCase):
         self.db.validate_material(res[0]['ID'], 'testuser')
         res2=self.db.search_material(ID=res[0]['ID'])
         self.assertIsNotNone(res2[0]['validated'])
+
+    def test_invalidate_item(self):
+        self.db.add_material('To Invalidate', 'Pb', density=11.4)
+        res=self.db.search_material(name='To Invalidate', density=11.4)
+        self.db.invalidate_material(res[0]['ID'], 'testuser')
+        res2=self.db.search_material(ID=res[0]['ID'], filter_invalid=False)
+        self.assertIsNotNone(res2[0]['invalid'])
+        res=self.db.search_material(name='To Invalidate', density=11.4)
+        self.assertEqual(0, len(res))
 
     def test_tags(self):
         self.db.add_material('Tag it', 'Pb', density=11.4, tags=['magnetic', 'metal'])

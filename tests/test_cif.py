@@ -10,3 +10,4 @@ class TestFormula(unittest.TestCase):
 
         for fi in fls:
             res=CifImporter(fi)
+            repr(res)

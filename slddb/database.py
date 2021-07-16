@@ -179,9 +179,13 @@ class SLDDB():
     def select_material(self, result):
         # generate Material object from database entry and increment selection counter
         formula=Formula(result['formula'])
+        if result['density']:
+            fu_volume=None
+        else:
+            fu_volume=result['FU_volume']
         m=Material([(self.elements.get_element(element), amount) for element, amount in formula],
                    dens=result['density'],
-                   fu_volume=result['FU_volume'],
+                   fu_volume=fu_volume,
                    rho_n=result['SLD_n'],
                    xsld=result['SLD_x'], xE=result['E_x'],
                    mu=result['mu'],
@@ -252,10 +256,23 @@ class SLDDB():
         c.execute('SELECT * FROM %s LIMIT 1'%DB_MATERIALS_NAME)
         res=c.fetchall()
         fields=[col[0] for col in c.description]
-        if len(fields)>=len(DB_MATERIALS_FIELDS):
+        if len(fields)==len(DB_MATERIALS_FIELDS) and DB_MATERIALS_FIELDS==fields[:len(DB_MATERIALS_FIELDS)]:
             return
         if DB_MATERIALS_FIELDS[:len(fields)]!=fields:
-            raise ValueError("Can only append fields at the end")
+            # need to reorder and/or add/remove colums of the databse, requires copy of table
+            name_type=['%s %s %s'%(fi, ci.sql_type, (di is not None) and "DEFAULT %s"%di or "")
+                       for fi, ci, di in zip(DB_MATERIALS_FIELDS, DB_MATERIALS_CONVERTERS,
+                                             DB_MATERIALS_FIELD_DEFAULTS)]
+            qstr='CREATE TABLE tmp_table (%s)'%(", ".join(name_type))
+            c.execute(qstr)
+            jf=[field for field in fields if field in DB_MATERIALS_FIELDS]
+            qstr='INSERT INTO tmp_table (%s) SELECT %s FROM %s'%(','.join(jf), ','.join(jf), DB_MATERIALS_NAME)
+            c.execute(qstr)
+            c.execute('DROP TABLE %s'%DB_MATERIALS_NAME)
+            c.execute('ALTER TABLE tmp_table RENAME TO %s'%DB_MATERIALS_NAME)
+            c.close()
+            self.db.commit()
+            return
         # append new columns
         start=len(fields)
         name_type=['%s %s %s'%(fi, ci.sql_type, (di is not None) and "DEFAULT %s"%di or "")

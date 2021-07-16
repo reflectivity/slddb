@@ -66,6 +66,7 @@ DB_MATERIALS_COLUMNS=[
     ('CAS_No',       Ccas(),    None,    None),
     ('crystal_data', cstr,      None,    None),
     ('temperature',  cposfloat, None,     'K'),
+    ('magnetic_field', cfloat,  None,     'T'),
     ('data_origin',  CSelect(['unspecified', 'text book',
                               'x-ray reflectivity', 'neutron reflectivity',
                               'mass density', 'diffraction', 'interferometry',

@@ -155,7 +155,7 @@ def api_query():
     else:
         return search_api(request.args)
 
-@app.route('/download_api', methods=['GET'])
+@app.route('/api_download', methods=['GET'])
 def api_download():
     record=api_query()
     mem_json=BytesIO()

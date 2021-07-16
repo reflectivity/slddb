@@ -52,3 +52,8 @@ class TestFormula(unittest.TestCase):
         str(Formula('NaCl'))
         str(Formula('Na1Cl1.0'))
         str(Formula('Na0.5Cl2'))
+
+    def test_contains(self):
+        self.assertTrue('Cr' in Formula('Cr2O3'))
+        self.assertEqual(0, Formula('Fe2O3').index('Fe'))
+        self.assertEqual(1, Formula('Fe2O3').index('O'))
