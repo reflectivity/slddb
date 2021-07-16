@@ -39,13 +39,14 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=True
 db=SQLAlchemy()
 db.init_app(app)
 
-app.config['MAIL_SERVER']='smtp.mailtrap.io'
-app.config['MAIL_PORT'] = 2525
-app.config['MAIL_USERNAME'] = '175ffa3adc24f2'
-app.config['MAIL_PASSWORD'] = '31fde10b3694db'
+app.config['MAIL_SERVER']=os.environ.get('MAIL_SERVER', 'smtp.mailtrap.io')
+app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 2525))
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME', '175ffa3adc24f2')
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD', '31fde10b3694db')
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USE_SSL'] = False
 mail=Mail(app)
+MAIL_SENDER='ORSO SLDdb Admin <slddb_admin@esss.dk>'
 
 login_manager=LoginManager()
 login_manager.init_app(app)
