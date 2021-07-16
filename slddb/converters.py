@@ -112,7 +112,7 @@ class CFormula(Converter):
 
     def html_input(self, field, value):
         return f'<input name="{field}" id="compound {field}" value="{value}"'\
-               ' placeholder="exmpl: Fe2O3 / H[2]2O"/>'
+               ' placeholder="Fe2O3 / H[2]2O / H2(C2H4)4"/>'
 
 class ValidatedString(CType):
     regex=None

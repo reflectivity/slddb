@@ -268,7 +268,8 @@
     <form action="{{ url_for('calculate_sld') }}" method="get"><center>
       <table class="withborder">
         <tr><td>Field</td><td>value for calculation</td></tr>
-        <tr><td>Formula</td><td><input name="formula" id="compound formula" value="{{ request.args['formula'] or formula }}"></td></tr>
+        <tr><td>Formula</td><td><input name="formula" id="compound formula"
+                                       value="{{ request.args['formula'] or formula }}" placeholder="Fe2O3 / H[2]2O / H2(C2H4)4"></td></tr>
         <tr><td><select id="densinput" name="densinput">
           <option value="density">Density (g/cm³)</option>
           <option value="FUdens" {% if request.args['densinput']=='FUdens' %} selected {% endif %}>Density (FU/Å³)</option>

@@ -41,24 +41,69 @@ class Formula(list):
         string=string.replace(' ', '').replace('\t', '').replace('\n','')
         string=string.replace('{', '').replace('}', '').replace('_','').replace('$','')
 
-        # TODO: Implement groups of formulas like Fe(HO)3
-        items=self.parse_group(string)
-        self+=items
+        groups=self.split_groups(string)
+        for group, factor in groups:
+            try:
+                items=self.parse_group(group, case_sensitive=True)
+            except ValueError:
+                items=self.parse_group(group, case_sensitive=False)
+            items=[(i[0], i[1]*factor) for i in items]
+            self+=items
 
-    def parse_group(self, group):
+    def split_groups(self, string):
+        if not '(' in string:
+            return [(string, 1.0)]
         out=[]
-        mele=re.search(self.elements, group, flags=re.IGNORECASE)
-        miso=re.search(self.isotopes, group, flags=re.IGNORECASE)
+        start=string.index('(')
+        end=start
+        if start>0:
+            out.append((string[:start], 1.0))
+        while end<len(string):
+            end=start+string[start:].find(')')
+            next=end+1
+            if end<start:
+                raise ValueError('Brackets need to be closed')
+            while not (next==len(string) or string[next].isalpha() or string[next]=='('):
+                next+=1
+            block=string[start+1:end]
+            if '(' in block:
+                raise ValueError("Only one level of brackets is allowed")
+            number=string[end+1:next]
+            if number=='':
+                out.append((block, 1.0))
+            else:
+                out.append((block, float(number)))
+            if next==len(string):
+                break
+            if not '(' in string[next:]:
+                out.append((string[next:], 1.0))
+                break
+            else:
+                start=next+string[next:].index('(')
+                end=start
+                if start>next:
+                    out.append((string[next:start], 1.0))
+        return out
+
+
+    def parse_group(self, group, case_sensitive=True):
+        if case_sensitive:
+            flags=0
+        else:
+            flags=re.IGNORECASE
+        out=[]
+        mele=re.search(self.elements, group, flags=flags)
+        miso=re.search(self.isotopes, group, flags=flags)
         if miso is not None and miso.start()==mele.start():
             prev=miso
         else:
             prev=mele
         if prev is None or prev.start()!=0:
-            raise ValueError('Did not find any valid elemnt in string')
+            raise ValueError('Did not find any valid element in string')
         pos=prev.end()
         while pos<len(group):
-            mele=re.search(self.elements, group[pos:], flags=re.IGNORECASE)
-            miso=re.search(self.isotopes, group[pos:], flags=re.IGNORECASE)
+            mele=re.search(self.elements, group[pos:], flags=flags)
+            miso=re.search(self.isotopes, group[pos:], flags=flags)
             if miso is not None and miso.start()==mele.start():
                 next=miso
             else:
