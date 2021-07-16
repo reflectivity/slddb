@@ -3,3 +3,4 @@ __pycache__
 coverage_html
 flaskr/db.sqlite
 flaskr/secret.key
+/tests/cover/

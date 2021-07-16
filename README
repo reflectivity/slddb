@@ -8,11 +8,12 @@ This is the development version for the SLD Database. To test on you local machi
 3b Expand database by materials from Christy "python3 testdata_christy.py"
 4. Run "flask run" and visit http://127.0.0.1:5000/
 
-5. To setup authentication for ORSO users, open python console and run the following commands:
-    $ from flaskr import authentication as auth
-    $ auth.generate_secret() # create unique key for cookies, requires flask restart
-    $ auth.create_database() # build database for users
-    $ auth.add_user('{user name}', '{email}') # can be repeated later for more users, password is requested
+x. To setup initial authentication for ORSO users run:
+    $ python -m flaskr.authentication
+    To setup new users a valid SMTP server is required to send the activation emails.
+    (Defaults to mailtrap fake server for testing.)
+    To activate a real SMTP server set the following environment variables before starting the flask server:
+    MAIL_SERVER, MAIL_PORT, MAIL_USERNAME, MAIL_PASSWORD  (authentication is usint TLS)
 
 The database is already filled with all elements and the densities for those. SLD calculation should therefore work. 
 Up to now there is no interface to enter data, yet. This can, however, be done through the python interface manually:

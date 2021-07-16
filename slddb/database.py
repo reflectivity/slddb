@@ -7,6 +7,7 @@ from .dbconfig import DB_MATERIALS_CONVERTERS, DB_MATERIALS_NAME, \
     DB_MATERIALS_FIELDS, DB_MATERIALS_FIELD_DEFAULTS, db_lookup
 from .element_table import Elements
 from .material import Material, Formula
+from .importers import importers
 
 class SLDDB():
     """
@@ -19,6 +20,19 @@ class SLDDB():
         self.db=sqlite3.connect(dbfile)
         self.elements=Elements(self.db)
 
+    def import_material(self, filename, name=None, commit=True):
+        suffix=filename.rsplit('.',1)[1]
+        res=None
+        for importer in importers:
+            if importer.suffix==suffix:
+                res=importer(filename)
+                break
+        if res is None:
+            raise IOError("File import failed for %s, no suitable importer found"%filename)
+        if name is None:
+            name=res.name
+        return self.add_material(name, res.formula, commit=commit, **importer(filename))
+
     def add_material(self, name, formula, commit=True, **data):
         din={}
         for key, value in data.items():
@@ -26,7 +40,7 @@ class SLDDB():
                 raise KeyError('%s is not a valid data field'%key)
             din[key]=db_lookup[key][1].convert(value)
 
-        if not ('density' in din or 'FU volume' in din
+        if not ('density' in din or 'FU_volume' in din
                 or 'SLD_n' in din or ('SLD_x' in din and 'E_x' in din)):
             raise ValueError("Not enough information to determine density")
 
@@ -49,24 +63,38 @@ class SLDDB():
         if commit:
             self.db.commit()
 
-    def search_material(self, join_and=True, serializable=False, **data):
+    def search_material(self, join_and=True, serializable=False, filter_invalid=True, limit=100, offset=0, **data):
         for key, value in data.items():
             if not key in DB_MATERIALS_FIELDS:
                 raise KeyError('%s is not a valid data field'%key)
 
         if len(data)==0:
             sstr='SELECT * FROM %s'%DB_MATERIALS_NAME
+            if filter_invalid:
+                sstr+=' WHERE invalid IS NULL'
             qstr=''
             qlst=[]
             ustr=''
         else:
             sstr='SELECT * FROM %s WHERE '%DB_MATERIALS_NAME
+            if filter_invalid:
+                sstr+='invalid IS NULL AND '
             ustr='UPDATE %s SET accessed = accessed + 1 WHERE '%DB_MATERIALS_NAME
             qstr=''
             qlst=[]
             for key, value in data.items():
                 cval=db_lookup[key][1].convert(value)
-                if type(cval) is str:
+                if type(value) in (list, tuple):
+                    if len(value)==0:
+                        continue
+                    qstr+='('
+                    for itm in value:
+                        qstr+='%s LIKE ?'%key
+                        qstr+=' AND '
+                        qlst.append('%%%s%%'%repr(itm))
+                    cval=qlst.pop(-1)
+                    qstr=qstr[:-5]+')'
+                elif type(cval) is str:
                     qstr+='%s LIKE ?'%key
                     cval='%%%s%%'%cval
                 else:
@@ -79,7 +107,7 @@ class SLDDB():
                     qstr+='  OR '
             qstr=qstr[:-5]
         c=self.db.cursor()
-        c.execute(sstr+qstr+' ORDER BY selected DESC, accessed DESC LIMIT 100', qlst)
+        c.execute(sstr+qstr+' ORDER BY validated DESC, selected DESC, accessed DESC LIMIT %i,%i'%(offset, limit), qlst)
         results=c.fetchall()
         keys=[key for key, *ignore in c.description]
         # update access counter
@@ -99,15 +127,69 @@ class SLDDB():
                 output.append(rowdict)
         return output
 
+    def count_material(self, join_and=True, filter_invalid=True, **data):
+        for key, value in data.items():
+            if not key in DB_MATERIALS_FIELDS:
+                raise KeyError('%s is not a valid data field'%key)
+
+        if len(data)==0:
+            sstr='SELECT COUNT(*) FROM %s'%DB_MATERIALS_NAME
+            if filter_invalid:
+                sstr+=' WHERE invalid IS NULL'
+            qstr=''
+            qlst=[]
+        else:
+            sstr='SELECT COUNT(*) FROM %s WHERE '%DB_MATERIALS_NAME
+            if filter_invalid:
+                sstr+='invalid IS NULL AND '
+            qstr=''
+            qlst=[]
+            for key, value in data.items():
+                cval=db_lookup[key][1].convert(value)
+                if type(value) in (list, tuple):
+                    if len(value)==0:
+                        continue
+                    qstr+='('
+                    for itm in value:
+                        qstr+='%s LIKE ?'%key
+                        qstr+=' AND '
+                        qlst.append('%%%s%%'%repr(itm))
+                    cval=qlst.pop(-1)
+                    qstr=qstr[:-5]+')'
+                elif type(cval) is str:
+                    qstr+='%s LIKE ?'%key
+                    cval='%%%s%%'%cval
+                else:
+                    qstr+='%s == ?'%key
+                qlst.append(cval)
+
+                if join_and:
+                    qstr+=' AND '
+                else:
+                    qstr+='  OR '
+            qstr=qstr[:-5]
+        c=self.db.cursor()
+        c.execute(sstr+qstr, qlst)
+        result=c.fetchone()
+        # update access counter
+        c.close()
+        self.db.commit()
+        return result[0]
+
     def select_material(self, result):
         # generate Material object from database entry and increment selection counter
         formula=Formula(result['formula'])
+        if result['density']:
+            fu_volume=None
+        else:
+            fu_volume=result['FU_volume']
         m=Material([(self.elements.get_element(element), amount) for element, amount in formula],
                    dens=result['density'],
-                   fu_volume=result['FU_volume'],
+                   fu_volume=fu_volume,
                    rho_n=result['SLD_n'],
                    xsld=result['SLD_x'], xE=result['E_x'],
-                   mu=result['mu'])
+                   mu=result['mu'],
+                   ID=result['ID'])
 
         ustr='UPDATE %s SET selected = selected + 1 WHERE ID == ?'%DB_MATERIALS_NAME
         c=self.db.cursor()
@@ -117,7 +199,16 @@ class SLDDB():
         return m
 
     def validate_material(self, ID, user):
-        ustr='UPDATE %s SET validated = CURRENT_TIMESTAMP, validated_by = ? WHERE ID == ?'%DB_MATERIALS_NAME
+        ustr='UPDATE %s SET validated = CURRENT_TIMESTAMP, validated_by = ?,' \
+             ' invalid = NULL, invalid_by = NULL WHERE ID == ?'%DB_MATERIALS_NAME
+        c=self.db.cursor()
+        c.execute(ustr, (user, ID,))
+        c.close()
+        self.db.commit()
+
+    def invalidate_material(self, ID, user):
+        ustr='UPDATE %s SET invalid = CURRENT_TIMESTAMP, invalid_by = ?, ' \
+             ' validated = NULL, validated_by = NULL WHERE ID == ?'%DB_MATERIALS_NAME
         c=self.db.cursor()
         c.execute(ustr, (user, ID,))
         c.close()
@@ -129,7 +220,6 @@ class SLDDB():
                    for fi, ci, di in zip(DB_MATERIALS_FIELDS, DB_MATERIALS_CONVERTERS,
                                      DB_MATERIALS_FIELD_DEFAULTS)]
         qstr='CREATE TABLE %s (%s)'%(DB_MATERIALS_NAME, ", ".join(name_type))
-        print(qstr)
         c.execute(qstr)
         c.close()
         self.db.commit()
@@ -166,10 +256,23 @@ class SLDDB():
         c.execute('SELECT * FROM %s LIMIT 1'%DB_MATERIALS_NAME)
         res=c.fetchall()
         fields=[col[0] for col in c.description]
-        if len(fields)>=len(DB_MATERIALS_FIELDS):
+        if len(fields)==len(DB_MATERIALS_FIELDS) and DB_MATERIALS_FIELDS==fields[:len(DB_MATERIALS_FIELDS)]:
             return
         if DB_MATERIALS_FIELDS[:len(fields)]!=fields:
-            raise ValueError("Can only append fields at the end")
+            # need to reorder and/or add/remove colums of the databse, requires copy of table
+            name_type=['%s %s %s'%(fi, ci.sql_type, (di is not None) and "DEFAULT %s"%di or "")
+                       for fi, ci, di in zip(DB_MATERIALS_FIELDS, DB_MATERIALS_CONVERTERS,
+                                             DB_MATERIALS_FIELD_DEFAULTS)]
+            qstr='CREATE TABLE tmp_table (%s)'%(", ".join(name_type))
+            c.execute(qstr)
+            jf=[field for field in fields if field in DB_MATERIALS_FIELDS]
+            qstr='INSERT INTO tmp_table (%s) SELECT %s FROM %s'%(','.join(jf), ','.join(jf), DB_MATERIALS_NAME)
+            c.execute(qstr)
+            c.execute('DROP TABLE %s'%DB_MATERIALS_NAME)
+            c.execute('ALTER TABLE tmp_table RENAME TO %s'%DB_MATERIALS_NAME)
+            c.close()
+            self.db.commit()
+            return
         # append new columns
         start=len(fields)
         name_type=['%s %s %s'%(fi, ci.sql_type, (di is not None) and "DEFAULT %s"%di or "")
@@ -180,6 +283,12 @@ class SLDDB():
         c.close()
         self.db.commit()
 
+    def backup(self, filename):
+        # make a copy of the open database
+        out=sqlite3.connect(filename)
+        with out:
+            self.db.backup(out)
+        out.close()
 
     def __del__(self):
         self.db.close()

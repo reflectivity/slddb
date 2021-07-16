@@ -5,80 +5,374 @@
 {% block content %}
   {% if material %}
     <script>
-    var material_energies = {{ xray_E }};
-    var material_delta_real = {{ xray_delta_real }};
-    var material_delta_imag = {{ xray_delta_imag }};
+    const material_energies = {{ xray_E }};
+    const material_rho_real = {{ xray_rho_real }};
+    const material_rho_imag = {{ xray_rho_imag }};
+    const material_delta = {{ xray_delta }};
+    const material_beta = {{ xray_beta }};
+
+    var material_neutron_real = {{1e6*material.rho_n.real}};
+    var material_neutron_imag = {{1e6*material.rho_n.imag}};
+    var material_neutron_magn = {{1e6*material.rho_m.real}};
+    var material_Cu_real = {{1e6*material.rho_of_E(Cu_kalpha).real}};
+    var material_Cu_imag = {{1e6*material.rho_of_E(Cu_kalpha).imag}};
+    var material_Mo_real = {{1e6*material.rho_of_E(Mo_kalpha).real}};
+    var material_Mo_imag = {{1e6*material.rho_of_E(Mo_kalpha).imag}};
+
+    var can_switch=true;
 
     function updateSlider(slideAmount) {
-        var idx = material_energies.findIndex(ele => ele >= parseFloat(slideAmount)/1000.0);
-        document.getElementById("value_real").innerHTML = (material_delta_real[idx]*1e6).toFixed(6);
-        document.getElementById("value_imag").innerHTML = (material_delta_imag[idx]*1e6).toFixed(6);
+        var unit = document.getElementById("user_select").value;
+        var real_part; var imag_part;
+        if (slideAmount<0) {
+            slideAmount=document.getElementById("xray_energy_value").value;
+            if (can_switch) {
+                can_switch=false;
+                document.getElementById("cu_select").selectedIndex=document.getElementById("user_select").selectedIndex;
+                document.getElementById("mo_select").selectedIndex=document.getElementById("user_select").selectedIndex;
+                switch_sld_cu(unit)
+                switch_sld_mo(unit)
+                can_switch=true;
+            }
+            }
+        if (unit == 'sld') {
+            factor=1.0e6;
+            real_part=material_rho_real;
+            imag_part=material_rho_imag;
+        } else if (unit == 'electron'){
+            factor=1.0e5/{{r_e}};
+            real_part=material_rho_real;
+            imag_part=material_rho_imag;
+        } else {
+            factor=1.0;
+            real_part=material_delta;
+            imag_part=material_beta;
+        }
+
+        var factor; var val_real; var val_imag;
+        var xval=parseFloat(slideAmount)/1000.0;
+        var left = material_energies.findIndex(ele => ele >= xval);
+        var right = left+1;
+        var dxleft = material_energies[left]-xval;
+        var dxright = xval-material_energies[right];
+        var dx=dxleft+dxright;
+        if (dxleft>0) {
+            val_real=real_part[left]*(dxright/dx)+real_part[right]*(dxleft/dx);
+            val_imag=imag_part[left]*(dxright/dx)+imag_part[right]*(dxleft/dx);
+        } else {
+            val_real=real_part[left];
+            val_imag=imag_part[left];
+        }
+
+        if (unit == 'n_db') {
+            document.getElementById("value_real").innerHTML = (val_real).toExponential(4);
+            document.getElementById("value_imag").innerHTML = (val_imag).toExponential(4);
+        } else {
+            document.getElementById("value_real").innerHTML = (val_real*factor).toFixed(6);
+            document.getElementById("value_imag").innerHTML = (val_imag*factor).toFixed(6)+'i';
+        }
 
         document.getElementById("xray_energy_value").value = slideAmount;
     }
 
     function updateValue() {
-        var value = document.getElementById("xray_energy_value").value;
+        const value = document.getElementById("xray_energy_value").value;
         document.getElementById("xray_energy").value = value;
         updateSlider(value);
+    }
+
+    {% if deuterated %}
+    var deuterated_neutron_real = {{1e6*deuterated.rho_n.real}};
+    var deuterated_neutron_imag = {{1e6*deuterated.rho_n.imag}};
+
+    function deuterateSlider(slideAmount) {
+        frac=slideAmount*0.01;
+
+        var val_real=(1.0-frac)*material_neutron_real+frac*deuterated_neutron_real;
+        var val_imag=(1.0-frac)*material_neutron_imag+frac*deuterated_neutron_imag;
+
+        document.getElementById("neutron_entry_real").innerHTML = (val_real).toFixed(6);
+        document.getElementById("neutron_entry_imag").innerHTML = (val_imag).toFixed(6)+'i';
+
+        document.getElementById("deuteration_amount_value").value = slideAmount;
+    }
+
+    function deuterateValue() {
+        const value = document.getElementById("deuteration_amount_value").value;
+        document.getElementById("deuteration_amount").value = value;
+        deuterateSlider(value);
+    }
+    {% endif %}
+
+    function copy_all() {
+        var out = '';
+        out=out.concat('Compound', '\t', '{{material_name}}', '\n');
+        out=out.concat('Description', '\t', '{{material_description}}', '\n');
+        out=out.concat('Chemical Formula', '\t', '{{material}}', '\n');
+
+        var dens_select=document.getElementById("densresult")
+        out=out.concat(dens_select.options[dens_select.selectedIndex].text, '\t',
+                        document.getElementById("density_value").innerHTML, '\n');
+
+        out=out.concat('Neutron nuclear SLD (10⁻⁶ Å⁻²)',
+                        '\t', document.getElementById("neutron_entry_real").innerHTML,
+                        '\t', document.getElementById("neutron_entry_imag").innerHTML, '\n');
+        var magn_select=document.getElementById("magnresult")
+        out=out.concat(magn_select.options[magn_select.selectedIndex].text, '\t', material_neutron_magn, '\n');
+
+        var xray_select=document.getElementById("cu_select");
+        var xray_unit=xray_select.options[xray_select.selectedIndex].text
+        out=out.concat(`Cu-Kɑ ${xray_unit}`,
+                        '\t', document.getElementById("cu_entry_real").innerHTML,
+                        '\t', document.getElementById("cu_entry_imag").innerHTML, '\n');
+        out=out.concat(`Mo-Kɑ SLD ${xray_unit}`,
+                        '\t', document.getElementById("mo_entry_real").innerHTML,
+                        '\t', document.getElementById("mo_entry_imag").innerHTML, '\n');
+        out=out.concat(`Custom (${document.getElementById("xray_energy_value").value} eV) ${xray_unit}`,
+                        '\t', document.getElementById("value_real").innerHTML,
+                        '\t', document.getElementById("value_imag").innerHTML, '\n');
+
+        navigator.clipboard.writeText(out);
+    }
+
+    function copy_NSLD() {
+        const value_real=document.getElementById("neutron_entry_real").innerHTML;
+        const value_imag=document.getElementById("neutron_entry_imag").innerHTML;
+
+        navigator.clipboard.writeText(`${value_real}\t${value_imag}`);
+    }
+    function copy_Nmag() {
+        navigator.clipboard.writeText(`${material_neutron_magn.toFixed(6)}`);
+    }
+    function copy_Cu() {
+        const value_real=document.getElementById("cu_entry_real").innerHTML;
+        const value_imag=document.getElementById("cu_entry_imag").innerHTML;
+        var unit = document.getElementById("cu_select").value;
+        if (unit == 'n_db') {
+        navigator.clipboard.writeText(`${value_real}\t${value_imag}`);
+        } else {
+        navigator.clipboard.writeText(`${value_real}+${value_imag}`.replace('+-', '-'));
+        }
+    }
+    function copy_Mo() {
+        const value_real=document.getElementById("mo_entry_real").innerHTML;
+        const value_imag=document.getElementById("mo_entry_imag").innerHTML;
+        var unit = document.getElementById("mo_select").value;
+        if (unit == 'n_db') {
+        navigator.clipboard.writeText(`${value_real}\t${value_imag}`);
+        } else {
+        navigator.clipboard.writeText(`${value_real}+${value_imag}`.replace('+-', '-'));
+        }
+    }
+    function copy_xE() {
+        var unit = document.getElementById("user_select").value;
+        var factor;
+        if (unit == 'sld') {
+            factor=1.0e6;
+            real_part=material_rho_real;
+            imag_part=material_rho_imag;
+        } else if (unit == 'electron'){
+            factor=1.0e5/{{r_e}};
+            real_part=material_rho_real;
+            imag_part=material_rho_imag;
+        } else {
+            factor=1.0;
+            real_part=material_delta;
+            imag_part=material_beta;
+        }
+
+        var out = 'E (kev)\treal\timag\n';
+        for (let i = 0; i < material_energies.length; i++) {
+          out+=`${material_energies[i]}\t${factor*real_part[i]}\t${factor*imag_part[i]}\n`;
+        }
+
+        const SLD_real=document.getElementById("value_real").innerHTML;
+        const SLD_imag=document.getElementById("value_imag").innerHTML;
+        navigator.clipboard.writeText(out);
+    }
+    function copy_xray() {
+        const SLD_real=document.getElementById("value_real").innerHTML;
+        const SLD_imag=document.getElementById("value_imag").innerHTML;
+        var unit = document.getElementById("user_select").value;
+        if (unit == 'n_db') {
+        navigator.clipboard.writeText(`${SLD_real}\t${SLD_imag}`);
+        } else {
+        navigator.clipboard.writeText(`${SLD_real}+${SLD_imag}`.replace('+-', '-'));
+        }
+    }
+
+    function switch_density() {
+        var selection = document.getElementById("densresult").value;
+        if (selection == 'density') {document.getElementById("density_value").innerHTML = '{{"%.6f"%material.dens}}';}
+        if (selection == 'FUdens') {document.getElementById("density_value").innerHTML = '{{"%.6e"%material.fu_dens}}';}
+        if (selection == 'FUdnm') {document.getElementById("density_value").innerHTML = '{{"%.7f"%(material.fu_dens*1e3)}}';}
+        if (selection == 'volume') {document.getElementById("density_value").innerHTML = '{{"%.3f"%material.fu_volume}}';}
+    }
+
+    function switch_sld_cu(selection) {
+        if (selection == 'electron') {
+            document.getElementById("cu_entry_real").innerHTML = '{{"%.6f"%(1e5/r_e*material.rho_of_E(Cu_kalpha).real)}}';
+            document.getElementById("cu_entry_imag").innerHTML = '{{"%.6f"%(1e5/r_e*material.rho_of_E(Cu_kalpha).imag)}}i';
+            {% if material.ID %}
+            document.getElementById("download_link").href = '{{url_for('api_download', ID=material.ID, xray_unit='edens')|safe}}';
+            {% endif %}
+            } else if (selection == 'sld') {
+            document.getElementById("cu_entry_real").innerHTML = '{{"%.6f"%(1e6*material.rho_of_E(Cu_kalpha).real)}}';
+            document.getElementById("cu_entry_imag").innerHTML = '{{"%.6f"%(1e6*material.rho_of_E(Cu_kalpha).imag)}}i';
+            {% if material.ID %}
+            document.getElementById("download_link").href = '{{url_for('api_download', ID=material.ID, xray_unit='sld')|safe}}';
+            {% endif %}
+            } else if (selection == 'n_db') {
+            document.getElementById("cu_entry_real").innerHTML = '{{"%.4e"%(material.delta_of_E(Cu_kalpha))}}';
+            document.getElementById("cu_entry_imag").innerHTML = '{{"%.4e"%(material.beta_of_E(Cu_kalpha))}}';
+            {% if material.ID %}
+            document.getElementById("download_link").href = '{{url_for('api_download', ID=material.ID, xray_unit='n_db')|safe}}';
+            {% endif %}
+            }
+        if (can_switch) {
+            can_switch=false;
+            document.getElementById("mo_select").selectedIndex=document.getElementById("cu_select").selectedIndex;
+            switch_sld_mo(selection)
+            document.getElementById("user_select").selectedIndex=document.getElementById("cu_select").selectedIndex;
+            updateSlider(-1)
+            can_switch=true;
+        }
+    }
+
+    function switch_sld_mo(selection) {
+        if (selection == 'electron') {
+            document.getElementById("mo_entry_real").innerHTML = '{{"%.6f"%(1e5/r_e*material.rho_of_E(Mo_kalpha).real)}}';
+            document.getElementById("mo_entry_imag").innerHTML = '{{"%.6f"%(1e5/r_e*material.rho_of_E(Mo_kalpha).imag)}}i';
+            } else if (selection == 'sld') {
+            document.getElementById("mo_entry_real").innerHTML = '{{"%.6f"%(1e6*material.rho_of_E(Mo_kalpha).real)}}';
+            document.getElementById("mo_entry_imag").innerHTML = '{{"%.6f"%(1e6*material.rho_of_E(Mo_kalpha).imag)}}i';
+            } else if (selection == 'n_db') {
+            document.getElementById("mo_entry_real").innerHTML = '{{"%.4e"%(material.delta_of_E(Mo_kalpha))}}';
+            document.getElementById("mo_entry_imag").innerHTML = '{{"%.4e"%(material.beta_of_E(Mo_kalpha))}}';
+            }
+        if (can_switch) {
+            can_switch=false;
+            document.getElementById("cu_select").selectedIndex=document.getElementById("mo_select").selectedIndex;
+            switch_sld_cu(selection)
+            document.getElementById("user_select").selectedIndex=document.getElementById("mo_select").selectedIndex;
+            updateSlider(-1)
+            can_switch=true;
+        }
+    }
+
+    function switch_magn() {
+        var selection = document.getElementById("magnresult").value;
+        if (selection == 'msld') {material_neutron_magn={{1e6*material.rho_m}};}
+        if (selection == 'muB') {material_neutron_magn={{material.mu}};}
+        if (selection == 'magn') {material_neutron_magn={{material.M}};}
+        document.getElementById("magn_value").innerHTML = material_neutron_magn.toFixed(6);
     }
     </script>
   {% endif %}
 
-  <p><center>
-    <form action="{{ url_for('calculate_sld') }}" method="get">
-      <table class="withborder">
-        <tr><td>Field</td><td>value for calculation</td></tr>
-        <tr><td>Formula</td><td><input name="formula" id="compound formula" value="{{ request.args['formula'] or formula }}"></td></tr>
-        <tr><td><select id="densinput" name="densinput">
+    <p></p>
+    <form action="{{ url_for('calculate_sld', _anchor='results_header') }}" method="get"><center>
+      <table class="noborder">
+        <tr><th>Field</th><th>value for calculation</th></tr>
+        <tr><td style="text-align: right;">Formula</td><td><input type="text" name="formula" id="compound formula"
+                                       value="{{ request.args['formula'] or formula }}" placeholder="Fe2O3 / H[2]2O / H2(C2H4)4"></td></tr>
+        <tr><td style="text-align: right;"><select id="densinput" name="densinput" style="width: 150pt;">
           <option value="density">Density (g/cm³)</option>
-          <option value="volume">FU Volume (Å³)</option>
+          <option value="FUdens" {% if request.args['densinput']=='FUdens' %} selected {% endif %}>Density (FU/Å³)</option>
+          <option value="FUdnm" {% if request.args['densinput']=='FUdnm' %} selected {% endif %}>Density (FU/nm³)</option>
+          <option value="volume" {% if request.args['densinput']=='volume' %} selected {% endif %}>FU Volume (Å³)</option>
         </select></td><td><input type='number' step="0.00001" name="density" id="compound density" value="{{ request.args['density'] or density }}"></td></tr>
-        <tr><td>Magnetisation (µB/FU)</td><td><input type='number' step="0.00001" name="mu" id="compound mu" value="{{ request.args['mu'] or mu }}"></td></tr>
+        <tr><td style="text-align: right;"><select id="magninput" name="magninput" style="width: 150pt;">
+            <option value="muB">Magnetisation (µB/FU)</option>
+            <option value="magn" {% if request.args['magninput']=='magn' %} selected {% endif %}>Magnetisation (kA/m=emu/cm³)</option>
+            </select></td>
+            <td><input type='number' step="0.00001" name="mu" id="compound mu" value="{{ request.args['mu'] or mu }}"></td></tr>
         <tr><td colspan="2"><center><input type="submit"></center></td> </tr>
       </table>
-    </form>
-    </center>
-  </p>
+    </center></form>
 
-  <p><center>
-    <form action="{{ url_for('start_page') }}">
+    <p></p>
+    <form action="{{ url_for('start_page') }}"><center>
       <button type="submit" >back to database query</button>
-    </form>
-    </center>
-  </p>
+    </center></form>
+
 
   {% if material %}
-  <p><center>
-  <h2>Result of SLD calculation:</h2>
-    <table class="withborder"{% if validated %} style="background-color: #dfd"{% endif %}>
-        <tr><td>Compound</td><td colspan=2>{{material_name}}</td></tr>
-        <tr><td>Description</td><td colspan=2 syle="word-wrap;">{{material_description}}</td></tr>
-        <tr><td>Chemical Formula</td><td colspan=2>{{material}}</td></tr>
-        <tr><td>Density (g/cm³)</td><td colspan=2>{{"%.4f"%material.dens}}</td></tr>
-        <tr><td>Neutron nuclear SLD (10⁻⁶ Å⁻²)</td>
-          <td>{{"%.6f"%(1000000*material.rho_n.real)}}</td>
-          <td>{{"%.6f"%(1000000*material.rho_n.imag)}}</td></tr>
-        <tr><td>Neutron magnetic SLD (10⁻⁶ Å⁻²)</td><td colspan=2>{{"%.6f"%(1000000*material.rho_m)}}</td>
-        <tr><td>Cu-Kɑ SLD (10⁻⁶ Å⁻²)</td>
-          <td>{{"%.6f"%(1000000*material.delta_of_E(Cu_kalpha).real)}}</td>
-          <td>{{"%.6f"%(1000000*material.delta_of_E(Cu_kalpha).imag)}}</td></tr>
-        <tr><td>Mo-Kɑ SLD (10⁻⁶ Å⁻²)</td>
-          <td>{{"%.6f"%(1000000*material.delta_of_E(Mo_kalpha).real)}}</td>
-          <td>{{"%.6f"%(1000000*material.delta_of_E(Mo_kalpha).imag)}}</td></tr>
-        <tr><td>Custom Energy (eV)</td>
-          <td colspan="2">SLD (10⁻⁶ Å⁻²)</td></tr>
-        <tr><td><form action="" onsubmit="return false;">
-            <input type="range" min="100" max="30000" value="8040" class="slider" id="xray_energy" step="20" onchange="updateSlider(this.value)">
-            <input type="number" min="100" max="30000" value="8040" class="slider_value" id="xray_energy_value" onchange="updateValue(this.value)">
+  <center>
+  <h2 style="margin: 15pt 0pt 5pt;" id="results_header">Result of SLD calculation:</h2>
+    <table class="noborder"{% if validated %} style="background-color: #dfd"{% endif %}{% if invalid %} style="background-color: #fdd"{% endif %}>
+        {% if material.ID %}
+        <tr><th>Compound (ORSO ID={{material.ID}})</th><td colspan=2>{{material_name}}</td>
+            <th><a href="{{url_for('calculate_sld', ID=material.ID, _anchor='results_header')|safe}}" target="_blank">direct link</a></th></tr>
+        {% else %}
+        <tr><th>Compound</th><th colspan=2>{{material_name}}</th>
+            <th><a href="{{url_for('calculate_sld', formula=str(material.formula), density=material.dens, mu=material.mu, densinput='density', magninput='muB', _anchor='results_header')|safe}}" target="_blank">direct link</a></th></tr>
+        {% endif %}
+        <tr><td style="text-align:right;">Description</td><td colspan=2 style="word-wrap;">{{material_description}}</td>
+            <td rowspan="3"><center><button type="button" onclick="copy_all()">Copy to<br />Clipboard</button></center></td></tr>
+        <tr><td style="text-align:right;">Chemical Formula</td><td colspan=2>{{material}}</td></tr>
+        <tr><td style="text-align:right;"><select id="densresult" name="densresult" onchange="switch_density()">
+          <option value="density">Density (g/cm³)</option>
+          <option value="FUdens">Density (FU/Å³)</option>
+          <option value="FUdnm">Density (FU/nm³)</option>
+          <option value="volume">FU Volume (Å³)</option>
+        </select></td><td colspan=2 id="density_value">{{"%.4f"%material.dens}}</td></tr>
+        <tr><td style="text-align:right;">Neutron nuclear SLD (10⁻⁶ Å⁻²)</td>
+          <td id="neutron_entry_real">{{"%.6f"%(1e6*material.rho_n.real)}}</td>
+          <td id="neutron_entry_imag">{{"%.6f"%(1e6*material.rho_n.imag)}}i</td>
+          <td><button type="button" onclick="copy_NSLD()">as Complex</button></td></tr>
+        {% if deuterated %}
+        <tr><td style="text-align:right;">Material Deuteration</td><td colspan="2">
+            <input type="range" min="0" max="100" value="0" class="slider" id="deuteration_amount" step="1" onchange="deuterateSlider(this.value)" style="width: 100pt;">
+            <input type="number" min="0" max="100" value="0" class="slider_value" id="deuteration_amount_value" onchange="deuterateValue(this.value)" style="width: 30pt;">%
+        </td><td></td></tr>
+        {% endif %}
+        <tr><td style="text-align:right;"><select id="magnresult" name="magnresult" onchange="switch_magn()">
+            <option value="msld">Neutron magnetic SLD (10⁻⁶ Å⁻²)</option>
+            <option value="muB">Magnetisation (µB/FU)</option>
+            <option value="magn">Magnetisation (kA/m = emu/cm³)</option>
+            </select></td><td colspan=2 id="magn_value">{{"%.6f"%(1e6*material.rho_m)}}</td>
+            <td><button type="button" onclick="copy_Nmag()">as Float</button></td></tr>
+        <tr><td style="text-align:right;">Cu-Kɑ <select id="cu_select" name="cu_select" onchange="switch_sld_cu(this.value)" style="width: 150pt;">
+                <option value="electron">e-density (rₑ/Å³)</option>
+                <option value="sld">SLD (10⁻⁶ Å⁻²)</option>
+                <option value="n_db">n=1-δ+iβ (δ/-β)</option>
+                </select></td>
+          <td id="cu_entry_real">{{"%.6f"%(1e5/r_e*material.rho_of_E(Cu_kalpha).real)}}</td>
+          <td id="cu_entry_imag">{{"%.6f"%(1e5/r_e*material.rho_of_E(Cu_kalpha).imag)}}i</td>
+          <td><button type="button" onclick="copy_Cu()">as Complex</button></td></tr>
+        <tr><td style="text-align:right;">Mo-Kɑ <select id="mo_select" name="mo_select" onchange="switch_sld_mo(this.value)" style="width: 150pt;">
+                <option value="electron">e-density (rₑ/Å³)</option>
+                <option value="sld">SLD (10⁻⁶ Å⁻²)</option>
+                <option value="n_db">n=1-δ+iβ (δ/-β)</option>
+                </select></td>
+          <td id="mo_entry_real">{{"%.6f"%(1e5/r_e*material.rho_of_E(Mo_kalpha).real)}}</td>
+          <td id="mo_entry_imag">{{"%.6f"%(1e5/r_e*material.rho_of_E(Mo_kalpha).imag)}}i</td>
+          <td><button type="button" onclick="copy_Mo()">as Complex</button></td></tr>
+        <tr style="border-top: solid 2px #888;"><th>Custom Energy (eV)</th>
+          <td colspan="2"><select id="user_select" name="user_select" onchange="updateSlider(-1)" style="width: 150pt;">
+                <option value="electron">e-density (rₑ/Å³)</option>
+                <option value="sld">SLD (10⁻⁶ Å⁻²)</option>
+                <option value="n_db">n=1-δ+iβ (δ/-β)</option>
+                </select></td><td><button type="button" onclick="copy_xE()">Full Data</button></td></tr>
+        <tr><td style="text-align:center;"><form action="" onsubmit="return false;">
+            <input type="range" min="50" max="30000" value="8040" class="slider" id="xray_energy" step="20" onchange="updateSlider(this.value)" style="width: 120pt;">
+            <input type="number" min="50" max="30000" value="8040" class="slider_value" id="xray_energy_value" style="width: 60pt;" onchange="updateValue(this.value)">
             </form></td>
-            <td><div id="value_real"></div></td>
-            <td><div id="value_imag"></div></td></tr>
+            <td><div id="value_real">{{"%.6f"%(1e5/r_e*material.rho_of_E(Cu_kalpha).real)}}</div></td>
+            <td><div id="value_imag">{{"%.6f"%(1e5/r_e*material.rho_of_E(Cu_kalpha).imag)}}i</div></td>
+            <td><button type="button" onclick="copy_xray()">as Complex</button></td></tr>
         {% if validated %}
-        <tr><td colspan="3">This entry was validated by ORSO<br />({{ validated }} by {{ validated_by }})</td></tr>
+        <tr><td colspan="4">This entry was validated by ORSO<br />({{ validated }} by {{ validated_by }})</td></tr>
+        {% endif %}
+        {% if invalid %}
+        <tr><td colspan="4">This entry was removed by ORSO because it was invalid<br />({{ invalid }} by {{ invalid_by }})</td></tr>
         {% endif %}
     </table>
-  </center></p>
+        {% if material.ID %}
+        <br /><a id="download_link" href="{{url_for('api_download', ID=material.ID, xray_unit='edens')|safe}}">Download full record as JSON</a>
+        {% endif %}
+  </center><p></p>
   {% endif %}
 
   <center>

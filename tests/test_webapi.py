@@ -4,8 +4,7 @@ import tempfile
 import zipfile
 import shutil
 from urllib import request
-from slddb.dbconfig import WEBAPI_URL
-
+from importlib import reload
 
 class TestWebAPI(unittest.TestCase):
     server_available=True
@@ -20,7 +19,7 @@ class TestWebAPI(unittest.TestCase):
 
         # try to download the module from website
         try:
-            res=request.urlopen(WEBAPI_URL+'download_api', timeout=500)
+            res=request.urlopen('http://127.0.0.1:5000/download_api', timeout=500)
         except:
             cls.server_available=False
             print("Server unreachable to download python api")
@@ -32,23 +31,26 @@ class TestWebAPI(unittest.TestCase):
                 cls.server_available=False
                 print("Server unreachable to download python api")
                 return
-
         # clear all modules of slddb
         for key in list(sys.modules.keys()):
             if key.startswith('slddb'):
                 del sys.modules[key]
 
-        # make sure the temporary directory is the first search path for new modules
-        #sys.path.insert(0, cls.path)
+        # try extracting the zip file
         with zipfile.ZipFile(os.path.join(cls.path, 'slddb.zip')) as zf:
             zf.extractall(cls.path)
 
+        # use the local api version to make sure test coverage works
         global api, slddb
         import slddb
-        from slddb import api, dbconfig, webapi
+        from slddb import api, webapi, dbconfig
+        # overwrite local server URL
+        cls._api_url=dbconfig.WEBAPI_URL
+        dbconfig.WEBAPI_URL='http://127.0.0.1:5000/'
+        webapi.WEBAPI_URL=dbconfig.WEBAPI_URL
         # set a temporary database file
-        slddb.DB_FILE=os.path.join(cls.path, 'slddb.db')
-        dbconfig.DB_FILE=slddb.DB_FILE
+        dbconfig.DB_FILE=os.path.join(cls.path, 'slddb.db')
+        slddb.DB_FILE=dbconfig.DB_FILE
         webapi.DB_FILE=slddb.DB_FILE
 
     @classmethod
@@ -174,3 +176,61 @@ class TestWebAPI(unittest.TestCase):
             self.assertEqual(mat.__class__.__name__, 'Material')
         webapi.WEBAPI_URL=dbconfig.WEBAPI_URL
 
+class TestConfigPaths(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        # create a temporary fold to download python api and store database file
+        cls.path=os.path.join(tempfile.gettempdir(), 'slddb_testconfig')
+        if os.path.exists(cls.path):
+            shutil.rmtree(cls.path) # cleanup possible earlier runs
+        os.makedirs(cls.path)
+
+        cls.old_environ=dict(os.environ)
+        if 'APPDATA' in os.environ:
+            del os.environ['APPDATA']
+        if 'XDG_CONFIG_HOME' in os.environ:
+            del os.environ['XDG_CONFIG_HOME']
+        if 'HOME' in os.environ:
+            del os.environ['HOME']
+
+    @classmethod
+    def tearDownClass(cls):
+        # delete temporary folder with all files and reset environment variables
+        shutil.rmtree(cls.path)
+        os.environ=cls.old_environ
+
+    def test_macpath(self):
+        # mac version of config path
+        os.environ['APPDATA']=self.path
+        from slddb import dbconfig
+        reload(dbconfig)
+        del os.environ['APPDATA']
+
+        res_path=os.path.join(self.path, 'slddb')
+
+        self.assertEqual(dbconfig.configpath, res_path)
+        self.assertTrue(os.path.exists(res_path))
+
+    def test_linux(self):
+        # mac version of config path
+        os.environ['XDG_CONFIG_HOME']=self.path
+        from slddb import dbconfig
+        reload(dbconfig)
+        del os.environ['XDG_CONFIG_HOME']
+
+        res_path=os.path.join(self.path, 'slddb')
+
+        self.assertEqual(dbconfig.configpath, res_path)
+        self.assertTrue(os.path.exists(res_path))
+
+    def test_rest(self):
+        # mac version of config path
+        os.environ['HOME']=self.path
+        from slddb import dbconfig
+        reload(dbconfig)
+        del os.environ['HOME']
+
+        res_path=os.path.join(self.path, '.config', 'slddb')
+
+        self.assertEqual(dbconfig.configpath, res_path)
+        self.assertTrue(os.path.exists(res_path))

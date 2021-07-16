@@ -81,16 +81,15 @@ class TestCreateDB(unittest.TestCase):
         self.db.update_fields()
 
         # call with inserted column
-        with self.assertRaises(ValueError):
-            dbconfig.DB_MATERIALS_FIELDS.insert(5, 'testadd2')
-            dbconfig.DB_MATERIALS_CONVERTERS.insert(5, dbconfig.DB_MATERIALS_CONVERTERS[-1])
-            dbconfig.DB_MATERIALS_FIELD_DEFAULTS.insert(5, dbconfig.DB_MATERIALS_FIELD_DEFAULTS[-1])
-            dbconfig.db_lookup=dict([(field, (i, converter, default))
-                for i, (field, converter, default) in
-                enumerate(zip(dbconfig.DB_MATERIALS_FIELDS,
-                              dbconfig.DB_MATERIALS_CONVERTERS,
-                              dbconfig.DB_MATERIALS_FIELD_DEFAULTS))])
-            self.db.update_fields()
+        dbconfig.DB_MATERIALS_FIELDS.insert(5, 'testadd2')
+        dbconfig.DB_MATERIALS_CONVERTERS.insert(5, dbconfig.DB_MATERIALS_CONVERTERS[-1])
+        dbconfig.DB_MATERIALS_FIELD_DEFAULTS.insert(5, dbconfig.DB_MATERIALS_FIELD_DEFAULTS[-1])
+        dbconfig.db_lookup=dict([(field, (i, converter, default))
+            for i, (field, converter, default) in
+            enumerate(zip(dbconfig.DB_MATERIALS_FIELDS,
+                          dbconfig.DB_MATERIALS_CONVERTERS,
+                          dbconfig.DB_MATERIALS_FIELD_DEFAULTS))])
+        self.db.update_fields()
 
         #reset database
         dbconfig.DB_MATERIALS_FIELDS.pop(-1)
@@ -106,3 +105,6 @@ class TestCreateDB(unittest.TestCase):
                           dbconfig.DB_MATERIALS_FIELD_DEFAULTS))])
         self.db=SLDDB(':memory:')
         self.db.create_database()
+
+    def test_backup(self):
+        self.db.backup('memory')

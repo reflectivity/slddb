@@ -1,7 +1,7 @@
 """
 Generate and query database table for chemical elements.
 """
-from numpy import array
+from numpy import array, nan, linspace
 from .dbconfig import DB_ELEMENTS_CONVERTERS, DB_ELEMENTS_FIELDS, \
     DB_ELEMENTS_NAME, DB_ISOTOPES_CONVERTERS, DB_ISOTOPES_FIELDS, \
     DB_ISOTOPES_NAME, DB_SLDATA_CONVERTERS, DB_SLDATA_FIELDS, DB_SLDATA_NAME
@@ -43,12 +43,18 @@ class Element():
         self.N=N
         self.name=qres[2]
         xid=qres[6]
-        self._xdata=self.get_sldata(xid, c)
+        if xid==-1:
+            self._xdata=array([linspace(0.01, 30.0, 10), linspace(0.01, 30.0, 10)*nan, linspace(0.01, 30.0, 10)*nan])
+        else:
+            self._xdata=self.get_sldata(xid, c)
 
         if N is None:
             self.mass=qres[3]
             nid=qres[5]
-            self.b=self.get_sldata(nid, c)[0]
+            if nid==-1:
+                self.b=nan
+            else:
+                self.b=self.get_sldata(nid, c)[0]
         else:
             c.execute("SELECT %s FROM %s WHERE %s = ? AND %s = ?"%(
                 ', '.join(DB_ISOTOPES_FIELDS),

@@ -96,7 +96,7 @@ class SLDDBWindow(QtWidgets.QMainWindow):
         self.ui.neutronSLDimag.setText("%.6f"%(1e6*material.rho_n.imag))
 
         try:
-            rhox=material.delta_of_E(float(self.ui.xrayEnergyEdit.currentText()))
+            rhox=material.rho_of_E(float(self.ui.xrayEnergyEdit.currentText()))
         except ValueError:
             self.ui.xraySLD.setText("")
             self.ui.xraySLDimag.setText("")

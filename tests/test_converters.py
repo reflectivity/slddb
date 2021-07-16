@@ -2,7 +2,7 @@ import unittest
 import json
 from datetime import datetime
 from slddb.converters import CType, CLimited, CArray, CFormula, CComplex, Converter, \
-    CDate, CSelect, CMultiSelect, CUrl
+    CDate, CSelect, CMultiSelect, CUrl, Cdoi
 from slddb.material import Formula
 from numpy import array, ndarray, testing
 
@@ -74,8 +74,9 @@ class TestConverter(unittest.TestCase):
 
     def test_formula(self):
         conv=CFormula()
-        start_formula=str(Formula('Fe2O3'))
-        self.assertEqual(start_formula, conv.revert(conv.convert(start_formula)))
+        start_formula=Formula('Fe2O3')
+        self.assertEqual(str(start_formula), conv.revert(conv.convert(str(start_formula))))
+        self.assertEqual(str(start_formula), conv.revert(conv.convert(start_formula)))
         with self.assertRaises(ValueError):
             conv.convert("z1o")
 
@@ -100,6 +101,23 @@ class TestConverter(unittest.TestCase):
             conv.convert("ssh://www.abc.de")
         with self.assertRaises(ValueError):
             conv.revert(b"abc")
+
+    def test_doi(self):
+        conv=Cdoi()
+        self.assertEqual("https://doi.org/10.1107/S2052520616017935",
+                         conv.revert(conv.convert("10.1107/S2052520616017935")))
+        self.assertEqual("https://doi.org/10.1107/S2052520616017935",
+                         conv.revert(conv.convert("https://doi.org/10.1107/S2052520616017935")))
+        self.assertEqual(conv.sql_type, "TEXT")
+
+        self.assertTrue(type(conv.convert("https://doi.org/10.1107/S2052520616017935")) is str)
+
+        with self.assertRaises(ValueError):
+            conv.convert("http://doi.org/10.1107/S2052520616017935")
+        with self.assertRaises(ValueError):
+            conv.convert("ftp://www.abc.de")
+        with self.assertRaises(ValueError):
+            conv.convert("https://www.abc.de")
 
     def test_date(self):
         conv=CDate()
@@ -233,4 +251,4 @@ class TestConverter(unittest.TestCase):
                      CMultiSelect(['abc', 'def', 'ghi']),
                      CDate(),
                      CUrl()]:
-            conv.html_input()%{'field': 'abc', 'value': 'def'}
+            conv.html_input('abc', 'def')

@@ -4,9 +4,9 @@ of x-ray and neutron SLDs for different applications.
 """
 
 import re
-from numpy import array
+from numpy import array, pi
 from collections import OrderedDict
-from .constants import u2g, r_e, muB, rho_of_M, Cu_kalpha
+from .constants import u2g, r_e, muB, rho_of_M, Cu_kalpha, E_to_lambda
 
 SUBSCRIPT_DIGITS="₀₁₂₃₄₅₆₇₈₉"
 
@@ -25,35 +25,85 @@ class Formula(list):
               r"\[[1-9][0-9]{0,2}\]")
 
     def __init__(self, string, sort=True):
-        self._do_sort=sort
-        self.HR_formula=string
-        list.__init__(self, [])
-        self.parse_string(string)
-        self.merge_same()
+        if isinstance(string, Formula):
+            list.__init__(self, string)
+            self._do_sort=string._do_sort
+            self.HR_formula=string.HR_formula
+        else:
+            self._do_sort=sort
+            self.HR_formula=string
+            list.__init__(self, [])
+            self.parse_string(string)
+            self.merge_same()
 
     def parse_string(self, string):
         # remove gaps and ignored characters
         string=string.replace(' ', '').replace('\t', '').replace('\n','')
         string=string.replace('{', '').replace('}', '').replace('_','').replace('$','')
 
-        # TODO: Implement groups of formulas like Fe(HO)3
-        items=self.parse_group(string)
-        self+=items
+        groups=self.split_groups(string)
+        for group, factor in groups:
+            try:
+                items=self.parse_group(group, case_sensitive=True)
+            except ValueError:
+                items=self.parse_group(group, case_sensitive=False)
+            items=[(i[0], i[1]*factor) for i in items]
+            self+=items
 
-    def parse_group(self, group):
+    def split_groups(self, string):
+        if not '(' in string:
+            return [(string, 1.0)]
         out=[]
-        mele=re.search(self.elements, group, flags=re.IGNORECASE)
-        miso=re.search(self.isotopes, group, flags=re.IGNORECASE)
+        start=string.index('(')
+        end=start
+        if start>0:
+            out.append((string[:start], 1.0))
+        while end<len(string):
+            end=start+string[start:].find(')')
+            next=end+1
+            if end<start:
+                raise ValueError('Brackets need to be closed')
+            while not (next==len(string) or string[next].isalpha() or string[next]=='('):
+                next+=1
+            block=string[start+1:end]
+            if '(' in block:
+                raise ValueError("Only one level of brackets is allowed")
+            number=string[end+1:next]
+            if number=='':
+                out.append((block, 1.0))
+            else:
+                out.append((block, float(number)))
+            if next==len(string):
+                break
+            if not '(' in string[next:]:
+                out.append((string[next:], 1.0))
+                break
+            else:
+                start=next+string[next:].index('(')
+                end=start
+                if start>next:
+                    out.append((string[next:start], 1.0))
+        return out
+
+
+    def parse_group(self, group, case_sensitive=True):
+        if case_sensitive:
+            flags=0
+        else:
+            flags=re.IGNORECASE
+        out=[]
+        mele=re.search(self.elements, group, flags=flags)
+        miso=re.search(self.isotopes, group, flags=flags)
         if miso is not None and miso.start()==mele.start():
             prev=miso
         else:
             prev=mele
         if prev is None or prev.start()!=0:
-            raise ValueError('Did not find any valid elemnt in string')
+            raise ValueError('Did not find any valid element in string')
         pos=prev.end()
         while pos<len(group):
-            mele=re.search(self.elements, group[pos:], flags=re.IGNORECASE)
-            miso=re.search(self.isotopes, group[pos:], flags=re.IGNORECASE)
+            mele=re.search(self.elements, group[pos:], flags=flags)
+            miso=re.search(self.isotopes, group[pos:], flags=flags)
             if miso is not None and miso.start()==mele.start():
                 next=miso
             else:
@@ -95,6 +145,13 @@ class Formula(list):
                 output+=element+str(number)
         return output
 
+    def __contains__(self, item):
+        # check if an element is in the formula
+        return item in [el[0] for el in self]
+
+    def index(self, item):
+        return [el[0] for el in self].index(item)
+
 class Material():
     """
     Units used:
@@ -108,13 +165,21 @@ class Material():
     M: kA/m = emu/cm³
     """
 
-    def __init__(self, elements, dens=None, fu_volume=None, rho_n=None, mu=0., xsld=None, xE=None):
+    def __init__(self, elements, dens=None, fu_volume=None, rho_n=None, mu=0., xsld=None, xE=None,
+                 fu_dens=None, M=None,
+                 ID=None):
         self.elements=elements
         # generate formula unit density using different priority of possible inputs
         if fu_volume is not None:
+            if dens is not None or fu_dens is not None:
+                raise ValueError("fu_volume can't be supplied together with a density value")
             self.fu_dens=1./fu_volume
         elif dens is not None:
+            if fu_dens is not None:
+                raise ValueError("dens and fu_dens can't be provided at the same time")
             self.fu_dens=dens/self.fu_mass/u2g*1e-24
+        elif fu_dens is not None:
+            self.fu_dens=fu_dens
         elif rho_n is not None:
             self.fu_dens=abs(rho_n/self.fu_b)*1e5
         elif xsld is not None and xE is not None:
@@ -122,7 +187,17 @@ class Material():
         else:
             raise ValueError(
                 "Need to provide means to calculate density, {dens, fu_volume, rho_n, xsld+xE}")
-        self.mu=mu
+        if M is not None:
+            if mu!=0.:
+                raise ValueError("M and mu can't be provided at the same time")
+            self.M=M
+        else:
+            self.mu=mu
+        self.ID=ID
+
+    @property
+    def fu_volume(self):
+        return 1./self.fu_dens
 
     @property
     def rho_n(self):
@@ -136,23 +211,57 @@ class Material():
     def M(self):
         return self.mu*muB*self.fu_dens
 
+    @M.setter
+    def M(self, value):
+        self.mu=value/self.fu_dens/muB
+
     def f_of_E(self, E=Cu_kalpha):
         f=0.
         for element, number in self.elements:
             f+=number*element.f_of_E(E)
         return f
 
-    def delta_of_E(self, E):
+    def rho_of_E(self, E):
         f=self.f_of_E(E)
         return f*r_e*self.fu_dens*1e-5 # Å^-1
 
-    def delta_vs_E(self):
-        # generate full energy range data
+    def delta_of_E(self, E):
+        rho=self.rho_of_E(E)
+        lamda=E_to_lambda/E
+        return lamda**2/2./pi*rho.real
+
+    def beta_of_E(self, E):
+        rho=self.rho_of_E(E)
+        lamda=E_to_lambda/E
+        return -lamda**2/2./pi*rho.imag
+
+    def mu_of_E(self, E):
+        rho=self.rho_of_E(E)
+        lamda=E_to_lambda/E
+        return -lamda*2.*rho.imag
+
+    def rho_vs_E(self):
+        # generate full energy range data for E,SLD
         E=self.elements[0][0].E
         for element, number in self.elements:
             E=E[(E>=element.E.min())&(E<=element.E.max())]
-        delta=array([self.delta_of_E(Ei) for Ei in E])
-        return E,delta
+        rho=array([self.rho_of_E(Ei) for Ei in E])
+        return E,rho
+
+    def delta_vs_E(self):
+        E,rho=self.rho_vs_E()
+        lamda=E_to_lambda/E
+        return E,lamda**2/2./pi*rho.real
+
+    def beta_vs_E(self):
+        E,rho=self.rho_vs_E()
+        lamda=E_to_lambda/E
+        return E,-lamda**2/2./pi*rho.imag
+
+    def mu_vs_E(self):
+        E,rho=self.rho_vs_E()
+        lamda=E_to_lambda/E
+        return E,-lamda*2.*rho.imag
 
     @property
     def dens(self):
@@ -204,5 +313,7 @@ class Material():
         output='Material('
         output+=str([(ei.symbol, num) for ei, num in self.elements])
         output+=', fu_volume=%s'%(1./self.fu_dens)
+        if self.ID:
+            output+=', ID=%i'%self.ID
         output+=')'
         return output
