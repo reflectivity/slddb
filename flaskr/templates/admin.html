@@ -8,9 +8,15 @@
   <br /><br />
   <form method="post">
   Add new user: <br />
-    Name: <input type="text" name="user_name"> <br />
-    Email:<input type="email" name="user_email"> <br />
-    <input type="submit" name="new_user">
+    <table><tr>
+        <td style="text-align: right">Name:</td>
+        <td><input type="text" name="user_name" style="border: solid 1px; margin: 2pt; box-shadow: none; background-color: #fff;"> </td>
+      </tr><tr>
+        <td style="text-align: right">Email:</td>
+        <td><input type="email" name="user_email" style="border: solid 1px; margin: 2pt; width: 200pt;"></td>
+      </tr><tr>
+        <td colspan="2" style="text-align: center"><input type="submit" name="new_user"></td>
+      </tr></table>
   <br /><br />
   <table class="withborder">
     <tr><th>ID</th><th>User Name</th><th>Email</th><th>is Admin?</th>

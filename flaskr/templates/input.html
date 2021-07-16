@@ -3,15 +3,8 @@
 {% block nav_input_page %}active{% endblock %}
 
 {% block content %}
-    <center>
-        {% if comment %}
-        <p style="color: #f00;">
-            {{comment}}
-        </p>
-        {% endif %}
-
-
-      <div style="width: 30%; float:left; text-align: justify; margin: 20pt;"><div style="height: 60pt;"></div>
+    <table style="width: 100%; height: 100%;"><tr>
+      <td style="width: 35%; text-align: justify; font-size: 125%; vertical-align: top; padding: 150pt 20pt 20pt 20pt;">
           Here you can enter new materials into the database.
           Each material will get its unique ID and if relevant will be reviewed by ORSO and then validated.
           Please provide as much information as possible, especially suitable references to allow us
@@ -20,24 +13,28 @@
           <small><sup>*</sup>  Is a mendatory field for any material.<br />
           <sup>**</sup> One way to determine density is required. This can be either <i>density</i>, <i>FU_volume</i>,
           <i>SLD_n</i> or <i>SLD_x</i> with energy <i>E_x</i>.</small>
-      </div>
-      <div style="width: 30%; float:right;text-align: left;"><div style="height: 100pt;"></div>
+      </td>
+
+    <td style="width: 420pt; align: center; vertical-align: top;">
+    <form method="POST">
+        <table class="withborder" style="width: 400pt; margin-bottom: 10pt;">
+          <tr><td style="border: none; text-align: right;">Your email (hidden)</td>
+              <td style="border: none;">{{ get_input("created_by")|safe }}</td></tr>
+        </table>
+      <table class="noborder" style="width: 400pt;">
+          <tr><th>Compound field:</th><th>Value:</th></tr>
+    {%for field in fields%}
+          <tr><td style="text-align: right;">{{field}} {{get_unit(field)}}</td>
+              <td>{{ get_input(field)|safe }}</td></tr>
+    {%endfor%}
+        <tr><td colspan="2" style="border: none;"><center><input type="submit" name="material"></center></td> </tr>
+      </table>
+    </form></td>
+
+      <td style="text-align: left; vertical-align: top; padding: 150pt 20pt 20pt 20pt;">
       <form method="POST" enctype="multipart/form-data">
           Upload CIF file<br />
           <input type="file" accept=".cif" id="cif_file" name="cif_file" onchange="form.submit()">
-      </form></div>
-    <div style="width: 40%;">
-    <form method="POST">
-      <table class="withborder" style="width: 75%;">
-          <tr><td>Your email (hidden)</td>
-              <td>{{ get_input("created_by")|safe }}</td></tr>
-          <tr><td>Compound field:</td><td>Value:</td></tr>
-    {%for field in fields%}
-          <tr><td>{{field}} {{get_unit(field)}}</td><td>{{ get_input(field)|safe }}</td></tr>
-    {%endfor%}
-        <tr><td colspan="2"><center><input type="submit" name="material"></center></td> </tr>
-      </table>
-    </form></div>
-    </center>
-
+      </form></td>
+    </tr></table>
 {% endblock %}

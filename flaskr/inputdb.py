@@ -1,5 +1,5 @@
 import tempfile, os
-from flask import request, render_template
+from flask import request, render_template, flash
 from werkzeug.utils import secure_filename
 
 from .querydb import search_db
@@ -61,8 +61,8 @@ def input_material(args):
         return fill_input(field, args)
 
     if args['name']=='' or args['formula' ]=='':
-        return render_template('input.html', fields=input_fields, get_input=get_input_args, get_unit=get_unit,
-                               comment="You have to supply a name and Formula!")
+        flash("You have to supply a name and Formula!")
+        return render_template('input.html', fields=input_fields, get_input=get_input_args, get_unit=get_unit)
 
 
     useargs=dict(args.items())
@@ -80,7 +80,7 @@ def input_material(args):
     try:
         db.add_material(name, formula, **useargs)
     except Exception as e:
+        flash("Error when trying to insert data:\n"+repr(e))
         return render_template('input.html', fields=input_fields,
-                               get_input=get_input_args, get_unit=get_unit,
-                               comment="Error when trying to insert data:\n"+repr(e))
+                               get_input=get_input_args, get_unit=get_unit)
     return search_db(useargs)

@@ -29,7 +29,7 @@ def calc_api(args):
             out['xray_E']=E.tolist()
             out['xray_delta_real']=delta.real.tolist()
             out['xray_delta_imag']=delta.imag.tolist()
-            return json.dumps(out)
+            return json.dumps(out, indent='    ')
 
 def select_api(args):
     db=SLDDB(DB_FILE)
@@ -107,4 +107,9 @@ def search_api(args):
     db=SLDDB(DB_FILE)
     res=db.search_material(serializable=True, limit=10000, **query)
 
-    return json.dumps(res)
+    # remove hidden database fields
+    for ri in res:
+        for field in DB_MATERIALS_HIDDEN_DATA:
+            del ri[field]
+
+    return json.dumps(res, indent='    ')

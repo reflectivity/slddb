@@ -1,3 +1,5 @@
+import sys
+
 from flask import render_template
 
 from slddb.constants import Cu_kalpha, Mo_kalpha, r_e
@@ -64,6 +66,8 @@ def calculate_selection(ID):
 def calculate_user(formula, density, mu, density_choice, mu_choice):
     db=SLDDB(DB_FILE)
     kwrds={}
+    if density==0:
+        return render_template('sldcalc.html', error="Density can not be zero!")
     if density_choice=='density':
         kwrds['dens']=density
     elif density_choice=='volume':
@@ -80,7 +84,7 @@ def calculate_user(formula, density, mu, density_choice, mu_choice):
     try:
         m=Material([(db.elements.get_element(element), amount) for element, amount in formula], **kwrds)
     except Exception as e:
-        return render_template('sldcalc.html', error=repr(e)+'<br/>'+str(e))
+        return render_template('sldcalc.html', error=repr(e))
     else:
         E, rho_x=m.rho_vs_E()
         _, delta=m.delta_vs_E()

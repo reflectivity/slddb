@@ -136,7 +136,7 @@ def calculate_sld():
             f=Formula(request.args['formula'], sort=False)
         except Exception as e:
             return render_template('sldcalc.html',
-                                   error=repr(e)+'<br >'+"Raised when tried to parse formula = %s"%request.args['formula'])
+                                   error=repr(e)+'<br >'+"Raised when tried to parse formula = '%s'"%request.args['formula'])
         else:
             return calculate_user(f, float(request.args['density'] or 1.0), float(request.args['mu'] or 0),
                                   request.args['densinput'], request.args['magninput'])
@@ -151,7 +151,8 @@ def api_query():
     elif 'sldcalc' in request.args:
         return calc_api(request.args)
     elif 'get_fields' in request.args:
-        return json.dumps([field for field in DB_MATERIALS_FIELDS if field not in DB_MATERIALS_HIDDEN_DATA])
+        return json.dumps([field for field in DB_MATERIALS_FIELDS if field not in DB_MATERIALS_HIDDEN_DATA],
+                          indent='    ')
     else:
         return search_api(request.args)
 
@@ -162,7 +163,7 @@ def api_download():
     mem_json.write(record.encode('utf-8'))
     mem_json.seek(0)
     result=send_file(mem_json, mimetype='application/json', as_attachment=True,
-                     attachment_filename=f'orso_slddb_record_{request.args["ID"]}.json', conditional=True)
+                     attachment_filename=f'orso_slddb_{request.args.get("ID", "query")}.json', conditional=True)
     return result
 
 @app.route('/download_db')

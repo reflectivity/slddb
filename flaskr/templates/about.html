@@ -4,6 +4,7 @@
 
 {% block content %}
 <center>
+    <div style="width: 60%; font-size: 125%; text-align: justify; ">
     <p>
         This is a database for materials for scattering length density (SLD)
         calculations for neutron and x-ray reflectometry and small angle scattering.
@@ -12,30 +13,39 @@
         <a href="https://www.reflectometry.org/">ORSO Website</a>
     </p>
     <p>
-        In addition to this website manual search we provide a simple API for
+        In addition to this website manual search we provide a simple API
         that can be called by other software and provides data as JSON text.
     </p>
-    <p>
-        Usage:<br/><br/>
+    <div style="background-color: #ddd; padding: 12pt; box-shadow: 3pt 3pt #aaa;">
+        <h4 style="margin: 0pt;">Application Programmers Interface (API) Usage:</h4><br />
 
-        Manual calculation of SLD form formula and density values:<br/>
-        <i>https://{this website}/api?formula={}&density={}&sldcalc=true</i>
+        Manual calculation of SLD from formula and density values:<br/>
+        <i>{{ url_for('api_query', _external=True, formula="XXX", density="YYY", sldcald="true") }}</i>
         <br/><br/>
 
         Retrieve a list of fields that can be used for database queries.<br/>
-        <i>https://{this website}/api?get_fields=True</i>
+        <i>{{ url_for('api_query', _external=True, get_fields=True) }}</i>
         <br/><br/>
 
         Search database for material using arbitrary fields.<br/>
-        <i>https://{this website}/api?field1={}&field2={}</i>
+        <i>{{ url_for('api_query', _external=True, field1="XXX", field2="YYY") }}</i>
         <br/><br/>
 
         Calculation of SLD form database material.<br/>
-        <i>https://{this website}/api?ID={}</i>:
+        <i>{{ url_for('api_query', _external=True, ID="XXX", xray_unit="edens") }}</i><br /><br />
+        Units for x-ray results are:
+            <ol type="1">
+                <li><i>edens</i>=electron density (rₑ/Å³)</li><br />
+                <li><i>sld</i>=scattering length density (1/Å²)</li><br />
+                <li><i>n_db</i>=optical constants (δ/β) for refractive index (n=1-δ+iβ) (1)</li>
+            </ol>
         <br/><br/>
+        The resulting data is a dictionary with the SLD information and some further materials parameters.
+        Units for the given values are provided unter the <i>"units"</i> keyword.
+    </div>
 
-        <a href="{{ url_for('download_api') }}">Download Python API</a>
-    </p>
-
+        <br/><br/>
+        <a href="{{ url_for('download_api') }}" style="text-shadow: 1pt 1pt #888;">Download Python library that implements the API.</a>
+    </div>
 </center>
 {% endblock %}

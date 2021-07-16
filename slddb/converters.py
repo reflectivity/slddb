@@ -41,7 +41,7 @@ class Converter():
 
     def html_input(self, field, value):
         # return a string containing the input key for html entry template
-        return f'<input name="{field}" id="compound {field}" value="{value}">'
+        return f'<input type="text" name="{field}" id="compound {field}" value="{value}">'
 
 
 class CType(Converter):
@@ -96,7 +96,7 @@ class CDate(Converter):
         return db_data
 
     def html_input(self, field, value):
-        return f'<input name="{field}" id="compound {field}" value="{value}"'\
+        return f'<input type="text" name="{field}" id="compound {field}" value="{value}"'\
                ' placeholder="date: {year}-{month}-{day} {hours}:{minutes}:{seconds}"/>'
 
 class CFormula(Converter):
@@ -111,7 +111,7 @@ class CFormula(Converter):
         return db_data
 
     def html_input(self, field, value):
-        return f'<input name="{field}" id="compound {field}" value="{value}"'\
+        return f'<input type="text" name="{field}" id="compound {field}" value="{value}"'\
                ' placeholder="Fe2O3 / H[2]2O / H2(C2H4)4"/>'
 
 class ValidatedString(CType):
@@ -128,7 +128,7 @@ class ValidatedString(CType):
             raise ValueError("Not a valid %s: %s"%(self.__class__.__name__[1:], data))
 
     def html_input(self, field, value):
-        return f'<input name="{field}" id="compound {field}" value="{value}"'\
+        return f'<input type="text" name="{field}" id="compound {field}" value="{value}"'\
                ' placeholder="'+self.placeholder+'"/>'
 
 class CUrl(ValidatedString):
@@ -248,7 +248,7 @@ class CLimited(CType):
                 self._low_lim, self._up_lim))
 
     def html_input(self, field, value):
-        return f'<input name="{field}" id="compound {field}" value="{value}"'\
+        return f'<input type="text" name="{field}" id="compound {field}" value="{value}"'\
                f' placeholder="{self._low_lim}<value<{self._up_lim}"/>'
 
 class CComplex(CArray):
@@ -275,7 +275,7 @@ class CComplex(CArray):
             return str(self.revert(db_data))
 
     def html_input(self, field, value):
-        return f'<input name="{field}" id="compound {field}" value="{value}"'\
+        return f'<input type="text" name="{field}" id="compound {field}" value="{value}"'\
                ' placeholder="complex: (real)+(imag)j"/>'
 
 
