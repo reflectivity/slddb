@@ -155,6 +155,16 @@ def api_query():
     else:
         return search_api(request.args)
 
+@app.route('/download_api', methods=['GET'])
+def api_download():
+    record=api_query()
+    mem_json=BytesIO()
+    mem_json.write(record.encode('utf-8'))
+    mem_json.seek(0)
+    result=send_file(mem_json, mimetype='application/json', as_attachment=True,
+                     attachment_filename=f'orso_slddb_record_{request.args["ID"]}.json', conditional=True)
+    return result
+
 @app.route('/download_db')
 def download_database():
     result=send_file(DB_FILE, mimetype='application/x-sqlite3', as_attachment=True,

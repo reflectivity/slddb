@@ -213,12 +213,15 @@
         if (selection == 'electron') {
             document.getElementById("cu_entry_real").innerHTML = '{{"%.6f"%(1e5/r_e*material.rho_of_E(Cu_kalpha).real)}}';
             document.getElementById("cu_entry_imag").innerHTML = '{{"%.6f"%(1e5/r_e*material.rho_of_E(Cu_kalpha).imag)}}i';
+            document.getElementById("download_link").href = '{{url_for('api_download', ID=material.ID, xray_unit='edens')|safe}}';
             } else if (selection == 'sld') {
             document.getElementById("cu_entry_real").innerHTML = '{{"%.6f"%(1e6*material.rho_of_E(Cu_kalpha).real)}}';
             document.getElementById("cu_entry_imag").innerHTML = '{{"%.6f"%(1e6*material.rho_of_E(Cu_kalpha).imag)}}i';
+            document.getElementById("download_link").href = '{{url_for('api_download', ID=material.ID, xray_unit='sld')|safe}}';
             } else if (selection == 'n_db') {
             document.getElementById("cu_entry_real").innerHTML = '{{"%.4e"%(material.delta_of_E(Cu_kalpha))}}';
             document.getElementById("cu_entry_imag").innerHTML = '{{"%.4e"%(material.beta_of_E(Cu_kalpha))}}';
+            document.getElementById("download_link").href = '{{url_for('api_download', ID=material.ID, xray_unit='n_db')|safe}}';
             }
         if (can_switch) {
             can_switch=false;
@@ -288,7 +291,7 @@
 
 
   {% if material %}
-  <center><p>
+  <center>
   <h2>Result of SLD calculation:</h2>
     <table class="withborder"{% if validated %} style="background-color: #dfd"{% endif %}{% if invalid %} style="background-color: #fdd"{% endif %}>
         {% if material.ID %}
@@ -359,7 +362,8 @@
         <tr><td colspan="4">This entry was removed by ORSO because it was invalid<br />({{ invalid }} by {{ invalid_by }})</td></tr>
         {% endif %}
     </table>
-  </p></center>
+  <br /><a id="download_link" href="{{url_for('api_download', ID=material.ID, xray_unit='edens')|safe}}">Download full record as JSON</a>
+  </center>
   {% endif %}
 
   <center>

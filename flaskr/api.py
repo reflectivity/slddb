@@ -49,6 +49,8 @@ def select_api(args):
             res[0]['invalid'], res[0]['invalid_by'])
     out['ID']=int(args['ID'])
     out['ORSO_validated']=res[0]['validated'] is not None
+    out['reference']=res[0].get('reference', '')
+    out['doi']=res[0].get('doi', '')
     out['name']=res[0]['name']
     out['formula']=str(material.formula)
     out['density']=material.dens
