@@ -3,7 +3,6 @@ body, html{
     width: 100%;
     margin: 0px;
     font-size: 16pt;
-    font-size: 16pt;
     line-height: 1.3;
     }
 .content{
@@ -17,6 +16,17 @@ table.main {
     height: 100%;
     table-layout: fixed;
     border: none;
+}
+
+@media only screen and (max-width: 1050pt) {
+    body, html{
+    font-size: 15pt;
+    }
+}
+@media only screen and (max-width: 1000pt) {
+    body, html{
+    font-size: 14pt;
+    }
 }
 
 input, select, button {
@@ -42,6 +52,20 @@ td.sides {
 }
 td.center {
     background-color: #fafafa;
+}
+
+img.top_logo {
+      display: none;
+}
+
+@media only screen and (max-width: 950pt) {
+    td.sides {
+      display: none;
+    }
+
+    img.top_logo {
+          display: block;
+    }
 }
 
 a {
@@ -147,6 +171,26 @@ li a:hover {
   text-decoration: none;
   background-color: #555;
   color: white;
+}
+
+.desktop_scroll {
+    overflow: auto;
+}
+
+@media only screen and (max-width: 730pt) {
+    li, li.login, li.about {
+        float: none;
+    }
+    li.login, li.about {
+        float: none;
+        display: none;
+    }
+    .hide_mobile {
+        display: none;
+    }
+    .desktop_scroll {
+        overflow: visible;
+    }
 }
 
 /* special buttons to be aware of */

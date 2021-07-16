@@ -5,12 +5,15 @@
 <section class="content">
   <header>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     {% block header %}{% endblock %}
   </header>
       <table class="main">
         <tr style="height: 100pt;">
-          <td class="sides"><img src="https://github.com/reflectivity/logo/raw/master/aglavic/ORSO_Logo_clean.png" width="200px"></td>
-          <td style="background-color: #fafafa"><center><h1>SLD Database</h1>{{ slddb_version }}</center>
+          <td class="sides"><img src="https://github.com/reflectivity/logo/raw/master/aglavic/ORSO_Logo_clean.png" width="200pt"></td>
+          <td style="background-color: #fafafa">
+              <img src="https://github.com/reflectivity/logo/raw/master/aglavic/ORSO_Logo_clean.png" width="150pt" class="top_logo" style="float: left; margin: 10pt;">
+              <center><h1 style="margin: 30pt 0pt 0pt 0pt;">SLD Database</h1>{{ slddb_version }}</center>
           <br/>
             <ul>
               <li class="{% block nav_start_page %}{% endblock %}"><a href="{{ url_for('start_page') }}">Query Database</a></li>
@@ -29,7 +32,7 @@
           </td>
           <td class="sides"></td>
         </tr>
-          <tr><td></td><td style="vertical-align: text-top;" class="center">
+          <tr><td class="sides"></td><td style="vertical-align: text-top;" class="center">
             <div style="width: 100%; height: 100%; overflow: auto;">
    {% block content %} {% endblock %}
             </div>
@@ -50,8 +53,9 @@
         </td><td class="sides"></td></tr>
           {% endif %}
         {% endwith %}
-        <tr style="height: 12pt;"><td></td><td style="background-color: #ddd; text-align: center;">
-            Open Reflectometry Standards Organization scattering length density database. Written by <a href="mailto:artur.glavic@psi.ch">Artur Glavic</a> from Paul Scherrer Institut (PSI).</td><td></td></tr>
+        <tr style="height: 12pt;" class="hide_mobile"><td class="sides"></td><td style="background-color: #ddd; text-align: center;">
+            Open Reflectometry Standards Organization scattering length density database. Written by <a href="mailto:artur.glavic@psi.ch">Artur Glavic</a> from Paul Scherrer Institut (PSI).</td>
+            <td class="sides"></td></tr>
       </table>
 </section>
 </html>

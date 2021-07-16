@@ -4,7 +4,7 @@
 
 {% block content %}
     <table style="width: 100%; height: 100%;"><tr>
-      <td style="width: 35%; text-align: justify; font-size: 125%; vertical-align: top; padding: 150pt 20pt 20pt 20pt;">
+      <td class="hide_mobile" style="width: 35%; text-align: justify; font-size: 125%; vertical-align: top; padding: 150pt 20pt 20pt 20pt;">
           Here you can enter new materials into the database.
           Each material will get its unique ID and if relevant will be reviewed by ORSO and then validated.
           Please provide as much information as possible, especially suitable references to allow us
@@ -31,7 +31,7 @@
       </table>
     </form></td>
 
-      <td style="text-align: left; vertical-align: top; padding: 150pt 20pt 20pt 20pt;">
+      <td class="hide_mobile" style="text-align: left; vertical-align: top; padding: 150pt 20pt 20pt 20pt;">
       <form method="POST" enctype="multipart/form-data">
           Upload CIF file<br />
           <input type="file" accept=".cif" id="cif_file" name="cif_file" onchange="form.submit()">
