@@ -62,6 +62,13 @@ table.withborder {
   font-family: 'Times New Roman', serif;
 }
 
+table.withborder thead th {
+    position: sticky;
+    top: 0;
+    background-color: #eee;
+    z-index: 1;
+}
+
 table.withborder td,
 table.withborder th {
       border: 1px solid black;
