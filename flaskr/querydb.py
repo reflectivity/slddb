@@ -10,7 +10,7 @@ advanced_fields=['physical_state', 'description','reference', 'CAS_No', 'tempera
 def fill_input(field, args):
     conv=db_lookup[field][1]
     if field in args:
-        if conv.__class__.__name__ == 'CMultiSelect':
+        if conv.html_list:
             value=args.getlist(field)
         else:
             value=args[field]

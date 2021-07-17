@@ -13,7 +13,7 @@ input_fields=[field for field in DB_MATERIALS_FIELDS[1:]
 def fill_input(field, args):
     conv=db_lookup[field][1]
     if field in args:
-        if conv.__class__.__name__ == 'CMultiSelect':
+        if conv.html_list:
             value=args.getlist(field)
         else:
             value=args[field]
@@ -73,7 +73,7 @@ def input_material(args):
     del(useargs['formula'])
 
     for key, value in list(useargs.items()):
-        if db_lookup[key][1].__class__.__name__ == 'CMultiSelect':
+        if db_lookup[key][1].html_list:
             useargs[key]=request.form.getlist(key)
         if value == '':
             del(useargs[key])
