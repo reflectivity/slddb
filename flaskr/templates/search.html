@@ -45,12 +45,15 @@
   {% if query_result %}
   <form method="post" action="{{ url_for('select_material', _anchor='results_header') }}"><center>
     <table class="withborder">
+      <thead>
       <tr>
         <th></th>{%for name in flt_fields_names%}<th>{{ name.replace("_", " ") }}</th>{%endfor%}
         {% if orso_user %}
           <th colspan="2">ORSO action</th>{%for name in hidden_fields_names%}<th>{{ name.replace("_", " ") }}</th>{%endfor%}
         {% endif %}
       </tr>
+      </thead>
+      <tbody>
       {%for row in query_result%}
         <tr style="background-color: {{row['color']}}">
           <td><button type="submit" name="ID" id="ID" value="{{row['ID']}}">select</button></td>
@@ -78,6 +81,7 @@
           {% endif %}
         </tr>
       {%endfor%}
+      </tbody>
     </table>
   </center></form>
   {% endif %}</div>
