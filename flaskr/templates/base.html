@@ -9,11 +9,11 @@
     {% block header %}{% endblock %}
   </header>
       <table class="main">
-        <tr style="height: 100pt;">
-          <td class="sides"><img src="https://github.com/reflectivity/logo/raw/master/aglavic/ORSO_Logo_clean.png" width="200pt"></td>
+        <tr style="height: 6em;">
+          <td class="sides"><img src="https://github.com/reflectivity/logo/raw/master/aglavic/ORSO_Logo_clean.png" style="width: 11em"></td>
           <td style="background-color: #fafafa">
-              <img src="https://github.com/reflectivity/logo/raw/master/aglavic/ORSO_Logo_clean.png" width="150pt" class="top_logo" style="float: left; margin: 10pt;">
-              <center><h1 style="margin: 30pt 0pt 0pt 0pt;">SLD Database</h1>{{ slddb_version }}</center>
+              <img src="https://github.com/reflectivity/logo/raw/master/aglavic/ORSO_Logo_clean.png" class="top_logo" style="width: 8em; float: left; margin: 10px;">
+              <center><h1 style="margin: 1.5em 0pt 0pt 0px;">SLD Database</h1>{{ slddb_version }}</center>
           <br/>
             <ul>
               <li class="{% block nav_start_page %}{% endblock %}"><a href="{{ url_for('start_page') }}">Query Database</a></li>
@@ -39,7 +39,7 @@
       </td><td class="sides"></td></tr>
         {% with messages = get_flashed_messages() %}
           {% if messages or error %}
-        <tr style="height: 2em; margin: 8pt;"><td class="sides"></td><td class="error">
+        <tr style="height: 2em; margin: 8px;"><td class="sides"></td><td class="error">
             <center>
             <ul class="error">
             {% for message in messages %}
@@ -53,7 +53,7 @@
         </td><td class="sides"></td></tr>
           {% endif %}
         {% endwith %}
-        <tr style="height: 12pt;" class="hide_mobile"><td class="sides"></td><td style="background-color: #ddd; text-align: center;">
+        <tr style="height: 12px;" class="hide_mobile"><td class="sides"></td><td style="background-color: #ddd; text-align: center;">
             Open Reflectometry Standards Organization scattering length density database. Written by <a href="mailto:artur.glavic@psi.ch">Artur Glavic</a> from Paul Scherrer Institut (PSI).</td>
             <td class="sides"></td></tr>
       </table>

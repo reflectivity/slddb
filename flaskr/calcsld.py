@@ -32,7 +32,7 @@ def get_graph(E, real, imag, name='Iron'):
     fig.tight_layout()
     # Embed the result in the html output.
     data = base64.b64encode(buf.getbuffer()).decode("ascii")
-    return f"<img src='data:image/png;base64,{data}'/>"
+    return f'<img style="width: 40em; max-width: 100%;" src="data:image/png;base64,{data}" />'
 
 def calculate_selection(ID):
     db=SLDDB(DB_FILE)

@@ -4,7 +4,7 @@
 
 {% block content %}
     <table style="width: 100%; height: 100%;"><tr>
-      <td class="hide_mobile" style="width: 35%; text-align: justify; font-size: 125%; vertical-align: top; padding: 150pt 20pt 20pt 20pt;">
+      <td class="hide_mobile" style="width: 35%; min-width: 13em; font-size: 115%; text-align: justify; vertical-align: top; padding: 10% 20pt 20pt 20px;">
           Here you can enter new materials into the database.
           Each material will get its unique ID and if relevant will be reviewed by ORSO and then validated.
           Please provide as much information as possible, especially suitable references to allow us
@@ -15,13 +15,13 @@
           <i>SLD_n</i> or <i>SLD_x</i> with energy <i>E_x</i>.</small>
       </td>
 
-    <td style="width: 420pt; align: center; vertical-align: top;">
-    <form method="POST">
-        <table class="withborder" style="width: 400pt; margin-bottom: 10pt;">
+    <td style="width: 22em; align: center; vertical-align: top;">
+    <form method="POST"><center>
+        <table class="withborder" style="width: 22em; margin-bottom: 10px;">
           <tr><td style="border: none; text-align: right;">Your email (hidden)</td>
               <td style="border: none;">{{ get_input("created_by")|safe }}</td></tr>
         </table>
-      <table class="noborder" style="width: 400pt;">
+      <table class="noborder" style="width: 22em;">
           <tr><th>Compound field:</th><th>Value:</th></tr>
     {%for field in fields%}
           <tr><td style="text-align: right;">{{field}} {{get_unit(field)}}</td>
@@ -29,12 +29,13 @@
     {%endfor%}
         <tr><td colspan="2" style="border: none;"><center><input type="submit" name="material"></center></td> </tr>
       </table>
-    </form></td>
+    </center></form></td>
 
-      <td class="hide_mobile" style="text-align: left; vertical-align: top; padding: 150pt 20pt 20pt 20pt;">
+      <td class="hide_mobile" style="width: 35%; text-align: left; vertical-align: top; padding: 150pt 0pt 0pt 20px;">
       <form method="POST" enctype="multipart/form-data">
           Upload CIF file<br />
-          <input type="file" accept=".cif" id="cif_file" name="cif_file" onchange="form.submit()">
+          <input type="file" accept=".cif" id="cif_file" name="cif_file" onchange="form.submit()" style="display: none;">
+          <input type="button" value="Choose File" onclick="document.getElementById('cif_file').click();" />
       </form></td>
     </tr></table>
 {% endblock %}
