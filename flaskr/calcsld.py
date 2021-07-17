@@ -2,7 +2,7 @@ import sys
 
 from flask import render_template
 
-from slddb.constants import Cu_kalpha, Mo_kalpha, r_e
+from slddb.constants import Cu_kalpha, Mo_kalpha, r_e, r_e_angstrom
 from slddb import SLDDB, DB_FILE
 from slddb.material import Material, Formula
 
@@ -15,8 +15,8 @@ def get_graph(E, real, imag, name='Iron'):
     # Generate the figure **without using pyplot**.
     fig = Figure()
     ax = fig.subplots()
-    ax.plot(E,  1e5/r_e*real, label='Re')
-    ax.plot(E, -1e5/r_e*imag, label='-Im')
+    ax.plot(E,  real/r_e_angstrom, label='Re')
+    ax.plot(E, -imag/r_e_angstrom, label='-Im')
     ax.legend()
     ax.set_xscale('log')
     ax.set_xlabel('E (keV)')
