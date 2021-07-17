@@ -276,13 +276,13 @@
         <tr><th>Field</th><th>value for calculation</th></tr>
         <tr><td style="text-align: right;">Formula</td><td><input type="text" name="formula" id="compound formula"
                                        value="{{ request.args['formula'] or formula }}" placeholder="Fe2O3 / H[2]2O / H2(C2H4)4"></td></tr>
-        <tr><td style="text-align: right;"><select id="densinput" name="densinput" style="width: 150pt;">
+        <tr><td style="text-align: right;"><select id="densinput" name="densinput" style="width: 150px;">
           <option value="density">Density (g/cm³)</option>
           <option value="FUdens" {% if request.args['densinput']=='FUdens' %} selected {% endif %}>Density (FU/Å³)</option>
           <option value="FUdnm" {% if request.args['densinput']=='FUdnm' %} selected {% endif %}>Density (FU/nm³)</option>
           <option value="volume" {% if request.args['densinput']=='volume' %} selected {% endif %}>FU Volume (Å³)</option>
         </select></td><td><input type='number' step="0.00001" name="density" id="compound density" value="{{ request.args['density'] or density }}"></td></tr>
-        <tr><td style="text-align: right;"><select id="magninput" name="magninput" style="width: 150pt;">
+        <tr><td style="text-align: right;"><select id="magninput" name="magninput" style="width: 150px;">
             <option value="muB">Magnetisation (µB/FU)</option>
             <option value="magn" {% if request.args['magninput']=='magn' %} selected {% endif %}>Magnetisation (kA/m=emu/cm³)</option>
             </select></td>
@@ -299,17 +299,17 @@
 
   {% if material %}
   <center>
-  <h2 style="margin: 15pt 0pt 5pt;" id="results_header">Result of SLD calculation:</h2>
+  <h2 style="margin: 15px 0px 5px;" id="results_header">Result of SLD calculation:</h2>
     <table class="noborder"{% if validated %} style="background-color: #dfd"{% endif %}{% if invalid %} style="background-color: #fdd"{% endif %}>
         {% if material.ID %}
         <tr><th>Compound (ORSO ID={{material.ID}})</th><td colspan=2>{{material_name}}</td>
-            <th><a href="{{url_for('calculate_sld', ID=material.ID, _anchor='results_header')|safe}}" target="_blank">direct link</a></th></tr>
+            <th class="hide_mobile"><a href="{{url_for('calculate_sld', ID=material.ID, _anchor='results_header')|safe}}" target="_blank">direct link</a></th></tr>
         {% else %}
         <tr><th>Compound</th><th colspan=2>{{material_name}}</th>
             <th><a href="{{url_for('calculate_sld', formula=str(material.formula), density=material.dens, mu=material.mu, densinput='density', magninput='muB', _anchor='results_header')|safe}}" target="_blank">direct link</a></th></tr>
         {% endif %}
         <tr><td style="text-align:right;">Description</td><td colspan=2 style="word-wrap;">{{material_description}}</td>
-            <td rowspan="3"><center><button type="button" onclick="copy_all()">Copy to<br />Clipboard</button></center></td></tr>
+            <td rowspan="3" class="hide_mobile"><center><button type="button" onclick="copy_all()">Copy to<br />Clipboard</button></center></td></tr>
         <tr><td style="text-align:right;">Chemical Formula</td><td colspan=2>{{material}}</td></tr>
         <tr><td style="text-align:right;"><select id="densresult" name="densresult" onchange="switch_density()">
           <option value="density">Density (g/cm³)</option>
@@ -320,48 +320,48 @@
         <tr><td style="text-align:right;">Neutron nuclear SLD (10⁻⁶ Å⁻²)</td>
           <td id="neutron_entry_real">{{"%.6f"%(1e6*material.rho_n.real)}}</td>
           <td id="neutron_entry_imag">{{"%.6f"%(1e6*material.rho_n.imag)}}i</td>
-          <td><button type="button" onclick="copy_NSLD()">as Complex</button></td></tr>
+          <td class="hide_mobile"><button type="button" onclick="copy_NSLD()">as Complex</button></td></tr>
         {% if deuterated %}
         <tr><td style="text-align:right;">Material Deuteration</td><td colspan="2">
-            <input type="range" min="0" max="100" value="0" class="slider" id="deuteration_amount" step="1" onchange="deuterateSlider(this.value)" style="width: 100pt;">
-            <input type="number" min="0" max="100" value="0" class="slider_value" id="deuteration_amount_value" onchange="deuterateValue(this.value)" style="width: 30pt;">%
-        </td><td></td></tr>
+            <input type="range" min="0" max="100" value="0" class="slider" id="deuteration_amount" step="1" onchange="deuterateSlider(this.value)" style="width: 100px;">
+            <input type="number" min="0" max="100" value="0" class="slider_value" id="deuteration_amount_value" onchange="deuterateValue(this.value)" style="width: 30px;">%
+        </td><td class="hide_mobile"></td></tr>
         {% endif %}
         <tr><td style="text-align:right;"><select id="magnresult" name="magnresult" onchange="switch_magn()">
             <option value="msld">Neutron magnetic SLD (10⁻⁶ Å⁻²)</option>
             <option value="muB">Magnetisation (µB/FU)</option>
             <option value="magn">Magnetisation (kA/m = emu/cm³)</option>
             </select></td><td colspan=2 id="magn_value">{{"%.6f"%(1e6*material.rho_m)}}</td>
-            <td><button type="button" onclick="copy_Nmag()">as Float</button></td></tr>
-        <tr><td style="text-align:right;">Cu-Kɑ <select id="cu_select" name="cu_select" onchange="switch_sld_cu(this.value)" style="width: 150pt;">
+            <td class="hide_mobile"><button type="button" onclick="copy_Nmag()">as Float</button></td></tr>
+        <tr><td style="text-align:right;">Cu-Kɑ <select id="cu_select" name="cu_select" onchange="switch_sld_cu(this.value)" style="width: 150px;">
                 <option value="electron">e-density (rₑ/Å³)</option>
                 <option value="sld">SLD (10⁻⁶ Å⁻²)</option>
                 <option value="n_db">n=1-δ+iβ (δ/-β)</option>
                 </select></td>
           <td id="cu_entry_real">{{"%.6f"%(1e5/r_e*material.rho_of_E(Cu_kalpha).real)}}</td>
           <td id="cu_entry_imag">{{"%.6f"%(1e5/r_e*material.rho_of_E(Cu_kalpha).imag)}}i</td>
-          <td><button type="button" onclick="copy_Cu()">as Complex</button></td></tr>
-        <tr><td style="text-align:right;">Mo-Kɑ <select id="mo_select" name="mo_select" onchange="switch_sld_mo(this.value)" style="width: 150pt;">
+          <td class="hide_mobile"><button type="button" onclick="copy_Cu()">as Complex</button></td></tr>
+        <tr><td style="text-align:right;">Mo-Kɑ <select id="mo_select" name="mo_select" onchange="switch_sld_mo(this.value)" style="width: 150px;">
                 <option value="electron">e-density (rₑ/Å³)</option>
                 <option value="sld">SLD (10⁻⁶ Å⁻²)</option>
                 <option value="n_db">n=1-δ+iβ (δ/-β)</option>
                 </select></td>
           <td id="mo_entry_real">{{"%.6f"%(1e5/r_e*material.rho_of_E(Mo_kalpha).real)}}</td>
           <td id="mo_entry_imag">{{"%.6f"%(1e5/r_e*material.rho_of_E(Mo_kalpha).imag)}}i</td>
-          <td><button type="button" onclick="copy_Mo()">as Complex</button></td></tr>
+          <td class="hide_mobile"><button type="button" onclick="copy_Mo()">as Complex</button></td></tr>
         <tr style="border-top: solid 2px #888;"><th>Custom Energy (eV)</th>
-          <td colspan="2"><select id="user_select" name="user_select" onchange="updateSlider(-1)" style="width: 150pt;">
+          <td colspan="2"><select id="user_select" name="user_select" onchange="updateSlider(-1)" style="width: 150px;">
                 <option value="electron">e-density (rₑ/Å³)</option>
                 <option value="sld">SLD (10⁻⁶ Å⁻²)</option>
                 <option value="n_db">n=1-δ+iβ (δ/-β)</option>
-                </select></td><td><button type="button" onclick="copy_xE()">Full Data</button></td></tr>
+                </select></td><td class="hide_mobile"><button type="button" onclick="copy_xE()">Full Data</button></td></tr>
         <tr><td style="text-align:center;"><form action="" onsubmit="return false;">
-            <input type="range" min="50" max="30000" value="8040" class="slider" id="xray_energy" step="20" onchange="updateSlider(this.value)" style="width: 120pt;">
-            <input type="number" min="50" max="30000" value="8040" class="slider_value" id="xray_energy_value" style="width: 60pt;" onchange="updateValue(this.value)">
+            <input type="range" min="50" max="30000" value="8040" class="slider" id="xray_energy" step="20" onchange="updateSlider(this.value)" style="width: 120px;">
+            <input type="number" min="50" max="30000" value="8040" class="slider_value" id="xray_energy_value" style="width: 60px;" onchange="updateValue(this.value)">
             </form></td>
             <td><div id="value_real">{{"%.6f"%(1e5/r_e*material.rho_of_E(Cu_kalpha).real)}}</div></td>
             <td><div id="value_imag">{{"%.6f"%(1e5/r_e*material.rho_of_E(Cu_kalpha).imag)}}i</div></td>
-            <td><button type="button" onclick="copy_xray()">as Complex</button></td></tr>
+            <td class="hide_mobile"><button type="button" onclick="copy_xray()">as Complex</button></td></tr>
         {% if validated %}
         <tr><td colspan="4">This entry was validated by ORSO<br />({{ validated }} by {{ validated_by }})</td></tr>
         {% endif %}
