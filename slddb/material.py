@@ -6,7 +6,7 @@ of x-ray and neutron SLDs for different applications.
 import re
 from numpy import array, pi
 from collections import OrderedDict
-from .constants import u2g, r_e, muB, rho_of_M, Cu_kalpha, E_to_lambda
+from .constants import u2g, r_e, r_e_angstrom, muB, rho_of_M, Cu_kalpha, E_to_lambda, fm2angstrom
 
 SUBSCRIPT_DIGITS="₀₁₂₃₄₅₆₇₈₉"
 
@@ -181,9 +181,9 @@ class Material():
         elif fu_dens is not None:
             self.fu_dens=fu_dens
         elif rho_n is not None:
-            self.fu_dens=abs(rho_n/self.fu_b)*1e5
+            self.fu_dens=abs(rho_n/self.fu_b)/fm2angstrom
         elif xsld is not None and xE is not None:
-            self.fu_dens=abs(xsld/self.f_of_E(xE))*(1e5/r_e)
+            self.fu_dens=abs(xsld/self.f_of_E(xE))*(1./r_e_angstrom)
         else:
             raise ValueError(
                 "Need to provide means to calculate density, {dens, fu_volume, rho_n, xsld+xE}")
@@ -201,7 +201,7 @@ class Material():
 
     @property
     def rho_n(self):
-        return self.fu_b*self.fu_dens*1e-5 # Å^-1
+        return self.fu_b*self.fu_dens*fm2angstrom # Å^-1
 
     @property
     def rho_m(self):
@@ -223,7 +223,7 @@ class Material():
 
     def rho_of_E(self, E):
         f=self.f_of_E(E)
-        return f*r_e*self.fu_dens*1e-5 # Å^-1
+        return f*r_e*self.fu_dens*fm2angstrom # Å^-1
 
     def delta_of_E(self, E):
         rho=self.rho_of_E(E)

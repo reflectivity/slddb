@@ -14,6 +14,7 @@ class Converter():
     Base class for all other converters, can't be used stand alone.
     """
     sql_type="TEXT" # if subclass does not define the SQLite type assume TEXT for compatibility
+    html_list=False # only used for types that require to query a list in html requests
 
     def __init__(self):
         raise NotImplementedError(
@@ -302,6 +303,8 @@ class CSelect(CType):
         return output
 
 class CMultiSelect(CType):
+    html_list=True
+
     def __init__(self, options):
         self.options=options
         CType.__init__(self, list, str)

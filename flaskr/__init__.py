@@ -97,7 +97,7 @@ def search_query():
         if value.strip() == '':
             continue
         if key in DB_MATERIALS_FIELDS:
-            if db_lookup[key][1].__class__.__name__=='CMultiSelect':
+            if db_lookup[key][1].html_list:
                 value=request.form.getlist(key)
             try:
                 db_lookup[key][1].convert(value)
