@@ -165,7 +165,7 @@ class Cdoi(ValidatedString):
 
 class Ccas(ValidatedString):
     regex=re.compile(
-        r'\b[1-9]{1}[0-9]{1, 5}-\d{2}-\d\b', re.IGNORECASE)
+        r'\b[1-9]{1}[0-9]{1,5}-\d{2}-\d\b', re.IGNORECASE)
     placeholder='xxxxxxx-yy-z'
 
 
