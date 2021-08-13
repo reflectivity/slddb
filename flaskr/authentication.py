@@ -43,7 +43,7 @@ def initial_setup():
     generate_secret()
     print("Setup new databse.")
     create_database()
-    print("Create initial user initial.admin@orso.or (pw=ORSO4all).\n"
+    print("Create initial user initial.admin@orso.org (pw=ORSO4all).\n"
           "Please remove after adding the first real user!")
     add_user('initial_admin', 'initial.admin@orso.org', admin=True, password='ORSO4all')
 
