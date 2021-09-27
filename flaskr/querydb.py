@@ -21,13 +21,13 @@ def fill_input(field, args):
 def get_input(field):
     return fill_input(field, request.form)
 
-def show_search():
+def show_search(**kwargs):
     if current_user.is_authenticated:
         user="%s <%s>"%(current_user.name, current_user.email)
     else:
         user=None
     return render_template('search.html', main_fields=main_fields, orso_user=user,
-                           advanced_fields=advanced_fields, get_input=get_input)
+                           advanced_fields=advanced_fields, get_input=get_input, **kwargs)
 
 def search_db(query, invalids=False, offset=0):
     db=SLDDB(DB_FILE)
@@ -36,6 +36,8 @@ def search_db(query, invalids=False, offset=0):
     else:
         user=None
     res=db.search_material(filter_invalid=not invalids, offset=offset, **query)
+    if len(res)==0:
+        return show_search(unsuccessful_query=query)
     hidden_columns=[True for field in DB_MATERIALS_FIELDS]
     advanced_search=any([key in advanced_fields for key in query.keys()])
     for row in res:

@@ -103,8 +103,7 @@ def search_query():
             try:
                 db_lookup[key][1].convert(value)
             except Exception as e:
-                return render_template('search.html', error=repr(e)+'<br >'+
-                                    "Raised when tried to parse %s = %s"%(key, value))
+                return show_search(error=repr(e)+'<br >'+"Raised when tried to parse %s = %s"%(key, value))
             else:
                 query[key]=value
         if key=='show_invalid' and value:
