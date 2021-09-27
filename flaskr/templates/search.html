@@ -5,6 +5,14 @@
 {% block content %}
   <table style="width: 100%; height: 100%; table-layout: fixed;">
     <tr><td class="hide_mobile" style="text-align: right; vertical-align: bottom; width: 30%; height: 1px;">
+      <div style="font-size: 105%; text-align: justify; margin-left: 2em;">
+        On this page you can query materials that have been entered into our database. The search is carried out
+        using logical AND relation of all given fields.
+        <br />If you search without a value for any field the complete database is returned. You can select any
+        database entry to use in the SLD calculator or use the calculator directly with a know elemental composition
+        and density.
+        <br /><br />
+      </div>
       {% if query_result %}
         <h4 style="margin: 0px;">Results of database query:</h4>
       {% endif %}
@@ -33,6 +41,9 @@
       </table><br /><br />
     </center></form></td>
       <td class="hide_mobile" style="text-align: left; vertical-align: bottom; width: 30%; height: 1px; line-height: 1.7em;">
+        <div style="text-align: center; width: 100%;">
+            <img src="{{ url_for('static', filename='orso_db.png') }}" style="width: 70%;">
+        </div>
       {% if query_result %}
         <div style="background-color: #dfd; padding: 5px; border: 1px; width: 6em; display:inline; white-space: nowrap;">ORSO validated</div>
         <div style="background-color: #fff; padding: 5px; border: 1px; width: 6em; display:inline; white-space: nowrap;">Used Before</div>
