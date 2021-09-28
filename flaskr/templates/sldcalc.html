@@ -294,25 +294,28 @@ MathJax.Hub.Config({
   {% endif %}
 
     <table style="width: 100%; height: 100%;"><tr>
-      <td class="hide_mobile" style="width: 30%; font-size: 105%; text-align: justify; vertical-align: top; padding: 3em 20pt 20pt 20px;">
+      <td class="hide_mobile" style="width: 40%; font-size: 105%; text-align: justify; vertical-align: top; padding: 3em 1em 20pt 1em;">
+          <div style="max-height: 26em; overflow: auto;">
           This page provides the calculated SLD values from items selected from the database or entered manually.
           Using the given chemical formula and one type of density information the tabulated
           x-ray and neutron atomic scattering data are used to calculate the optical parameters.
           <br />
           You can select a specific x-ray energy to get customized calculated values.
           For hydrogen containing compounds there is a similar functionality to choose deuteration amount.
+          Isotopes are specified with N in square brackets (<i>B[10]</i>).
           <br /><br />
           <div style="font-size: 75%; font-style: italic; width: 100%;">
               Physical constants are taken from CODATA Internationally recommended 2018 values.
               Neutron scattering lengths use the NIST provided values through the python periodictable packate.
               X-ray energy dependant scattering is base on the Henke tables.
           </div>
+          </div>
       </td>
 
     <td style="width: 18em; align: center; vertical-align: top;">
     <p></p>
     <form action="{{ url_for('calculate_sld', _anchor='results_header') }}" method="get"><center>
-      <table class="noborder">
+      <table class="noborder" style="width: 18em;">
         <tr><th>Field</th><th>value for calculation</th></tr>
         <tr><td style="text-align: right;">Formula</td><td><input type="text" name="formula" id="compound formula"
                                        value="{{ request.args['formula'] or formula }}" placeholder="Fe2O3 / H[2]2O / H2(C2H4)4"></td></tr>
@@ -321,12 +324,12 @@ MathJax.Hub.Config({
           <option value="FUdens" {% if request.args['densinput']=='FUdens' %} selected {% endif %}>Density (FU/Å³)</option>
           <option value="FUdnm" {% if request.args['densinput']=='FUdnm' %} selected {% endif %}>Density (FU/nm³)</option>
           <option value="volume" {% if request.args['densinput']=='volume' %} selected {% endif %}>FU Volume (Å³)</option>
-        </select></td><td><input type='number' step="0.00001" name="density" id="compound density" value="{{ request.args['density'] or density }}"></td></tr>
+        </select></td><td><input type='number' step="any" name="density" id="compound density" value="{{ request.args['density'] or density }}"></td></tr>
         <tr><td style="text-align: right;"><select id="magninput" name="magninput" style="width: 150px;">
             <option value="muB">Magnetisation (µB/FU)</option>
             <option value="magn" {% if request.args['magninput']=='magn' %} selected {% endif %}>Magnetisation (kA/m=emu/cm³)</option>
             </select></td>
-            <td><input type='number' step="0.00001" name="mu" id="compound mu" value="{{ request.args['mu'] or mu }}"></td></tr>
+            <td><input type='number' step="any" name="mu" id="compound mu" value="{{ request.args['mu'] or mu }}"></td></tr>
         <tr><td colspan="2"><center><input type="submit"></center></td> </tr>
       </table>
     </center></form>
@@ -397,7 +400,7 @@ MathJax.Hub.Config({
                     </select></td><td class="hide_mobile"><button type="button" onclick="copy_xE()">Full Data</button></td></tr>
             <tr><td style="text-align:center;"><form action="" onsubmit="return false;">
                 <input type="range" min="50" max="30000" value="8040" class="slider" id="xray_energy" step="20" onchange="updateSlider(this.value)" style="width: 120px;">
-                <input type="number" min="50" max="30000" value="8040" class="slider_value" id="xray_energy_value" style="width: 60px;" onchange="updateValue(this.value)">
+                <input type="number" min="50" max="30000" value="8040" step="any" class="slider_value" id="xray_energy_value" style="width: 60px;" onchange="updateValue(this.value)">
                 </form></td>
                 <td><div id="value_real">{{"%.6f"%(material.rho_of_E(Cu_kalpha).real/r_e_angstrom)}}</div></td>
                 <td><div id="value_imag">{{"%.6f"%(material.rho_of_E(Cu_kalpha).imag/r_e_angstrom)}}i</div></td>
@@ -420,12 +423,12 @@ MathJax.Hub.Config({
       </center>
     </td>
 
-      <td class="hide_mobile" style="width: 30%; text-align: left; vertical-align: top; padding: 3em 20pt 20pt 20px;">
+      <td class="hide_mobile" style="width: 40%; text-align: left; vertical-align: top; padding: 3em 20pt 20pt 20px;">
         <div style="background-color: #ddd; padding: 12px; box-shadow: 3px 3px #aaa;">
             <h4 style="margin: 0px;">Formulas used for the calculation:</h4>
             <center>
-             \( SLD_{n} = \) \( \rho_{FU} \sum\limits_{i=0}^{N_e} b_i \cdot n_i \) <br />
-             \( SLD_{x} = \) \( r_e \rho_{FU} \sum\limits_{i=0}^{N_e} f_i(E) \cdot n_i \)
+             \( SLD_{n} = \) \( \rho_{FU} \sum\limits_{i=0}^{N_{FU}} b_i \cdot n_i \) <br />
+             \( SLD_{x} = \) \( r_e \rho_{FU} \sum\limits_{i=0}^{N_{FU}} f_i(E) \cdot n_i \)
             </center>
              $$\begin{aligned}
              n &= 1 - \delta + i \beta \\

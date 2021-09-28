@@ -4,22 +4,15 @@
 
 {% block content %}
   <table style="width: 100%; height: 100%; table-layout: fixed;">
-    <tr><td class="hide_mobile" style="text-align: right; vertical-align: bottom; width: 30%; height: 1px;">
-      <div style="font-size: 105%; text-align: justify; margin-left: 2em;">
+    <tr><td style="text-align: right; vertical-align: center; width: 40%; overflow: auto;">
+      <div class="hide_mobile" style="font-size: 105%; text-align: justify; margin: 5px 1em 5px 1em; max-height: 18em;">
         On this page you can query materials that have been entered into our database. The search is carried out
         using logical AND relation of all given fields.
         <br />If you search without a value for any field the complete database is returned. You can select any
-        database entry to use in the SLD calculator or use the calculator directly with a know elemental composition
+        database entry to use in the SLD calculator or use the calculator directly with a known elemental composition
         and density.
-        <br /><br />
       </div>
-      {% if query_result %}
-        <h4 style="margin: 0px;">Results of database query:</h4>
-      {% endif %}
-      {% if unsuccessful_query %}
-        <h4 style="margin: 0px;">Did not find any database entry for query:</h4>
-      {% endif %}
-    </td><td style="width: 23em; height: 1px;">
+    </td><td style="width: 23em; height: 1px; align: center;">
     <form action="{{ url_for('search_query') }}" method="post"><center>
       <table class="noborder" style="width: 23em;">
         <tr><th style="width: 8.3em;">Field</th><th>search for value</th></tr>
@@ -38,22 +31,32 @@
     {% if multipage %}
         <tr><td colspan="2"><center>{{multipage|safe}}</center></td></tr>
     {% endif %}
-      </table><br /><br />
+      </table>
     </center></form></td>
-      <td class="hide_mobile" style="text-align: left; vertical-align: bottom; width: 30%; height: 1px; line-height: 1.7em;">
-        <div style="text-align: center; width: 100%;">
-            <img src="{{ url_for('static', filename='orso_db.png') }}" style="width: 70%;">
-        </div>
-      {% if query_result %}
+      <td style="text-align: center; vertical-align: center; width: 40%;">
+          <img class="hide_mobile" src="{{ url_for('static', filename='orso_db.png') }}" style="max-width: 90%; max-height: 17em;">
+      </td>
+    </tr>
+    {% if query_result %}
+    <tr class="hide_mobile"><td class="hide_mobile" style="text-align: right;">
+          <h4 style="margin: 0px;">Results of database query:</h4>
+        </td><td class="hide_mobile" colspan="2" style="text-align: center; width: 60%">
         <div style="background-color: #dfd; padding: 5px; border: 1px; width: 6em; display:inline; white-space: nowrap;">ORSO validated</div>
         <div style="background-color: #fff; padding: 5px; border: 1px; width: 6em; display:inline; white-space: nowrap;">Used Before</div>
         <div style="background-color: #ddd; padding: 5px; border: 1px; width: 6em; display:inline; white-space: nowrap;">Never Selected</div>
         {% if orso_user %}
         <div style="background-color: #fdd; padding: 5px; border: 1px; width: 6em; display:inline; white-space: nowrap;">Invalid</div>
         {% endif %}
-      {% endif %}
       </td>
     </tr>
+    {% endif %}
+    {% if unsuccessful_query %}
+        <tr class="hide_mobile">
+          <td class="hide_mobile" colspan="3" style="text-align: center;">
+            <h4 style="margin: 0px;">Did not find any database entry for query:</h4>
+          </td>
+        </tr>
+    {% endif %}
   <tr><td colspan="3" style="width: 100%; height: 100%;">
     <div class="desktop_scroll" style="width: 100%; height: 100%; min-height: 250px;">
   {% if unsuccessful_query %}
