@@ -72,7 +72,7 @@
       <tr>
         <th></th>{%for name in flt_fields_names%}<th>{{ name.replace("_", " ") }}</th>{%endfor%}
         {% if orso_user %}
-          <th colspan="2">ORSO action</th>{%for name in hidden_fields_names%}<th>{{ name.replace("_", " ") }}</th>{%endfor%}
+          <th colspan="3">ORSO action</th>{%for name in hidden_fields_names%}<th>{{ name.replace("_", " ") }}</th>{%endfor%}
         {% endif %}
       </tr>
       </thead>
@@ -90,8 +90,9 @@
             {% endif %}
           {%endfor%}
           {% if orso_user %}
-          <td><button type="submit" name="Validate" id="Validate" value="{{orso_user}}-{{row['ID']}}">validate</button></td>
-          <td><button type="submit" name="Invalidate" id="Invalidate" value="{{orso_user}}-{{row['ID']}}" class="danger">invalidate</button></td>
+          <td><button type="submit" name="Validate" id="Validate" value="{{orso_user}}-{{row['ID']}}">valid</button></td>
+          <td><button type="submit" name="Invalidate" id="Invalidate" value="{{orso_user}}-{{row['ID']}}" class="danger">invalid</button></td>
+          <td><button type="submit" name="Edit" id="Edit" value="{{orso_user}}-{{row['ID']}}">edit</button></td>
           {%for field in hidden_fields%}
             {% if ("%s"%row[field]).startswith('http://') or ("%s"%row[field]).startswith('https://') %}
               <td><a href="{{row[field]}}" target="_blank">link</a></td>

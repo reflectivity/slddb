@@ -16,7 +16,14 @@
       </td>
 
     <td style="width: 22em; align: center; vertical-align: top;">
-    <form method="POST"><center>
+    {% if editing_entry %}
+        <div style="background-color: #ffaaaa;">
+            You are editing SLD DB entry ID={{ editing_entry }},
+            please be careful when editing.
+            (Editing will void previous validation.)
+        </div>
+    {% endif %}
+    <form method="POST" action="{{ url_for('eval_input') }}"><center>
         <table class="withborder" style="width: 22em; margin-bottom: 10px;">
           <tr><td style="border: none; text-align: right;">Your email (hidden)</td>
               <td style="border: none;">{{ get_input("created_by")|safe }}</td></tr>
@@ -27,7 +34,14 @@
           <tr><td style="text-align: right;">{{field}} {{get_unit(field)}}</td>
               <td>{{ get_input(field)|safe }}</td></tr>
     {%endfor%}
-        <tr><td colspan="2" style="border: none;"><center><input type="submit" name="material"></center></td> </tr>
+        <tr><td colspan="2" style="border: none;"><center>
+            {% if editing_entry %}
+            <input type="hidden" name="ID" value="{{ editing_entry }}">
+            <input type="submit" name="material" value="Update">
+            {% else %}
+            <input type="submit" name="material">
+            {% endif %}
+        </center></td> </tr>
       </table>
     </center></form></td>
 

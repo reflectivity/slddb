@@ -63,6 +63,34 @@ class SLDDB():
         if commit:
             self.db.commit()
 
+    def update_material(self, ID, commit=True, **data):
+        din=self.search_material(ID=ID, filter_invalid=False)[0]
+        din.update(data)
+        del(din['ID'])
+        del(din['updated'])
+        del(din['validated'])
+        del(din['validated_by'])
+
+        for key, value in din.items():
+            if not key in DB_MATERIALS_FIELDS:
+                raise KeyError('%s is not a valid data field'%key)
+            if value is None:
+                continue
+            din[key]=db_lookup[key][1].convert(value)
+
+        if not ('density' in din or 'FU_volume' in din
+                or 'SLD_n' in din or ('SLD_x' in din and 'E_x' in din)):
+            raise ValueError("Not enough information to determine density")
+
+        c=self.db.cursor()
+
+        qstr="UPDATE %s SET %s,updated = CURRENT_TIMESTAMP,validated = NULL, validated_by = NULL WHERE ID==?"%(
+            DB_MATERIALS_NAME, ", ".join(["%s = ?"%key for key in din.keys()]))
+        c.execute(qstr, tuple(din.values())+(ID,))
+        c.close()
+        if commit:
+            self.db.commit()
+
     def search_material(self, join_and=True, serializable=False, filter_invalid=True, limit=100, offset=0, **data):
         for key, value in data.items():
             if not key in DB_MATERIALS_FIELDS:
