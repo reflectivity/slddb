@@ -185,7 +185,7 @@ li a:hover {
     }
 }
 
-@media only screen and (max-width: 950px) {
+@media only screen and (max-width: 1130px) {
     td.sides {
       display: none;
     }

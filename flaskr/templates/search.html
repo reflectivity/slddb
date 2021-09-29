@@ -4,11 +4,15 @@
 
 {% block content %}
   <table style="width: 100%; height: 100%; table-layout: fixed;">
-    <tr><td class="hide_mobile" style="text-align: right; vertical-align: bottom; width: 30%; height: 1px;">
-      {% if query_result %}
-        <h4 style="margin: 0px;">Results of database query:</h4>
-      {% endif %}
-    </td><td style="width: 23em; height: 1px;">
+    <tr><td style="text-align: right; vertical-align: center; width: 40%; overflow: auto;">
+      <div class="hide_mobile" style="font-size: 105%; text-align: justify; margin: 5px 1em 5px 1em; max-height: 18em;">
+        On this page you can query materials that have been entered into our database. The search is carried out
+        using logical AND relation of all given fields.
+        <br />If you search without a value for any field the complete database is returned. You can select any
+        database entry to use in the SLD calculator or use the calculator directly with a known elemental composition
+        and density.
+      </div>
+    </td><td style="width: 23em; height: 1px; align: center;">
     <form action="{{ url_for('search_query') }}" method="post"><center>
       <table class="noborder" style="width: 23em;">
         <tr><th style="width: 8.3em;">Field</th><th>search for value</th></tr>
@@ -27,21 +31,43 @@
     {% if multipage %}
         <tr><td colspan="2"><center>{{multipage|safe}}</center></td></tr>
     {% endif %}
-      </table><br /><br />
+      </table>
     </center></form></td>
-      <td class="hide_mobile" style="text-align: left; vertical-align: bottom; width: 30%; height: 1px; line-height: 1.7em;">
-      {% if query_result %}
+      <td style="text-align: center; vertical-align: center; width: 40%;">
+          <img class="hide_mobile" src="{{ url_for('static', filename='orso_db.png') }}" style="max-width: 90%; max-height: 17em;">
+      </td>
+    </tr>
+    {% if query_result %}
+    <tr class="hide_mobile"><td class="hide_mobile" style="text-align: right;">
+          <h4 style="margin: 0px;">Results of database query:</h4>
+        </td><td class="hide_mobile" colspan="2" style="text-align: center; width: 60%">
         <div style="background-color: #dfd; padding: 5px; border: 1px; width: 6em; display:inline; white-space: nowrap;">ORSO validated</div>
         <div style="background-color: #fff; padding: 5px; border: 1px; width: 6em; display:inline; white-space: nowrap;">Used Before</div>
         <div style="background-color: #ddd; padding: 5px; border: 1px; width: 6em; display:inline; white-space: nowrap;">Never Selected</div>
         {% if orso_user %}
         <div style="background-color: #fdd; padding: 5px; border: 1px; width: 6em; display:inline; white-space: nowrap;">Invalid</div>
         {% endif %}
-      {% endif %}
       </td>
     </tr>
+    {% endif %}
+    {% if unsuccessful_query %}
+        <tr class="hide_mobile">
+          <td class="hide_mobile" colspan="3" style="text-align: center;">
+            <h4 style="margin: 0px;">Did not find any database entry for query:</h4>
+          </td>
+        </tr>
+    {% endif %}
   <tr><td colspan="3" style="width: 100%; height: 100%;">
     <div class="desktop_scroll" style="width: 100%; height: 100%; min-height: 250px;">
+  {% if unsuccessful_query %}
+      <center>
+        {%for key,value in unsuccessful_query.items()%}
+          <b>{{key}}</b> = "{{value}}" <br />
+        {% endfor %}
+        <p>
+          Try using less filtering criteria, an empty search will return the full database with examples.
+        </p></center>
+  {% endif %}
   {% if query_result %}
   <form method="post" action="{{ url_for('select_material', _anchor='results_header') }}"><center>
     <table class="withborder">
@@ -49,7 +75,7 @@
       <tr>
         <th></th>{%for name in flt_fields_names%}<th>{{ name.replace("_", " ") }}</th>{%endfor%}
         {% if orso_user %}
-          <th colspan="2">ORSO action</th>{%for name in hidden_fields_names%}<th>{{ name.replace("_", " ") }}</th>{%endfor%}
+          <th colspan="3">ORSO action</th>{%for name in hidden_fields_names%}<th>{{ name.replace("_", " ") }}</th>{%endfor%}
         {% endif %}
       </tr>
       </thead>
@@ -67,8 +93,9 @@
             {% endif %}
           {%endfor%}
           {% if orso_user %}
-          <td><button type="submit" name="Validate" id="Validate" value="{{orso_user}}-{{row['ID']}}">validate</button></td>
-          <td><button type="submit" name="Invalidate" id="Invalidate" value="{{orso_user}}-{{row['ID']}}" class="danger">invalidate</button></td>
+          <td><button type="submit" name="Validate" id="Validate" value="{{orso_user}}-{{row['ID']}}">valid</button></td>
+          <td><button type="submit" name="Invalidate" id="Invalidate" value="{{orso_user}}-{{row['ID']}}" class="danger">invalid</button></td>
+          <td><button type="submit" name="Edit" id="Edit" value="{{orso_user}}-{{row['ID']}}">edit</button></td>
           {%for field in hidden_fields%}
             {% if ("%s"%row[field]).startswith('http://') or ("%s"%row[field]).startswith('https://') %}
               <td><a href="{{row[field]}}" target="_blank">link</a></td>

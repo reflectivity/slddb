@@ -85,3 +85,53 @@ def input_material(args):
         return render_template('input.html', fields=input_fields,
                                get_input=get_input_args, get_unit=get_unit)
     return search_db(useargs)
+
+def edit_selection(ID, user):
+    db=SLDDB(DB_FILE)
+    res=db.search_material(ID=ID, filter_invalid=False)[0]
+
+    def get_input_args(field):
+        conv = db_lookup[field][1]
+        if field in res:
+            value = res[field]
+            if value is None:
+                value = ""
+        else:
+            value = ""
+        return conv.html_input(field, value)
+
+    return render_template('input.html', fields=input_fields, get_input=get_input_args, get_unit=get_unit,
+                           editing_entry=ID)
+
+def update_material(args):
+    db=SLDDB(DB_FILE)
+
+    def get_input_args(field):
+        return fill_input(field, args)
+
+    if args['name']=='' or args['formula' ]=='':
+        flash("You have to supply a name and Formula!")
+        return render_template('input.html', fields=input_fields, get_input=get_input_args, get_unit=get_unit,
+                               editing_entry=args['ID'])
+
+
+    useargs=dict(args.items())
+    del(useargs['material'])
+    del(useargs['ID'])
+
+    for key, value in list(useargs.items()):
+        if db_lookup[key][1].html_list:
+            useargs[key]=request.form.getlist(key)
+        if value=='':
+            useargs[key]=None
+
+    try:
+        db.update_material(args['ID'], **useargs)
+    except Exception as e:
+        flash("Error when trying to insert data:\n"+repr(e))
+        return render_template('input.html', fields=input_fields, get_input=get_input_args, get_unit=get_unit,
+                               editing_entry=args['ID'])
+    for key, value in list(useargs.items()):
+        if value is None:
+            del(useargs[key])
+    return search_db(useargs)

@@ -98,7 +98,7 @@ class CDate(Converter):
 
     def html_input(self, field, value):
         return f'<input type="text" name="{field}" id="compound {field}" value="{value}"'\
-               ' placeholder="date: {year}-{month}-{day} {hours}:{minutes}:{seconds}"/>'
+               ' placeholder="date: {year}-{month}-{day} {hours}:{minutes}:{seconds}" title="2021-01-10 00:00:00" />'
 
 class CFormula(Converter):
     def __init__(self):
@@ -113,7 +113,7 @@ class CFormula(Converter):
 
     def html_input(self, field, value):
         return f'<input type="text" name="{field}" id="compound {field}" value="{value}"'\
-               ' placeholder="Fe2O3 / H[2]2O / H2(C2H4)4"/>'
+               ' placeholder="Fe2O3 / H[2]2O / H2(C2H4)4" title="Chemical Formula: Fe2O3 / H[2]2O / H2(C2H4)4" />'
 
 class ValidatedString(CType):
     regex=None
@@ -130,7 +130,7 @@ class ValidatedString(CType):
 
     def html_input(self, field, value):
         return f'<input type="text" name="{field}" id="compound {field}" value="{value}"'\
-               ' placeholder="'+self.placeholder+'"/>'
+               ' placeholder="'+self.placeholder+'" title="'+self.placeholder+'" />'
 
 class CUrl(ValidatedString):
     regex=re.compile(
@@ -165,7 +165,7 @@ class Cdoi(ValidatedString):
 
 class Ccas(ValidatedString):
     regex=re.compile(
-        r'\b[1-9]{1}[0-9]{1, 5}-\d{2}-\d\b', re.IGNORECASE)
+        r'\b[1-9]{1}[0-9]{1,5}-\d{2}-\d\b', re.IGNORECASE)
     placeholder='xxxxxxx-yy-z'
 
 

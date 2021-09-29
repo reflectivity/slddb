@@ -50,7 +50,7 @@ def calculate_selection(ID):
         Hidx=dformula.index('H')
         dformula[Hidx]=('D', dformula[Hidx][1])
         deuterated=Material([(db.elements.get_element(element), amount) for element, amount in dformula],
-                             dens=material.dens)
+                             fu_dens=material.fu_dens)
     else:
         deuterated=None
     return render_template('sldcalc.html', material=material, material_name=res[0]['name'],
@@ -95,7 +95,7 @@ def calculate_user(formula, density, mu, density_choice, mu_choice):
             Hidx=dformula.index('H')
             dformula[Hidx]=('D', dformula[Hidx][1])
             deuterated=Material([(db.elements.get_element(element), amount) for element, amount in dformula],
-                                **kwrds)
+                                fu_dens=m.fu_dens)
         else:
             deuterated=None
         return render_template('sldcalc.html', material=m, deuterated=deuterated,

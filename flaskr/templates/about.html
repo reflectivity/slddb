@@ -8,9 +8,11 @@
     <p>
         This is a database for materials for scattering length density (SLD)
         calculations for neutron and x-ray reflectometry and small angle scattering.
-        It is provided by the Open Reflectometry Standards Organization (ORDO):
-        <br/>
+        It is provided by the Open Reflectometry Standards Organization (ORSO):
         <a href="https://www.reflectometry.org/">ORSO Website</a>
+        <br/>
+        <center><i>Please report any issues and suggestions to
+        <a href="mailto:artur.glavic@psi.ch">Artur Glavic</a>.</i></center>
     </p>
     <p>
         In addition to this website manual search we provide a simple API
@@ -20,7 +22,7 @@
         <h4 style="margin: 0px;">Application Programmers Interface (API) Usage:</h4><br />
 
         Manual calculation of SLD from formula and density values:<br/>
-        <i>{{ url_for('api_query', _external=True, formula="XXX", density="YYY", sldcald="true") }}</i>
+        <i>{{ url_for('api_query', _external=True, formula="XXX", density="YYY", sldcalc="true") }}</i>
         <br/><br/>
 
         Retrieve a list of fields that can be used for database queries.<br/>
@@ -35,9 +37,9 @@
         <i>{{ url_for('api_query', _external=True, ID="XXX", xray_unit="edens") }}</i><br /><br />
         Units for x-ray results are:
             <ol type="1">
-                <li><i>edens</i>=electron density (rₑ/Å³)</li><br />
-                <li><i>sld</i>=scattering length density (1/Å²)</li><br />
-                <li><i>n_db</i>=optical constants (δ/β) for refractive index (n=1-δ+iβ) (1)</li>
+                <li><i>edens</i>: electron density (rₑ/Å³)</li><br />
+                <li><i>sld</i>: scattering length density (1/Å²)</li><br />
+                <li><i>n_db</i>: optical constants (δ/β) for refractive index (n=1-δ+iβ) (1)</li>
             </ol>
         <br/><br/>
         The resulting data is a dictionary with the SLD information and some further materials parameters.
