@@ -9,7 +9,7 @@ Contributers:
     Artur Glavic <artur.glavic@psi.ch>
 """
 
-__version__='1.0 beta1'
+__version__='1.0 beta2'
 
 from .database import SLDDB
 from .dbconfig import DB_FILE
