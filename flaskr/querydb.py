@@ -3,7 +3,7 @@ from flask_login import current_user
 
 from slddb import SLDDB, DB_FILE
 from slddb.dbconfig import DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA, db_lookup
-
+#DB_FILE = '/var/www/html/slddb/slddb.db'
 main_fields=['name', 'formula', 'tags']
 advanced_fields=['physical_state', 'description','reference', 'CAS_No', 'temperature', 'comments', 'data_origin']
 

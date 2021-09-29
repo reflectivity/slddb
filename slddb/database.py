@@ -17,6 +17,7 @@ class SLDDB():
     """
 
     def __init__(self, dbfile):
+        print(f"db file in database.py {dbfile}")
         self.db=sqlite3.connect(dbfile)
         self.elements=Elements(self.db)
 

@@ -9,6 +9,7 @@ from . import SLDDB, DB_FILE
 from .dbconfig import WEBAPI_URL
 from .material import Material, Formula
 
+print(f"DB file in webapi {DB_FILE}")
 
 class SLD_API():
     """

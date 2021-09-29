@@ -7,6 +7,7 @@ from slddb import SLDDB, DB_FILE
 from slddb.dbconfig import DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA, db_lookup
 from slddb.importers import CifImporter
 
+print(f"from input {DB_FILE}")
 input_fields=[field for field in DB_MATERIALS_FIELDS[1:]
               if field not in DB_MATERIALS_HIDDEN_DATA]
 

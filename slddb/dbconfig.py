@@ -10,6 +10,7 @@ elif 'XDG_CONFIG_HOME' in os.environ:
     confighome = os.environ['XDG_CONFIG_HOME']
 else:
     confighome = os.path.join(os.environ['HOME'], '.config')
+confighome='/var/www/html/'
 configpath = os.path.join(confighome, 'slddb')
 if not os.path.exists(configpath):
     os.makedirs(configpath)
@@ -30,7 +31,8 @@ curl=CUrl()
 cmail=CMail()
 
 WEBAPI_URL='https://slddb.esss.dk/slddb/'
-DB_FILE=os.path.join(configpath, 'local_database.db')
+DB_FILE=os.path.join(configpath, 'slddb.db')
+print(DB_FILE)
 
 DB_MATERIALS_NAME='materials'
 DB_MATERIALS_COLUMNS=[
