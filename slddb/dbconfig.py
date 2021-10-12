@@ -12,7 +12,10 @@ else:
     confighome = os.path.join(os.environ['HOME'], '.config')
 configpath = os.path.join(confighome, 'slddb')
 if not os.path.exists(configpath):
-    os.makedirs(configpath)
+    try:
+        os.makedirs(configpath)
+    except OSError:
+        print("Could not create config path, local database storage not possible.")
 
 from .converters import CType, CLimited, CArray, CDate, CComplex, CFormula, CSelect, CMultiSelect, \
     CUrl, CMail, Cdoi, Ccas
