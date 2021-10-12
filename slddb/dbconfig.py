@@ -61,7 +61,7 @@ DB_MATERIALS_COLUMNS=[
                                 'nanoparticle']), 'solid',    None),
     ('tags', CMultiSelect(['magnetic', 'polymer', 'biology', 'membrane', 'lipid',
                            'metal', 'metal alloy', 'inorganic', 'small organic',
-                           'surfactant', 'lipid', 'protein']), None,    None),
+                           'surfactant', 'protein']), None,    None),
     ('ref_website',  curl,      None,    None),
     ('reference',    cstr,      None,    None),
     ('doi',          Cdoi(),    None,    None),

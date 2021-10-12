@@ -34,6 +34,39 @@ def get_graph(E, real, imag, name='Iron'):
     data = base64.b64encode(buf.getbuffer()).decode("ascii")
     return f'<img style="width: 40em; max-width: 100%;" src="data:image/png;base64,{data}" />'
 
+db=SLDDB(DB_FILE)
+h2o=Material([(db.elements.get_element(element), amount) for element, amount in [('H', 2.0), ('O', 1.0)]],
+             dens=1.0)
+d2o=Material([(db.elements.get_element(element), amount) for element, amount in [('D', 2.0), ('O', 1.0)]],
+             fu_dens=h2o.fu_dens)
+del(db)
+
+def get_deuteration_graph(m: Material):
+    # Generate a graph for matching H2O/D2O with the given material
+    name=str(m.formula)
+    mpoint=(m.rho_n.real-h2o.rho_n.real)/(d2o.rho_n.real-h2o.rho_n.real)
+
+    fig = Figure()
+    ax = fig.subplots()
+    ax.plot([0,100], [m.rho_n.real, m.rho_n.real], label=name)
+    ax.plot([0,100], [h2o.rho_n.real, d2o.rho_n.real], label='Water')
+    if mpoint>=0 and mpoint<=1:
+        ax.plot([100*mpoint, 100*mpoint], [h2o.rho_n.real, m.rho_n.real], '--')
+        ax.text(100*mpoint, m.rho_n.real, '%.1f%%'%(100*mpoint))
+    ax.legend()
+    ax.set_xlabel('Water deuteration %')
+    ax.set_ylabel('SLD (10⁻⁶ Å⁻²)')
+    ax.set_title('Contrast matching of %s'%name)
+    ax.set_xlim([0., 100.])
+    ax.set_ylim([h2o.rho_n.real, d2o.rho_n.real])
+    # Save it to a temporary buffer.
+    buf = BytesIO()
+    fig.savefig(buf, format="png")
+    fig.tight_layout()
+    # Embed the result in the html output.
+    data = base64.b64encode(buf.getbuffer()).decode("ascii")
+    return f'<img style="width: 40em; max-width: 100%;" src="data:image/png;base64,{data}" />'
+
 def calculate_selection(ID):
     db=SLDDB(DB_FILE)
     res=db.search_material(ID=ID, filter_invalid=False)
@@ -53,6 +86,13 @@ def calculate_selection(ID):
                              fu_dens=material.fu_dens)
     else:
         deuterated=None
+    if 'H' in material.formula or 'D' in material.formula \
+            or any([tag in res[0].get('tags', []) for tag in
+                    ['polymer', 'biology', 'membrane', 'lipid', 'small organic', 'surfactant', 'protein']]):
+        script = '<table><tr><td colspan="2">' \
+                 '<button type="button" class="collapsible">Toggle Contrast Matching/X-Ray</button>' \
+                 '</td></tr><tr><td class="uncollapsed">%s</td></tr>' \
+                 '<tr><td class="collapsed">%s</td></tr></table>'%(script, get_deuteration_graph(material))
     return render_template('sldcalc.html', material=material, material_name=res[0]['name'],
                            material_description=res[0]['description'], deuterated=deuterated,
                            script=script, xray_E=E.tolist(),
@@ -96,6 +136,10 @@ def calculate_user(formula, density, mu, density_choice, mu_choice):
             dformula[Hidx]=('D', dformula[Hidx][1])
             deuterated=Material([(db.elements.get_element(element), amount) for element, amount in dformula],
                                 fu_dens=m.fu_dens)
+            script = '<table><tr><td colspan="2">' \
+                     '<button type="button" class="collapsible">Toggle Contrast Matching/X-Ray</button>' \
+                     '</td></tr><tr><td class="uncollapsed">%s</td></tr>' \
+                     '<tr><td class="collapsed">%s</td></tr></table>'%(script, get_deuteration_graph(m))
         else:
             deuterated=None
         return render_template('sldcalc.html', material=m, deuterated=deuterated,

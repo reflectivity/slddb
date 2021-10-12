@@ -355,6 +355,7 @@ MathJax.Hub.Config({
                 <td rowspan="3" class="hide_mobile"><center><button type="button" onclick="copy_all()">Copy to<br />Clipboard</button></center></td></tr>
             <tr><td style="text-align:right;">Chemical Formula</td><td colspan=2>{{material}}</td></tr>
             <form action="{{ url_for('set_preference') }}" id="preferences" method="POST">
+            <input type="hidden" name="items_collapsed" value="false" />
             <tr><td style="text-align:right;"><select id="densresult" name="densresult" onchange="switch_density()">
               <option value="density">Density (g/cm³)</option>
               <option value="FUdens">Density (FU/Å³)</option>
@@ -418,7 +419,6 @@ MathJax.Hub.Config({
             <br /><a id="download_link" href="{{url_for('api_download', ID=material.ID, xray_unit='edens')|safe}}">Download full record as JSON</a>
             {% endif %}
       <button type="submit" form="preferences">Save unit selections as default (stores Cookie)</button>
-          {{ request.cookies.get('magnresult') }}
       </center><p></p>
       {% endif %}
 
@@ -442,6 +442,35 @@ MathJax.Hub.Config({
         </div>
       </td>
     </tr></table>
+
+<script>
+    var but_coll  = document.getElementsByClassName("collapsible")[0];
+
+    but_coll.addEventListener("click", function() {
+        var added = this.classList.toggle("active");
+        document.getElementsByName("items_collapsed")[0].value=added;
+        var coll_itms = document.getElementsByClassName("collapsed");
+        for (var i = 0; i < coll_itms.length; i++) {
+          var content = coll_itms[i];
+          if (content.style.display === "table-cell") {
+            content.style.display = "none";
+          } else {
+            content.style.display = "table-cell";
+          }}
+        var uncoll_itms = document.getElementsByClassName("uncollapsed");
+        for (var i = 0; i < uncoll_itms.length; i++) {
+          var content = uncoll_itms[i];
+          if (content.style.display === "none") {
+            content.style.display = "table-cell";
+          } else {
+            content.style.display = "none";
+          }
+        }});
+
+{% if request.cookies.get("items_collapsed", "false").lower()=='true' %}
+    but_coll.click();
+{% endif %}
+</script>
 
 {% if request.cookies.get("densresult") %}
     <script>
