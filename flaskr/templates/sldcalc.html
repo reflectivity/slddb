@@ -354,6 +354,7 @@ MathJax.Hub.Config({
             <tr><td style="text-align:right;">Description</td><td colspan=2 style="word-wrap;">{{material_description}}</td>
                 <td rowspan="3" class="hide_mobile"><center><button type="button" onclick="copy_all()">Copy to<br />Clipboard</button></center></td></tr>
             <tr><td style="text-align:right;">Chemical Formula</td><td colspan=2>{{material}}</td></tr>
+            <form action="{{ url_for('set_preference') }}" id="preferences" method="POST">
             <tr><td style="text-align:right;"><select id="densresult" name="densresult" onchange="switch_density()">
               <option value="density">Density (g/cm³)</option>
               <option value="FUdens">Density (FU/Å³)</option>
@@ -384,6 +385,7 @@ MathJax.Hub.Config({
               <td id="cu_entry_real">{{"%.6f"%(material.rho_of_E(Cu_kalpha).real/r_e_angstrom)}}</td>
               <td id="cu_entry_imag">{{"%.6f"%(material.rho_of_E(Cu_kalpha).imag/r_e_angstrom)}}i</td>
               <td class="hide_mobile"><button type="button" onclick="copy_Cu()">as Complex</button></td></tr>
+            </form>
             <tr><td style="text-align:right;">Mo-Kɑ <select id="mo_select" name="mo_select" onchange="switch_sld_mo(this.value)" style="width: 150px;">
                     <option value="electron">e-density (rₑ/Å³)</option>
                     <option value="sld">SLD (10⁻⁶ Å⁻²)</option>
@@ -415,6 +417,8 @@ MathJax.Hub.Config({
             {% if material.ID %}
             <br /><a id="download_link" href="{{url_for('api_download', ID=material.ID, xray_unit='edens')|safe}}">Download full record as JSON</a>
             {% endif %}
+      <button type="submit" form="preferences">Save unit selections as default (stores Cookie)</button>
+          {{ request.cookies.get('magnresult') }}
       </center><p></p>
       {% endif %}
 
@@ -438,5 +442,24 @@ MathJax.Hub.Config({
         </div>
       </td>
     </tr></table>
+
+{% if request.cookies.get("densresult") %}
+    <script>
+        document.getElementById("densresult").value="{{request.cookies.get("densresult")}}";
+        switch_density();
+    </script>
+{% endif %}
+{% if request.cookies.get("magnresult") %}
+    <script>
+        document.getElementById("magnresult").value="{{request.cookies.get("magnresult")}}";
+        switch_magn();
+    </script>
+{% endif %}
+{% if request.cookies.get("cu_select") %}
+    <script>
+        document.getElementById("cu_select").value="{{request.cookies.get("cu_select")}}";
+        switch_sld_cu("{{request.cookies.get("cu_select")}}");
+    </script>
+{% endif %}
 
 {% endblock %}

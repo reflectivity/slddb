@@ -3,7 +3,7 @@ import zipfile
 import os
 from io import BytesIO
 from flask import Flask
-from flask import request, render_template, send_file, flash, redirect, url_for
+from flask import request, render_template, send_file, flash, redirect, url_for, make_response
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
 from flask_mail import Mail, Message
@@ -322,3 +322,10 @@ def user_set_password():
     else:
         flash('token is not active for user with id %i'%ID)
         return show_search()
+
+@app.route('/set_preference', methods=['POST'])
+def set_preference():
+    resp=make_response(start_page())
+    for key, value in request.form.items():
+        resp.set_cookie(key, value)
+    return resp
