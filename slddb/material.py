@@ -15,7 +15,7 @@ class Formula(list):
     Evaluate strings for element chemical fomula.
     """
     elements=(r"A[cglmrstu]|B[aehikr]?|C[adeflmorsu]?|D[bsy]{0,1}|E[rsu]|F[emr]?|"
-              r"G[ade]|H[efgos]?|I[nr]?|Kr?|L[airu]|M[dgnot]|N[abdeiop]?|"
+              r"G[ade]|H[efgosx]?|I[nr]?|Kr?|L[airu]|M[dgnot]|N[abdeiop]?|"
               r"Os?|P[abdmortu]?|R[abefghnu]|S[bcegimnr]?|T[abcehilm]|"
               r"Uu[bhopqst]|U|V|W|Xe|Yb?|Z[nr]")
     isotopes=(r"(A[cglmrstu]|B[aehikr]?|C[adeflmorsu]?|D[bsy]{0,1}|E[rsu]|F[emr]?|"
@@ -25,10 +25,14 @@ class Formula(list):
               r"\[[1-9][0-9]{0,2}\]")
 
     def __init__(self, string, sort=True):
-        if isinstance(string, Formula):
+        if isinstance(string, list):
             list.__init__(self, string)
-            self._do_sort=string._do_sort
-            self.HR_formula=string.HR_formula
+            if isinstance(string, Formula):
+                self._do_sort=string._do_sort
+                self.HR_formula=string.HR_formula
+            else:
+                self._do_sort=sort
+                self.HR_formula=str(self)
         else:
             self._do_sort=sort
             self.HR_formula=string
@@ -151,6 +155,11 @@ class Formula(list):
 
     def index(self, item):
         return [el[0] for el in self].index(item)
+
+    def __add__(self, other):
+        out=Formula(self[:]+other[:], sort=self.sort)
+        out.merge_same()
+        return out
 
 class Material():
     """
@@ -301,6 +310,22 @@ class Material():
             else:
                 out+=SUBSCRIPT_DIGITS[int(digit)]
         return out
+
+    def __add__(self, other):
+        # add two materials by adding the chemical formula and FU_volume of each element.
+        if type(other)!=type(self):
+            raise ValueError('Can only combine two Material instances.')
+        fout=dict(self.elements)
+        for ele, number in other.elements:
+            if ele in fout:
+                fout[ele]+=number
+            else:
+                fout[ele]=number
+        fout=list(fout.items())
+        Vout=self.fu_volume+other.fu_volume
+        mout=self.mu+other.mu
+        return Material(fout, fu_volume=Vout, mu=mout)
+
 
     def __str__(self):
         output=''

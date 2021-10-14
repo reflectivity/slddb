@@ -121,6 +121,16 @@ class Element():
             symb="%s[%s]"%(self.symbol, self.N)
         return 'Element(db, symbol="%s")'%symb
 
+    def __eq__(self, other):
+        if type(self)==type(other):
+            return self.N==other.N and self.Z==other.Z \
+                   and self.symbol==other.symbol
+        else:
+            return object.__eq__(self, other)
+
+    def __hash__(self):
+        return hash((self.N, self.Z, self.symbol))
+
 
 class Elements():
 
