@@ -54,6 +54,10 @@ class SLD_API():
                 self.download_db()
             else:
                 mtime=datetime.datetime.fromtimestamp(stat.st_ctime)
+                try:
+                    mtime=max(mtime, datetime.datetime.fromtimestamp(stat.st_mtime))
+                except AttributeError:
+                    pass
                 if (now-mtime).days>self.max_age:
                     try:
                         self.download_db()
