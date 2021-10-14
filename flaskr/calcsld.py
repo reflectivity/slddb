@@ -48,11 +48,30 @@ def get_deuteration_graph(m: Material):
 
     fig = Figure()
     ax = fig.subplots()
-    ax.plot([0,100], [m.rho_n.real, m.rho_n.real], label=name)
-    ax.plot([0,100], [h2o.rho_n.real, d2o.rho_n.real], label='Water')
+    ax.plot([0,100], [m.rho_n.real, m.rho_n.real], label=name, color='C0')
+    ax.plot([0,100], [h2o.rho_n.real, d2o.rho_n.real], label='Water', color='C1')
     if mpoint>=0 and mpoint<=1:
-        ax.plot([100*mpoint, 100*mpoint], [h2o.rho_n.real, m.rho_n.real], '--')
-        ax.text(100*mpoint, m.rho_n.real, '%.1f%%'%(100*mpoint))
+        ax.plot([100*mpoint, 100*mpoint], [h2o.rho_n.real, m.rho_n.real], '--',
+                label='Contrast Matched', color='C1')
+        ax.text(100*mpoint, m.rho_n.real, '%.1f%%'%(100*mpoint), va='bottom', ha='right')
+    if 'Hx' in m.formula:
+        db=SLDDB(DB_FILE)
+        # create material where all exchangable sites are replace by deuterium
+        md=Material([(db.elements.get_element(element.capitalize().replace('Hx', 'D')), amount)
+                     for element, amount in m.formula],
+                    fu_dens=m.fu_dens)
+        del(db)
+        ax.plot([0,100], [m.rho_n.real, md.rho_n.real],
+                label='90% exchange', color='C2')
+        mpoint2=(h2o.rho_n.real-m.rho_n.real)/(
+                md.rho_n.real+h2o.rho_n.real-m.rho_n.real-d2o.rho_n.real)
+        if mpoint2>=0 and mpoint2<=1:
+            mrho=mpoint2*md.rho_n.real+(1-mpoint2)*m.rho_n.real
+            ax.plot([100*mpoint2, 100*mpoint2], [h2o.rho_n.real, mrho], '--',
+                    label='Contrast Matched', color='C2')
+            ax.plot([0*mpoint2, 100*mpoint2], [mrho, mrho], '--', color='C2')
+            ax.text(100*mpoint2, mrho, '%.3f | %.1f%%'%(mrho*1e6, 100*mpoint2), va='bottom', ha='right')
+
     ax.legend()
     ax.set_xlabel('Water deuteration %')
     ax.set_ylabel('SLD (10⁻⁶ Å⁻²)')

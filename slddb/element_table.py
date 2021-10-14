@@ -19,6 +19,8 @@ class Element():
             self.symbol=symbol
             if symbol == 'D':
                 symb, N='H', 2
+            elif symbol.capitalize() == 'Hx':
+                symb, N='H', 1
             elif '[' in symbol:
                 symb, N=symbol.rstrip(']').split('[', 1)
             else:
