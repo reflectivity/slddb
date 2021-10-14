@@ -326,6 +326,21 @@ class Material():
         mout=self.mu+other.mu
         return Material(fout, fu_volume=Vout, mu=mout)
 
+    def __mul__(self, other):
+        """
+        Calculate a multiple of this material, mostly useful when combining
+        different components. The SLD should stay the same as the formula
+        as well as the FU_volume are multiplied with the same amount.
+        """
+        if type(other) in [int, float]:
+            fout=[(ele, number*other) for ele, number in self.elements]
+            return Material(fout, fu_volume=self.fu_volume*other,
+                            mu=self.mu*other)
+        else:
+            raise ValueError("Can only multiply material by scalar")
+
+    def __rmul__(self, other):
+        return self.__mul__(other)
 
     def __str__(self):
         output=''
