@@ -97,7 +97,89 @@ MathJax.Hub.Config({
         updateSlider(value);
     }
 
-    {% if deuterated %}
+    {% if exchanged %}
+    var deuterated_neutron_real = {{1e6*deuterated.rho_n.real}};
+    var deuterated_neutron_imag = {{1e6*deuterated.rho_n.imag}};
+    var deuterated_density = {{deuterated.dens}};
+    var hydrogenated_density = {{material.dens}};
+    var exchanged_diff_real = {{1e6*(exchanged.rho_n.real-material.rho_n.real)}};
+    var exchanged_diff_imag = {{1e6*(exchanged.rho_n.imag-material.rho_n.imag)}};
+    var exchanged_diff_density = {{exchanged.dens-material.dens}};
+
+    function updateNSLD() {
+        frac_deuterated=document.getElementById("deuteration_amount_value").value*0.01;
+        frac_exchange=document.getElementById("exchange_amount_value").value*0.01;
+        frac_d2o=document.getElementById("d2o_amount_value").value*0.01;
+
+        // SLD for material with no exchange
+        var val_hd_real=(1.0-frac_deuterated)*material_neutron_real+
+                        frac_deuterated*deuterated_neutron_real;
+        var val_hd_imag=(1.0-frac_deuterated)*material_neutron_imag+
+                        frac_deuterated*deuterated_neutron_imag;
+        var val_hd_dens=(1.0-frac_deuterated)*hydrogenated_density+
+                        frac_deuterated*deuterated_density;
+
+        // SLD for full H2O and D2O exchange
+        var val_exH_real=val_hd_real-frac_deuterated*exchanged_diff_real;
+        var val_exH_imag=val_hd_imag-frac_deuterated*exchanged_diff_imag;
+        var val_exD_real=val_hd_real+(1.0-frac_deuterated)*exchanged_diff_real;
+        var val_exD_imag=val_hd_imag+(1.0-frac_deuterated)*exchanged_diff_imag;
+        var val_exH_dens=val_hd_dens-frac_deuterated*exchanged_diff_density;
+        var val_exD_dens=val_hd_dens+(1.0-frac_deuterated)*exchanged_diff_density;
+
+        // SLD for partial exchanged system with full H2O/D2O
+        var val_mH_real=(1.0-frac_exchange)*val_hd_real+frac_exchange*val_exH_real;
+        var val_mH_imag=(1.0-frac_exchange)*val_hd_imag+frac_exchange*val_exH_imag;
+        var val_mD_real=(1.0-frac_exchange)*val_hd_real+frac_exchange*val_exD_real;
+        var val_mD_imag=(1.0-frac_exchange)*val_hd_imag+frac_exchange*val_exD_imag;
+        var val_mH_dens=(1.0-frac_exchange)*val_hd_dens+frac_exchange*val_exH_dens;
+        var val_mD_dens=(1.0-frac_exchange)*val_hd_dens+frac_exchange*val_exD_dens;
+
+        // Mix exchanged materials
+        var val_real=(1.0-frac_d2o)*val_mH_real+frac_d2o*val_mD_real;
+        var val_imag=(1.0-frac_d2o)*val_mH_imag+frac_d2o*val_mD_imag;
+        var val_dens=(1.0-frac_d2o)*val_mH_dens+frac_d2o*val_mD_dens;
+
+        document.getElementById("neutron_entry_real").innerHTML = (val_real).toFixed(5);
+        document.getElementById("neutron_entry_imag").innerHTML = (val_imag).toFixed(5)+'i';
+
+
+        if (document.getElementById("densresult").value == 'density') {
+            document.getElementById("density_value").innerHTML = (val_dens).toFixed(4);
+        }
+    }
+
+    function deuterateSlider(slideAmount) {
+        document.getElementById("deuteration_amount_value").value = slideAmount;
+        updateNSLD();
+    }
+
+    function deuterateValue() {
+        const value = document.getElementById("deuteration_amount_value").value;
+        document.getElementById("deuteration_amount").value = value;
+        deuterateSlider(value);
+    }
+    function exchangeSlider(slideAmount) {
+        document.getElementById("exchange_amount_value").value = slideAmount;
+        updateNSLD();
+    }
+
+    function exchangeValue() {
+        const value = document.getElementById("exchange_amount_value").value;
+        document.getElementById("exchange_amount").value = value;
+        exchangeSlider(value);
+    }
+    function d2oSlider(slideAmount) {
+        document.getElementById("d2o_amount_value").value = slideAmount;
+        updateNSLD();
+    }
+
+    function d2oValue() {
+        const value = document.getElementById("d2o_amount_value").value;
+        document.getElementById("d2o_amount").value = value;
+        d2oSlider(value);
+    }
+    {% elif deuterated %}
     var deuterated_neutron_real = {{1e6*deuterated.rho_n.real}};
     var deuterated_neutron_imag = {{1e6*deuterated.rho_n.imag}};
     var deuterated_density = {{deuterated.dens}};
@@ -343,6 +425,7 @@ MathJax.Hub.Config({
       {% if material %}
       <center>
       <h2 style="margin: 15px 0px 5px;" id="results_header">Result of SLD calculation:</h2>
+            <form action="{{ url_for('set_preference') }}" id="preferences" method="POST" onkeydown="return event.key != 'Enter';">
         <table class="noborder"{% if validated %} style="background-color: #dfd"{% endif %}{% if invalid %} style="background-color: #fdd"{% endif %}>
             {% if material.ID %}
             <tr><th>Compound (ORSO ID={{material.ID}})</th><td colspan=2>{{material_name}}</td>
@@ -354,7 +437,6 @@ MathJax.Hub.Config({
             <tr><td style="text-align:right;">Description</td><td colspan=2 style="word-wrap;">{{material_description}}</td>
                 <td rowspan="3" class="hide_mobile"><center><button type="button" onclick="copy_all()">Copy to<br />Clipboard</button></center></td></tr>
             <tr><td style="text-align:right;">Chemical Formula</td><td colspan=2>{{material}}</td></tr>
-            <form action="{{ url_for('set_preference') }}" id="preferences" method="POST">
             <input type="hidden" name="items_collapsed" value="false" />
             <tr><td style="text-align:right;"><select id="densresult" name="densresult" onchange="switch_density()">
               <option value="density">Density (g/cm³)</option>
@@ -368,8 +450,21 @@ MathJax.Hub.Config({
               <td class="hide_mobile"><button type="button" onclick="copy_NSLD()">as Complex</button></td></tr>
             {% if deuterated %}
             <tr><td style="text-align:right;">Material Deuteration</td><td colspan="2">
-                <input type="range" min="0" max="100" value="0" class="slider" id="deuteration_amount" step="1" onchange="deuterateSlider(this.value)" style="width: 90px;">
-                <input type="number" min="0" max="100" value="0" class="slider_value" id="deuteration_amount_value" onchange="deuterateValue(this.value)" style="width: 40px;">%
+                <input type="range" min="0" max="100" value="0" class="slider" id="deuteration_amount" step="1"  style="width: 90px;">
+                <input type="number" min="0" max="100" value="0" class="slider_value" id="deuteration_amount_value"
+                       onchange="deuterateValue(this.value)" onkeyup="if (event.key=='Enter') {deuterateValue(this.value)}" style="width: 40px;">%
+            </td><td class="hide_mobile"></td></tr>
+            {% endif %}
+            {% if exchanged %}
+            <tr><td style="text-align:right;">Amound Hx-exchange</td><td colspan="2">
+                <input type="range" min="0" max="100" value="90" class="slider" id="exchange_amount" step="1" onchange="exchangeSlider(this.value)" style="width: 90px;">
+                <input type="number" min="0" max="100" value="90" class="slider_value" id="exchange_amount_value"
+                       onchange="exchangeValue(this.value)" onkeyup="if (event.key=='Enter') {exchangeValue(this.value)}" style="width: 40px;">%
+            </td><td class="hide_mobile"></td></tr>
+            <tr><td style="text-align:right;">D<sub>2</sub>O in solution</td><td colspan="2">
+                <input type="range" min="0" max="100" value="0" class="slider" id="d2o_amount" step="1" onchange="d2oSlider(this.value)" style="width: 90px;">
+                <input type="number" min="0" max="100" value="0" class="slider_value" id="d2o_amount_value"
+                       onchange="d2oValue(this.value)" onkeyup="if (event.key=='Enter') {d2oValue(this.value)}" style="width: 40px;">%
             </td><td class="hide_mobile"></td></tr>
             {% endif %}
             <tr><td style="text-align:right;"><select id="magnresult" name="magnresult" onchange="switch_magn()">
@@ -386,7 +481,6 @@ MathJax.Hub.Config({
               <td id="cu_entry_real">{{"%.6f"%(material.rho_of_E(Cu_kalpha).real/r_e_angstrom)}}</td>
               <td id="cu_entry_imag">{{"%.6f"%(material.rho_of_E(Cu_kalpha).imag/r_e_angstrom)}}i</td>
               <td class="hide_mobile"><button type="button" onclick="copy_Cu()">as Complex</button></td></tr>
-            </form>
             <tr><td style="text-align:right;">Mo-Kɑ <select id="mo_select" name="mo_select" onchange="switch_sld_mo(this.value)" style="width: 150px;">
                     <option value="electron">e-density (rₑ/Å³)</option>
                     <option value="sld">SLD (10⁻⁶ Å⁻²)</option>
@@ -415,6 +509,7 @@ MathJax.Hub.Config({
             <tr><td colspan="4">This entry was removed by ORSO because it was invalid<br />({{ invalid }} by {{ invalid_by }})</td></tr>
             {% endif %}
         </table>
+            </form>
             {% if material.ID %}
             <br /><a id="download_link" href="{{url_for('api_download', ID=material.ID, xray_unit='edens')|safe}}">Download full record as JSON</a>
             {% endif %}
