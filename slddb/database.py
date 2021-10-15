@@ -204,7 +204,7 @@ class SLDDB():
         self.db.commit()
         return result[0]
 
-    def select_material(self, result):
+    def select_material(self, result)->Material:
         # generate Material object from database entry and increment selection counter
         formula=Formula(result['formula'])
         if result['density']:
@@ -265,7 +265,7 @@ class SLDDB():
             if element is periodictable.n or element.density is None:
                 continue
             state='solid'
-            if 'T=' in element.density_caveat:
+            if 'T=-' in element.density_caveat:
                 state='liquid'
             self.add_material(element.name.capitalize(),
                               element.symbol,

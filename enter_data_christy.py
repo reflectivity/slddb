@@ -144,8 +144,7 @@ data=[   ['Si', 2.33, 0.0],
          ['Bi2Te3', 7.7, 0.0],
          ['CrSe', 6.74, 0.0]]
 
-
-if __name__=="__main__":
+def main():
     db=SLDDB(DB_FILE)
     for item in data:
         print(item)
@@ -160,3 +159,6 @@ if __name__=="__main__":
                             reference="Christy Kinane",
                             density=item[1],
                             mu=item[2])
+
+if __name__=="__main__":
+    main()

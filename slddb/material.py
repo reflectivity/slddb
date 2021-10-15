@@ -161,6 +161,12 @@ class Formula(list):
         out.merge_same()
         return out
 
+class PolymerSequence(str):
+    """
+    Used to represent a chain of amino acids. Currently, no checking
+    is done and this is just a string containing the appropriate letters.
+    """
+
 class Material():
     """
     Units used:

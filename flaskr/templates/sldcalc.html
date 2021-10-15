@@ -450,13 +450,13 @@ MathJax.Hub.Config({
               <td class="hide_mobile"><button type="button" onclick="copy_NSLD()">as Complex</button></td></tr>
             {% if deuterated %}
             <tr><td style="text-align:right;">Material Deuteration</td><td colspan="2">
-                <input type="range" min="0" max="100" value="0" class="slider" id="deuteration_amount" step="1"  style="width: 90px;">
+                <input type="range" min="0" max="100" value="0" class="slider" id="deuteration_amount" step="1" onchange="deuterateSlider(this.value)" style="width: 90px;">
                 <input type="number" min="0" max="100" value="0" class="slider_value" id="deuteration_amount_value"
                        onchange="deuterateValue(this.value)" onkeyup="if (event.key=='Enter') {deuterateValue(this.value)}" style="width: 40px;">%
             </td><td class="hide_mobile"></td></tr>
             {% endif %}
             {% if exchanged %}
-            <tr><td style="text-align:right;">Amound Hx-exchange</td><td colspan="2">
+            <tr><td style="text-align:right;">Amount Hx-exchange</td><td colspan="2">
                 <input type="range" min="0" max="100" value="90" class="slider" id="exchange_amount" step="1" onchange="exchangeSlider(this.value)" style="width: 90px;">
                 <input type="number" min="0" max="100" value="90" class="slider_value" id="exchange_amount_value"
                        onchange="exchangeValue(this.value)" onkeyup="if (event.key=='Enter') {exchangeValue(this.value)}" style="width: 40px;">%

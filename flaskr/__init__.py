@@ -24,7 +24,8 @@ from slddb import constants
 from .api import calc_api, select_api, search_api
 from .querydb import search_db, show_search
 from .calcsld import calculate_selection, calculate_user, validate_selection, invalidate_selection
-from .inputdb import input_form, input_fill_cif, input_material, edit_selection, update_material
+from .inputdb import input_form, input_fill_cif, input_material, edit_selection, update_material, input_fill_blend
+from .blender import calculate_blend
 
 app=Flask("ORSO SLD Data Base", template_folder='flaskr/templates',
           static_folder='flaskr/static')
@@ -77,7 +78,11 @@ def input_page():
 @app.route('/input', methods=['POST'])
 def eval_input():
     if not 'material' in request.form:
-        return input_fill_cif(request.files['cif_file'])
+        try:
+            return input_fill_cif(request.files['cif_file'])
+        except Exception as e:
+            flash(str(e))
+            return  input_form()
     elif 'ID' in request.form:
         return update_material(request.form)
     else:
@@ -143,9 +148,27 @@ def calculate_sld():
                                    error=repr(e)+'<br >'+"Raised when tried to parse formula = '%s'"%request.args['formula'])
         else:
             return calculate_user(f, float(request.args['density'] or 1.0), float(request.args['mu'] or 0),
-                                  request.args['densinput'], request.args['magninput'])
+                                  request.args['densinput'], request.args['magninput'],
+                                  name=request.args.get('name', default=None))
     else:
         return render_template('sldcalc.html')
+
+@app.route('/bio_blender')
+def bio_blender():
+    return render_template('bio_blender.html')
+
+@app.route('/bio_blender', methods=['POST'])
+def combine_blender():
+    mtype=request.form.get('molecule_type', default='protein')
+    if request.form['submit'] == 'Calculate SLD':
+        try:
+            return calculate_blend(mtype, request.form['name'], request.form['structure'])
+        except Exception as e:
+            return render_template('bio_blender.html',
+                       error=repr(e)+'<br >'+"Raised when tried to parse composition = '%s'"%request.form['structure'])
+    else:
+        return input_fill_blend(mtype, request.form['name'], request.form['structure'])
+    return render_template('bio_blender.html')
 
 @app.route('/api', methods=['GET'])
 def api_query():

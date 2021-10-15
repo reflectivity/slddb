@@ -70,7 +70,7 @@ DB_MATERIALS_COLUMNS=[
     ('crystal_data', cstr,      None,    None),
     ('temperature',  cposfloat, None,     'K'),
     ('magnetic_field', cfloat,  None,     'T'),
-    ('data_origin',  CSelect(['unspecified', 'text book',
+    ('data_origin',  CSelect(['unspecified', 'textbook',
                               'x-ray reflectivity', 'neutron reflectivity',
                               'mass density', 'diffraction', 'interferometry',
                               'SANS', 'SAXS', 'molecular dynamics']), 'unspecified',    None),

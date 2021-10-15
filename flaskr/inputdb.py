@@ -1,11 +1,12 @@
 import tempfile, os
-from flask import request, render_template, flash
+from flask import request, render_template, flash, url_for, redirect
 from werkzeug.utils import secure_filename
 
 from .querydb import search_db
+from .blender import collect_protein, collect_blend
 from slddb import SLDDB, DB_FILE
 from slddb.dbconfig import DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA, db_lookup
-from slddb.importers import CifImporter
+from slddb.importers import CifImporter, PolymerSequence
 
 input_fields=[field for field in DB_MATERIALS_FIELDS[1:]
               if field not in DB_MATERIALS_HIDDEN_DATA]
@@ -38,8 +39,19 @@ def input_fill_cif(file_obj):
     filename=secure_filename(file_obj.filename)
     full_path=os.path.join(tempfile.gettempdir(), filename)
     file_obj.save(full_path)
-    data=CifImporter(full_path)
+    if filename.endswith('.gz'):
+        import gzip
+        txt=gzip.open(full_path, 'rb').read()
+        os.remove(full_path)
+        full_path=os.path.join(tempfile.gettempdir(), filename[:-3])
+        open(full_path, 'wb').write(txt)
+    data=CifImporter(full_path, validate=False)
     os.remove(full_path)
+
+    if type(data.formula) is PolymerSequence:
+        m=collect_protein('', data.formula)
+        data['FU_volume']=m.fu_volume
+        data.formula=m.formula
 
     def get_data_input(field):
         conv=db_lookup[field][1]
@@ -53,6 +65,10 @@ def input_fill_cif(file_obj):
             return get_input(field)
         return conv.html_input(field, value)
     return render_template('input.html', fields=input_fields, get_input=get_data_input, get_unit=get_unit)
+
+def input_fill_blend(mtype, name, idstr):
+    material=collect_blend(mtype, name, idstr)
+    return redirect(url_for('input_page', name=name, formula=str(material.formula), FU_volume=material.fu_volume))
 
 def input_material(args):
     db=SLDDB(DB_FILE)

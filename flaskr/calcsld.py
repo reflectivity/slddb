@@ -41,9 +41,10 @@ d2o=Material([(db.elements.get_element(element), amount) for element, amount in 
              fu_dens=h2o.fu_dens)
 del(db)
 
-def get_deuteration_graph(m: Material):
+def get_deuteration_graph(m: Material, name=None):
     # Generate a graph for matching H2O/D2O with the given material
-    name=str(m.formula)
+    if name is None:
+        name=str(m.formula)
     mpoint=(m.rho_n.real-h2o.rho_n.real)/(d2o.rho_n.real-h2o.rho_n.real)
 
     fig = Figure()
@@ -129,7 +130,8 @@ def calculate_selection(ID):
         script = '<table><tr><td colspan="2">' \
                  '<button type="button" class="collapsible">Toggle Contrast Matching/X-Ray</button>' \
                  '</td></tr><tr><td class="uncollapsed">%s</td></tr>' \
-                 '<tr><td class="collapsed">%s</td></tr></table>'%(script, get_deuteration_graph(material))
+                 '<tr><td class="collapsed">%s</td></tr></table>'%(script,
+                                                   get_deuteration_graph(material, name=res[0]['name']))
     return render_template('sldcalc.html', material=material, material_name=res[0]['name'],
                            material_description=res[0]['description'], deuterated=deuterated,
                            exchanged=exchanged, script=script, xray_E=E.tolist(),
@@ -140,7 +142,7 @@ def calculate_selection(ID):
                            invalid=res[0]['invalid'], invalid_by=res[0]['invalid_by'],
                            formula=res[0]['formula'], density=material.dens, mu=material.mu)
 
-def calculate_user(formula, density, mu, density_choice, mu_choice):
+def calculate_user(formula, density, mu, density_choice, mu_choice, name=None):
     db=SLDDB(DB_FILE)
     kwrds={}
     if density==0:
@@ -166,7 +168,7 @@ def calculate_user(formula, density, mu, density_choice, mu_choice):
         E, rho_x=m.rho_vs_E()
         _, delta=m.delta_vs_E()
         _, beta=m.beta_vs_E()
-        script=get_graph(E, rho_x.real, rho_x.imag, str(formula))
+        script=get_graph(E, rho_x.real, rho_x.imag, name or str(formula))
         if 'H' in m.formula or 'Hx' in m.formula or 'D' in m.formula:
             dformula=Formula(m.formula)
             if 'H' in dformula:
@@ -180,7 +182,7 @@ def calculate_user(formula, density, mu, density_choice, mu_choice):
             script = '<table><tr><td colspan="2">' \
                      '<button type="button" class="collapsible">Toggle Contrast Matching/X-Ray</button>' \
                      '</td></tr><tr><td class="uncollapsed">%s</td></tr>' \
-                     '<tr><td class="collapsed">%s</td></tr></table>'%(script, get_deuteration_graph(m))
+                     '<tr><td class="collapsed">%s</td></tr></table>'%(script, get_deuteration_graph(m, name=name))
             if 'Hx' in m.formula:
                 eformula=Formula(m.formula)
                 Hidx=eformula.index('Hx')
@@ -193,7 +195,7 @@ def calculate_user(formula, density, mu, density_choice, mu_choice):
             deuterated=None
             exchanged=None
         return render_template('sldcalc.html', material=m, deuterated=deuterated,
-                           exchanged=exchanged, material_name="User input",
+                           exchanged=exchanged, material_name=name or "User input",
                            material_description="", script=script, xray_E=E.tolist(),
                            xray_rho_real=nan_to_num(rho_x.real).tolist(),
                            xray_rho_imag=nan_to_num(rho_x.imag).tolist(),
