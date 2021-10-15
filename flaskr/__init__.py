@@ -167,8 +167,11 @@ def combine_blender():
             return render_template('bio_blender.html',
                        error=repr(e)+'<br >'+"Raised when tried to parse composition = '%s'"%request.form['structure'])
     else:
-        return input_fill_blend(mtype, request.form['name'], request.form['structure'])
-    return render_template('bio_blender.html')
+        try:
+            return input_fill_blend(mtype, request.form['name'], request.form['structure'])
+        except Exception as e:
+            return render_template('bio_blender.html',
+                       error=repr(e)+'<br >'+"Raised when tried to parse composition = '%s'"%request.form['structure'])
 
 @app.route('/api', methods=['GET'])
 def api_query():
