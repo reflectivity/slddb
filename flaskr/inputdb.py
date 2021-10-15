@@ -67,7 +67,7 @@ def input_fill_cif(file_obj):
     return render_template('input.html', fields=input_fields, get_input=get_data_input, get_unit=get_unit)
 
 def input_fill_blend(mtype, name, idstr):
-    material=collect_blend(mtype, name, idstr)
+    material=collect_blend(mtype, idstr)
     return redirect(url_for('input_page', name=name, formula=str(material.formula), FU_volume=material.fu_volume))
 
 def input_material(args):

@@ -52,7 +52,7 @@ def collect_combination(ids, name_dict):
     for id in ids:
         if not id in loaded_ids:
             try:
-                entry=db.search_material(name=name_dict[id])[0]
+                entry=db.search_material(name=name_dict[id], str_like=False)[0]
             except KeyError:
                 raise SequenceParseError(f"Not a valid identifier {id}")
             except IndexError:
@@ -60,6 +60,7 @@ def collect_combination(ids, name_dict):
             m=db.select_material(entry)
             loaded_ids[id]=m
         elements.append(loaded_ids[id])
+    print(';'.join([f'{id}={name_dict[id]} ({loaded_ids[id].formula})' for id in loaded_ids.keys()]))
     result=elements[0]
     for element in elements[1:]:
         # combine molecule matierials
@@ -70,37 +71,37 @@ def clean_str(string):
     return string.replace('\n', '').replace('\r', '').replace('\t', '').replace(' ', '').strip()
 
 def calculate_blend(mtype, name, idstr):
-    result=collect_blend(mtype, name, idstr)
+    result=collect_blend(mtype, idstr)
 
     return redirect(url_for('calculate_sld', formula=str(result.formula), density=result.fu_volume,
                             name=name or mtype, **CALC_DEFAULT_FIELDS))
 
-def collect_blend(mtype, name, idstr):
+def collect_blend(mtype, idstr):
     if mtype=='protein':
-        return collect_protein(name, idstr)
+        return collect_protein(idstr)
     elif mtype=='dna':
-        return collect_dna(name, idstr)
+        return collect_dna(idstr)
     elif mtype=='rna':
-        return collect_rna(name, idstr)
+        return collect_rna(idstr)
     elif mtype=='db':
-        return collect_blendIDs(name, idstr)
+        return collect_blendIDs(idstr)
 
-def collect_protein(name, acids):
+def collect_protein(acids):
     acids=clean_str(acids).upper()
     result=collect_combination(acids, AMINO_ABRV)
     return result
 
-def collect_dna(name, bases):
+def collect_dna(bases):
     bases=clean_str(bases).upper()
     result=collect_combination(bases, DNA_ABRV)
     return result
 
-def collect_rna(name, bases):
+def collect_rna(bases):
     bases=clean_str(bases).upper()
     result=collect_combination(bases, RNA_ABRV)
     return result
 
-def collect_blendIDs(name, formula):
+def collect_blendIDs(formula):
     db = SLDDB(DB_FILE)
     elements=[]
     loaded_ids={}
