@@ -76,4 +76,4 @@ class TestCreateDB(unittest.TestCase):
         self.db.create_database()
 
     def test_backup(self):
-        self.db.backup('memory')
+        self.db.backup(':memory:')

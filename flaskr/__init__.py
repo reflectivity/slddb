@@ -354,7 +354,9 @@ def user_set_password():
 
 @app.route('/set_preference', methods=['POST'])
 def set_preference():
-    resp=make_response(start_page())
+    resp=make_response(redirect(request.form['return_link']))
     for key, value in request.form.items():
+        if key in ['return_link']:
+            continue
         resp.set_cookie(key, value)
     return resp
