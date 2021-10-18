@@ -218,8 +218,9 @@
         out=out.concat('Neutron nuclear SLD (10⁻⁶ Å⁻²)',
                         '\t', document.getElementById("neutron_entry_real").innerHTML,
                         '\t', document.getElementById("neutron_entry_imag").innerHTML, '\n');
+        if (material_neutron_magn!=0) {
         var magn_select=document.getElementById("magnresult")
-        out=out.concat(magn_select.options[magn_select.selectedIndex].text, '\t', material_neutron_magn, '\n');
+        out=out.concat(magn_select.options[magn_select.selectedIndex].text, '\t', material_neutron_magn, '\n');}
 
         var xray_select=document.getElementById("cu_select");
         var xray_unit=xray_select.options[xray_select.selectedIndex].text
@@ -451,7 +452,7 @@
             <tr><td style="text-align:right;">Neutron nuclear SLD (10⁻⁶ Å⁻²)</td>
               <td id="neutron_entry_real">{{"%.5f"%(1e6*material.rho_n.real)}}</td>
               <td id="neutron_entry_imag">{{"%.5f"%(1e6*material.rho_n.imag)}}i</td>
-              <td class="hide_mobile"><button type="button" onclick="copy_NSLD()">as Complex</button></td></tr>
+              <td class="hide_mobile"></td></tr>
             {% if deuterated %}
             <tr><td style="text-align:right;">Material Deuteration</td><td colspan="2">
                 <input type="range" min="0" max="100" value="0" class="slider" id="deuteration_amount" step="1" onchange="deuterateSlider(this.value)" style="width: 90px;">
@@ -478,7 +479,7 @@
                 <option value="muB">Magnetisation (µB/FU)</option>
                 <option value="magn">Magnetisation (kA/m = emu/cm³)</option>
                 </select></td><td colspan=2 id="magn_value">{{"%.6f"%(1e6*material.rho_m)}}</td>
-                <td class="hide_mobile"><button type="button" onclick="copy_Nmag()">as Float</button></td></tr>
+                <td class="hide_mobile"></td></tr>
             {% endif %}
             <tr><td style="text-align:right;">Cu-Kɑ <select id="cu_select" name="cu_select" onchange="switch_sld_cu(this.value)" style="width: 150px;">
                     <option value="electron">e-density (rₑ/Å³)</option>
@@ -487,7 +488,7 @@
                     </select></td>
               <td id="cu_entry_real">{{"%.6f"%(material.rho_of_E(Cu_kalpha).real/r_e_angstrom)}}</td>
               <td id="cu_entry_imag">{{"%.6f"%(material.rho_of_E(Cu_kalpha).imag/r_e_angstrom)}}i</td>
-              <td class="hide_mobile"><button type="button" onclick="copy_Cu()">as Complex</button></td></tr>
+              <td class="hide_mobile"></td></tr>
             <tr><td style="text-align:right;">Mo-Kɑ <select id="mo_select" name="mo_select" onchange="switch_sld_mo(this.value)" style="width: 150px;">
                     <option value="electron">e-density (rₑ/Å³)</option>
                     <option value="sld">SLD (10⁻⁶ Å⁻²)</option>
@@ -495,7 +496,7 @@
                     </select></td>
               <td id="mo_entry_real">{{"%.6f"%(material.rho_of_E(Mo_kalpha).real/r_e_angstrom)}}</td>
               <td id="mo_entry_imag">{{"%.6f"%(material.rho_of_E(Mo_kalpha).imag/r_e_angstrom)}}i</td>
-              <td class="hide_mobile"><button type="button" onclick="copy_Mo()">as Complex</button></td></tr>
+              <td class="hide_mobile"></td></tr>
             <tr style="border-top: solid 2px #888;"><th>Custom Energy (eV)</th>
               <td colspan="2"><select id="user_select" name="user_select" onchange="updateSlider(-1)" style="width: 150px;">
                     <option value="electron">e-density (rₑ/Å³)</option>
@@ -508,7 +509,7 @@
                 </form></td>
                 <td><div id="value_real">{{"%.6f"%(material.rho_of_E(Cu_kalpha).real/r_e_angstrom)}}</div></td>
                 <td><div id="value_imag">{{"%.6f"%(material.rho_of_E(Cu_kalpha).imag/r_e_angstrom)}}i</div></td>
-                <td class="hide_mobile"><button type="button" onclick="copy_xray()">as Complex</button></td></tr>
+                <td class="hide_mobile"></td></tr>
             {% if validated %}
             <tr><td colspan="4">This entry was validated by ORSO<br />({{ validated }} by {{ validated_by }})</td></tr>
             {% endif %}
