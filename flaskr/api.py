@@ -37,6 +37,8 @@ def calc_api(args):
             return repr(e)
         else:
             name=args.get('name', default='User Query')
+    else:
+        return 'Could not calculate, missing formula and density or protein/dna/rna sequence'
     out={}
     out['ID']=None
     out['name']=name
