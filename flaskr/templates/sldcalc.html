@@ -105,6 +105,8 @@ MathJax.Hub.Config({
     var exchanged_diff_real = {{1e6*(exchanged.rho_n.real-material.rho_n.real)}};
     var exchanged_diff_imag = {{1e6*(exchanged.rho_n.imag-material.rho_n.imag)}};
     var exchanged_diff_density = {{exchanged.dens-material.dens}};
+    var h2o_sld_real = -0.55992;
+    var d2o_sld_real = 6.39978;
 
     function updateNSLD() {
         frac_deuterated=document.getElementById("deuteration_amount_value").value*0.01;
@@ -140,8 +142,13 @@ MathJax.Hub.Config({
         var val_imag=(1.0-frac_d2o)*val_mH_imag+frac_d2o*val_mD_imag;
         var val_dens=(1.0-frac_d2o)*val_mH_dens+frac_d2o*val_mD_dens;
 
+        // Calculate new match point
+        var val_match=100.0*(h2o_sld_real-val_mH_real)/
+                            (val_mD_real+h2o_sld_real-val_mH_real-d2o_sld_real);
+
         document.getElementById("neutron_entry_real").innerHTML = (val_real).toFixed(5);
         document.getElementById("neutron_entry_imag").innerHTML = (val_imag).toFixed(5)+'i';
+        document.getElementById("match_point_value").innerHTML = (val_match).toFixed(2)+' % D<sub>2</sub>O';
 
 
         if (document.getElementById("densresult").value == 'density') {
@@ -474,6 +481,7 @@ MathJax.Hub.Config({
                 <input type="number" min="0" max="100" value="0" class="slider_value" id="d2o_amount_value"
                        onchange="d2oValue(this.value)" onkeyup="if (event.key=='Enter') {d2oValue(this.value)}" style="width: 40px;">%
             </td><td class="hide_mobile"></td></tr>
+            <tr><td style="text-align:right;">Match Point</td><td colspan="2" id="match_point_value">{{"%.2f"%match_point}}% D<sub>2</sub>O</td><td class="hide_mobile"></td></tr>
             {% endif %}
             {% if material.rho_m!=0 %}
             <tr><td style="text-align:right;"><select id="magnresult" name="magnresult" onchange="switch_magn()">
@@ -551,6 +559,7 @@ MathJax.Hub.Config({
       </td>
     </tr></table>
 
+{% if material %}
 <script>
     var but_coll  = document.getElementsByClassName("collapsible")[0];
 
@@ -574,25 +583,26 @@ MathJax.Hub.Config({
             content.style.display = "none";
           }
         }});
+{% endif %}
 
-{% if request.cookies.get("items_collapsed", "false").lower()=='true' %}
+{% if material and request.cookies.get("items_collapsed", "false").lower()=='true' %}
     but_coll.click();
 {% endif %}
 </script>
 
-{% if request.cookies.get("densresult") %}
+{% if material and request.cookies.get("densresult") %}
     <script>
         document.getElementById("densresult").value="{{request.cookies.get("densresult")}}";
         switch_density();
     </script>
 {% endif %}
-{% if request.cookies.get("magnresult") %}
+{% if material and request.cookies.get("magnresult") and material.rho_m!=0 %}
     <script>
         document.getElementById("magnresult").value="{{request.cookies.get("magnresult")}}";
         switch_magn();
     </script>
 {% endif %}
-{% if request.cookies.get("cu_select") %}
+{% if material and request.cookies.get("cu_select") %}
     <script>
         document.getElementById("cu_select").value="{{request.cookies.get("cu_select")}}";
         switch_sld_cu("{{request.cookies.get("cu_select")}}");

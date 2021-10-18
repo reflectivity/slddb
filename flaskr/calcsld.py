@@ -99,6 +99,7 @@ def calculate_selection(ID):
         material=db.select_material(res[0])
     except Exception as e:
         return render_template('base.html', error=repr(e)+'<br >'+"Raised when tried to parse material = %s"%res[0])
+    match_point=0.
     E, rho_x=material.rho_vs_E()
     _, delta=material.delta_vs_E()
     _, beta=material.beta_vs_E()
@@ -119,6 +120,9 @@ def calculate_selection(ID):
             eformula[Hidx]=('D', dformula[Hidx][1])
             exchanged=Material([(get_element(element), amount) for element, amount in eformula],
                                fu_dens=material.fu_dens)
+            rho_n1=material.rho_n.real
+            rho_n2=((exchanged.rho_n-material.rho_n)*0.9+material.rho_n).real
+            match_point = 100.*(h2o.rho_n.real-rho_n1)/(rho_n2+h2o.rho_n.real-rho_n1-d2o.rho_n.real)
         else:
             exchanged=None
     else:
@@ -134,7 +138,8 @@ def calculate_selection(ID):
                                                    get_deuteration_graph(material, name=res[0]['name']))
     return render_template('sldcalc.html', material=material, material_name=res[0]['name'],
                            material_description=res[0]['description'], deuterated=deuterated,
-                           exchanged=exchanged, script=script, xray_E=E.tolist(),
+                           exchanged=exchanged, match_point=match_point,
+                           script=script, xray_E=E.tolist(),
                            xray_rho_real=nan_to_num(rho_x.real).tolist(),
                            xray_rho_imag=nan_to_num(rho_x.imag).tolist(),
                            xray_delta=nan_to_num(delta).tolist(), xray_beta=nan_to_num(beta).tolist(),
@@ -165,6 +170,7 @@ def calculate_user(formula, density, mu, density_choice, mu_choice, name=None):
         traceback.print_exc()
         return render_template('sldcalc.html', error=repr(e))
     else:
+        match_point=0.0
         E, rho_x=m.rho_vs_E()
         _, delta=m.delta_vs_E()
         _, beta=m.beta_vs_E()
@@ -189,13 +195,17 @@ def calculate_user(formula, density, mu, density_choice, mu_choice, name=None):
                 eformula[Hidx]=('D', dformula[Hidx][1])
                 exchanged=Material([(get_element(element), amount) for element, amount in eformula],
                                     fu_dens=m.fu_dens)
+                rho_n1 = m.rho_n.real
+                rho_n2 = ((exchanged.rho_n-m.rho_n)*0.9+m.rho_n).real
+                match_point = 100.*(h2o.rho_n.real-rho_n1)/(rho_n2+h2o.rho_n.real-rho_n1-d2o.rho_n.real)
             else:
                 exchanged=None
         else:
             deuterated=None
             exchanged=None
         return render_template('sldcalc.html', material=m, deuterated=deuterated,
-                           exchanged=exchanged, material_name=name or "User input",
+                           exchanged=exchanged, match_point=match_point,
+                           material_name=name or "User input",
                            material_description="", script=script, xray_E=E.tolist(),
                            xray_rho_real=nan_to_num(rho_x.real).tolist(),
                            xray_rho_imag=nan_to_num(rho_x.imag).tolist(),
