@@ -3,7 +3,7 @@ Functions to create database compatible entries from other file formats.
 """
 import pathlib
 import os
-from .material import Formula
+from .material import Formula, PolymerSequence
 from .dbconfig import db_lookup
 
 class Importer(dict):
@@ -12,11 +12,12 @@ class Importer(dict):
     """
     formula=None
 
-    def __init__(self, filename):
+    def __init__(self, filename, validate=True):
         self.filename=filename
         self.name=os.path.basename(filename).rsplit('.', 1)[0]
         data=self.build_data()
-        self.validate(name=self.name, formula=self.formula, **data)
+        if validate:
+            self.validate(name=self.name, formula=self.formula, **data)
         dict.__init__(self, data)
 
     @staticmethod
@@ -53,12 +54,23 @@ class CifImporter(Importer):
         cf=CifFile.ReadCif(pathlib.Path(self.filename).as_uri())
         block=cf.first_block()
 
-        formula=Formula(block['_chemical_formula_sum'])
+        if '_chemical_formula_sum' in block:
+            formula=Formula(block['_chemical_formula_sum'])
+        elif '_entity_poly.pdbx_seq_one_letter_code' in block:
+            formula=PolymerSequence(block['_entity_poly.pdbx_seq_one_letter_code'])
+            output['tags']=['biology', 'polymer']
+            output['reference']='Protein Data Bank (PDB)'
+            output['ref_website']='https://www.rcsb.org/'
+        else:
+            raise ValueError("Could not locate chemical formula or one letter PDB sequence")
 
         if '_exptl_crystal_density_diffrn' in block:
             output['density']=self.float_werr(block['_exptl_crystal_density_diffrn'])
         elif '_cell_volume' in block and '_cell_formula_units_Z' in block:
             output['FU_volume']=self.float_werr(block['_cell_volume'])/self.float_werr(block['_cell_formula_units_Z']) # Å³
+        elif '_entity_poly.pdbx_seq_one_letter_code' in block:
+            # will use database FU_volume to deduce polymer density
+            pass
         else:
             raise ValueError("No data to deduce material density")
 

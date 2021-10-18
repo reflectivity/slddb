@@ -15,7 +15,7 @@ if not os.path.exists(configpath):
     try:
         os.makedirs(configpath)
     except OSError:
-        pass
+        print("Could not create config path, local database storage not possible.")
 
 from .converters import CType, CLimited, CArray, CDate, CComplex, CFormula, CSelect, CMultiSelect, \
     CUrl, CMail, Cdoi, Ccas
@@ -62,7 +62,7 @@ DB_MATERIALS_COLUMNS=[
                                 'nanoparticle']), 'solid',    None),
     ('tags', CMultiSelect(['magnetic', 'polymer', 'biology', 'membrane', 'lipid',
                            'metal', 'metal alloy', 'inorganic', 'small organic',
-                           'surfactant', 'lipid', 'protein']), None,    None),
+                           'surfactant', 'protein']), None,    None),
     ('ref_website',  curl,      None,    None),
     ('reference',    cstr,      None,    None),
     ('doi',          Cdoi(),    None,    None),
@@ -71,7 +71,7 @@ DB_MATERIALS_COLUMNS=[
     ('crystal_data', cstr,      None,    None),
     ('temperature',  cposfloat, None,     'K'),
     ('magnetic_field', cfloat,  None,     'T'),
-    ('data_origin',  CSelect(['unspecified', 'text book',
+    ('data_origin',  CSelect(['unspecified', 'textbook',
                               'x-ray reflectivity', 'neutron reflectivity',
                               'mass density', 'diffraction', 'interferometry',
                               'SANS', 'SAXS', 'molecular dynamics']), 'unspecified',    None),

@@ -92,7 +92,8 @@ class SLDDB():
         if commit:
             self.db.commit()
 
-    def search_material(self, join_and=True, serializable=False, filter_invalid=True, limit=100, offset=0, **data):
+    def search_material(self, join_and=True, serializable=False, filter_invalid=True, limit=100, offset=0,
+                        str_like=True, **data):
         for key, value in data.items():
             if not key in DB_MATERIALS_FIELDS:
                 raise KeyError('%s is not a valid data field'%key)
@@ -124,8 +125,11 @@ class SLDDB():
                     cval=qlst.pop(-1)
                     qstr=qstr[:-5]+')'
                 elif type(cval) is str:
-                    qstr+='%s LIKE ?'%key
-                    cval='%%%s%%'%cval
+                    if str_like:
+                        qstr+='%s LIKE ?'%key
+                        cval='%%%s%%'%cval
+                    else:
+                        qstr+='%s == ?'%key
                 else:
                     qstr+='%s == ?'%key
                 qlst.append(cval)
@@ -205,7 +209,7 @@ class SLDDB():
         self.db.commit()
         return result[0]
 
-    def select_material(self, result):
+    def select_material(self, result)->Material:
         # generate Material object from database entry and increment selection counter
         formula=Formula(result['formula'])
         if result['density']:
@@ -266,7 +270,7 @@ class SLDDB():
             if element is periodictable.n or element.density is None:
                 continue
             state='solid'
-            if 'T=' in element.density_caveat:
+            if 'T=-' in element.density_caveat:
                 state='liquid'
             self.add_material(element.name.capitalize(),
                               element.symbol,

@@ -34,6 +34,64 @@ def get_graph(E, real, imag, name='Iron'):
     data = base64.b64encode(buf.getbuffer()).decode("ascii")
     return f'<img style="width: 40em; max-width: 100%;" src="data:image/png;base64,{data}" />'
 
+db=SLDDB(DB_FILE)
+h2o=Material([(db.elements.get_element(element), amount) for element, amount in [('H', 2.0), ('O', 1.0)]],
+             dens=1.0)
+d2o=Material([(db.elements.get_element(element), amount) for element, amount in [('D', 2.0), ('O', 1.0)]],
+             fu_dens=h2o.fu_dens)
+del(db)
+
+def get_deuteration_graph(m: Material, name=None):
+    # Generate a graph for matching H2O/D2O with the given material
+    if name is None:
+        name=str(m.formula)
+    mpoint=(m.rho_n.real-h2o.rho_n.real)/(d2o.rho_n.real-h2o.rho_n.real)
+
+    fig = Figure()
+    ax = fig.subplots()
+    ax.plot([0,100], [m.rho_n.real*1e6, m.rho_n.real*1e6], label=name, color='C0')
+    ax.plot([0,100], [h2o.rho_n.real*1e6, d2o.rho_n.real*1e6], label='Water', color='C1')
+    if mpoint>=0 and mpoint<=1:
+        ax.plot([100*mpoint, 100*mpoint], [h2o.rho_n.real*1e6, m.rho_n.real*1e6], '--',
+                label='Contrast Matched', color='C1')
+        ax.text(100*mpoint, m.rho_n.real*1e6, '%.1f%%'%(100*mpoint), va='bottom', ha='right')
+    if 'Hx' in m.formula:
+        db=SLDDB(DB_FILE)
+        # create material where all exchangable sites are replace by deuterium
+        elements=[]
+        for element, amount in m.formula:
+            if element.capitalize()=='Hx':
+                elements.append((db.elements.get_element('H'), 0.1*amount))
+                elements.append((db.elements.get_element('D'), 0.9*amount))
+            else:
+                elements.append((db.elements.get_element(element), amount))
+        md=Material(elements, fu_dens=m.fu_dens)
+        del(db)
+        ax.plot([0,100], [m.rho_n.real*1e6, md.rho_n.real*1e6],
+                label='90% exchange', color='C2')
+        mpoint2=(h2o.rho_n.real-m.rho_n.real)/(
+                md.rho_n.real+h2o.rho_n.real-m.rho_n.real-d2o.rho_n.real)
+        if mpoint2>=0 and mpoint2<=1:
+            mrho=mpoint2*md.rho_n.real+(1-mpoint2)*m.rho_n.real
+            ax.plot([100*mpoint2, 100*mpoint2], [h2o.rho_n.real*1e6, mrho*1e6], '--',
+                    label='Contrast Matched', color='C2')
+            ax.plot([0*mpoint2, 100*mpoint2], [mrho*1e6, mrho*1e6], '--', color='C2')
+            ax.text(100*mpoint2, mrho*1e6, '%.3f | %.1f%%'%(mrho*1e6, 100*mpoint2), va='bottom', ha='right')
+
+    ax.legend()
+    ax.set_xlabel('Water deuteration %')
+    ax.set_ylabel('SLD (10⁻⁶ Å⁻²)')
+    ax.set_title('Contrast matching of %s'%name)
+    ax.set_xlim([0., 100.])
+    ax.set_ylim([h2o.rho_n.real*1e6, d2o.rho_n.real*1e6])
+    # Save it to a temporary buffer.
+    buf = BytesIO()
+    fig.savefig(buf, format="png")
+    fig.tight_layout()
+    # Embed the result in the html output.
+    data = base64.b64encode(buf.getbuffer()).decode("ascii")
+    return f'<img style="width: 40em; max-width: 100%;" src="data:image/png;base64,{data}" />'
+
 def calculate_selection(ID):
     db=SLDDB(DB_FILE)
     res=db.search_material(ID=ID, filter_invalid=False)
@@ -45,17 +103,38 @@ def calculate_selection(ID):
     _, delta=material.delta_vs_E()
     _, beta=material.beta_vs_E()
     script=get_graph(E, rho_x.real, rho_x.imag, res[0]['name'])
-    if 'H' in material.formula:
+    if 'H' in material.formula or 'Hx' in material.formula:
         dformula=Formula(material.formula)
-        Hidx=dformula.index('H')
-        dformula[Hidx]=('D', dformula[Hidx][1])
+        if 'H' in dformula:
+            Hidx=dformula.index('H')
+            dformula[Hidx]=('D', dformula[Hidx][1])
+        if 'Hx' in dformula:
+            Hidx=dformula.index('Hx')
+            dformula[Hidx]=('D', dformula[Hidx][1])
         deuterated=Material([(db.elements.get_element(element), amount) for element, amount in dformula],
                              fu_dens=material.fu_dens)
+        if 'Hx' in material.formula:
+            eformula=Formula(material.formula)
+            Hidx=eformula.index('Hx')
+            eformula[Hidx]=('D', dformula[Hidx][1])
+            exchanged=Material([(db.elements.get_element(element), amount) for element, amount in eformula],
+                               fu_dens=material.fu_dens)
+        else:
+            exchanged=None
     else:
         deuterated=None
+        exchanged=None
+    if 'H' in material.formula or 'Hx' in material.formula or 'D' in material.formula \
+            or any([tag in res[0].get('tags', []) for tag in
+                    ['polymer', 'biology', 'membrane', 'lipid', 'small organic', 'surfactant', 'protein']]):
+        script = '<table><tr><td colspan="2">' \
+                 '<button type="button" class="collapsible">Toggle Contrast Matching/X-Ray</button>' \
+                 '</td></tr><tr><td class="uncollapsed">%s</td></tr>' \
+                 '<tr><td class="collapsed">%s</td></tr></table>'%(script,
+                                                   get_deuteration_graph(material, name=res[0]['name']))
     return render_template('sldcalc.html', material=material, material_name=res[0]['name'],
                            material_description=res[0]['description'], deuterated=deuterated,
-                           script=script, xray_E=E.tolist(),
+                           exchanged=exchanged, script=script, xray_E=E.tolist(),
                            xray_rho_real=nan_to_num(rho_x.real).tolist(),
                            xray_rho_imag=nan_to_num(rho_x.imag).tolist(),
                            xray_delta=nan_to_num(delta).tolist(), xray_beta=nan_to_num(beta).tolist(),
@@ -63,7 +142,7 @@ def calculate_selection(ID):
                            invalid=res[0]['invalid'], invalid_by=res[0]['invalid_by'],
                            formula=res[0]['formula'], density=material.dens, mu=material.mu)
 
-def calculate_user(formula, density, mu, density_choice, mu_choice):
+def calculate_user(formula, density, mu, density_choice, mu_choice, name=None):
     db=SLDDB(DB_FILE)
     kwrds={}
     if density==0:
@@ -89,17 +168,34 @@ def calculate_user(formula, density, mu, density_choice, mu_choice):
         E, rho_x=m.rho_vs_E()
         _, delta=m.delta_vs_E()
         _, beta=m.beta_vs_E()
-        script=get_graph(E, rho_x.real, rho_x.imag, str(formula))
-        if 'H' in m.formula:
+        script=get_graph(E, rho_x.real, rho_x.imag, name or str(formula))
+        if 'H' in m.formula or 'Hx' in m.formula or 'D' in m.formula:
             dformula=Formula(m.formula)
-            Hidx=dformula.index('H')
-            dformula[Hidx]=('D', dformula[Hidx][1])
+            if 'H' in dformula:
+                Hidx=dformula.index('H')
+                dformula[Hidx]=('D', dformula[Hidx][1])
+            if 'Hx' in dformula:
+                Hidx=dformula.index('Hx')
+                dformula[Hidx]=('D', dformula[Hidx][1])
             deuterated=Material([(db.elements.get_element(element), amount) for element, amount in dformula],
                                 fu_dens=m.fu_dens)
+            script = '<table><tr><td colspan="2">' \
+                     '<button type="button" class="collapsible">Toggle Contrast Matching/X-Ray</button>' \
+                     '</td></tr><tr><td class="uncollapsed">%s</td></tr>' \
+                     '<tr><td class="collapsed">%s</td></tr></table>'%(script, get_deuteration_graph(m, name=name))
+            if 'Hx' in m.formula:
+                eformula=Formula(m.formula)
+                Hidx=eformula.index('Hx')
+                eformula[Hidx]=('D', dformula[Hidx][1])
+                exchanged=Material([(db.elements.get_element(element), amount) for element, amount in eformula],
+                                    fu_dens=m.fu_dens)
+            else:
+                exchanged=None
         else:
             deuterated=None
+            exchanged=None
         return render_template('sldcalc.html', material=m, deuterated=deuterated,
-                           material_name="User input",
+                           exchanged=exchanged, material_name=name or "User input",
                            material_description="", script=script, xray_E=E.tolist(),
                            xray_rho_real=nan_to_num(rho_x.real).tolist(),
                            xray_rho_imag=nan_to_num(rho_x.imag).tolist(),

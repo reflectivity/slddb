@@ -107,9 +107,11 @@ def search_api(args):
     db=SLDDB(DB_FILE)
     res=db.search_material(serializable=True, limit=10000, **query)
 
-    # remove hidden database fields
+    # remove hidden database fields besides ORSO validation
     for ri in res:
         for field in DB_MATERIALS_HIDDEN_DATA:
+            if field.startswith('validated'):
+                continue
             del ri[field]
 
     return json.dumps(res, indent='    ')
