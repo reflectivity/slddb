@@ -6,9 +6,16 @@
 
   <table style="width: 100%;">
     <tr><td style="text-align: right; vertical-align: center; width: 40%; overflow: auto;">
-      <div class="hide_mobile" style="font-size: 105%; text-align: justify; margin: 5px 1em 5px 1em; max-height: 18em;">
-        Here you can use tabulated values for amino acids and nucleotides to create a larger molecule and "blend"
-        their SLDs together. It also allows manual combination of any entries in the database using their IDs.
+      <div class="hide_mobile" style="font-size: 105%; text-align: justify; margin: 5px 1em 5px 1em; max-height: 18em; hyphens: auto;">
+        <p>
+          Here you can use tabulated values for amino acids and nucleotides to create a larger molecule and "blend"
+          their SLDs together. It also allows manual combination of any entries in the database using their IDs.
+        </p>
+        <p>
+          The calculation of SLD is done by providing the sum of the chemical elements as well as their volume
+          from all constituents. The values of molecular volume used for the constituents is documented
+          in the associated database entry.
+        </p>
       </div>
     </td><td style="width: 40em; height: 1px; align: center; vertical-align: top;">
     <form action="{{ url_for('combine_blender') }}" method="post"><center>

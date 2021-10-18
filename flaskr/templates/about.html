@@ -4,7 +4,7 @@
 
 {% block content %}
 <center>
-    <div style="width: 60%; font-size: 125%; text-align: justify; ">
+    <div style="max-width: 42em; font-size: 115%; text-align: justify; hyphens: auto;">
     <p>
         This is a database for materials for scattering length density (SLD)
         calculations for neutron and x-ray reflectometry and small angle scattering.
@@ -22,21 +22,31 @@
         <h4 style="margin: 0px;">Application Programmers Interface (API) Usage:</h4><br />
 
         Manual calculation of SLD from formula and density values:<br/>
-        <i>{{ url_for('api_query', _external=True, formula="XXX", density="YYY", sldcalc="true") }}</i>
+        <a href="{{ url_for('api_query', _external=True, formula="Fe2O3", density=7.8, sldcalc="true") }}">
+        <i>{{ url_for('api_query', _external=True, formula="XXX", density="YYY", sldcalc="true") }}</i></a>
+        <br/>
+        <a href="{{ url_for('api_query', _external=True, protein="abtd", sldcalc="true") }}">
+        <i>{{ url_for('api_query', _external=True, protein="XXX", sldcalc="true") }}</i></a>
+        <br/>
+        <a href="{{ url_for('api_query', _external=True, dna="agat", sldcalc="true") }}">
+        <i>{{ url_for('api_query', _external=True, dna="XXX", sldcalc="true") }}</i></a>
         <br/><br/>
 
         Retrieve a list of fields that can be used for database queries.<br/>
-        <i>{{ url_for('api_query', _external=True, get_fields=True) }}</i>
+        <a href="{{ url_for('api_query', _external=True, get_fields=True) }}">
+        <i>{{ url_for('api_query', _external=True, get_fields=True) }}</i></a>
         <br/><br/>
 
         Search database for material using arbitrary fields.<br/>
-        <i>{{ url_for('api_query', _external=True, field1="XXX", field2="YYY") }}</i>
+        <a href="{{ url_for('api_query', _external=True, name="DNA") }}">
+        <i>{{ url_for('api_query', _external=True, field1="XXX", field2="YYY") }}</i></a>
         <br/><br/>
 
         Calculation of SLD form database material.<br/>
-        <i>{{ url_for('api_query', _external=True, ID="XXX", xray_unit="edens") }}</i><br /><br />
+        <a href="{{ url_for('api_query', _external=True, ID=24, xray_unit="sld") }}">
+        <i>{{ url_for('api_query', _external=True, ID="XXX", xray_unit="edens") }}</i><br /><br /></a>
         Units for x-ray results are:
-            <ol type="1">
+            <ol type="1" style="margin: 0pt;">
                 <li><i>edens</i>: electron density (rₑ/Å³)</li><br />
                 <li><i>sld</i>: scattering length density (1/Å²)</li><br />
                 <li><i>n_db</i>: optical constants (δ/β) for refractive index (n=1-δ+iβ) (1)</li>

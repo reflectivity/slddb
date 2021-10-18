@@ -8,13 +8,13 @@ from slddb.material import Material, Formula
 
 
 def calc_api(args):
-    if 'polymer' in args:
+    if 'protein' in args:
         try:
-            material=collect_protein(args['polymer'])
+            material=collect_protein(args['protein'])
         except Exception as e:
             return repr(e)
         else:
-            name=args.get('name', default='polymer')
+            name=args.get('name', default='protein')
     elif 'dna' in args:
         try:
             material=collect_dna(args['dna'])

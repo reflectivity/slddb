@@ -57,10 +57,16 @@ class CifImporter(Importer):
         if '_chemical_formula_sum' in block:
             formula=Formula(block['_chemical_formula_sum'])
         elif '_entity_poly.pdbx_seq_one_letter_code' in block:
-            formula=PolymerSequence(block['_entity_poly.pdbx_seq_one_letter_code'])
+            txt=block['_entity_poly.pdbx_seq_one_letter_code']
+            if type(txt) is list:
+                formula=PolymerSequence('\n\n'.join(txt))
+            else:
+                formula=PolymerSequence(txt)
             output['tags']=['biology', 'polymer']
             output['reference']='Protein Data Bank (PDB)'
             output['ref_website']='https://www.rcsb.org/'
+            if '_citation.pdbx_database_id_DOI' in block:
+                output['doi']=block['_citation.pdbx_database_id_DOI'][0]
         else:
             raise ValueError("Could not locate chemical formula or one letter PDB sequence")
 
