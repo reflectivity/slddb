@@ -11,11 +11,13 @@ from .xray_henke import XRAY_SCATTERING_FACTORS
 ELEMENT_NAMES = dict([(value, key) for key, value in ELEMENT_CHARGES.items()])
 
 ELEMENT_FULLNAMES['D']='deuterium'
-ELEMENT_FULLNAMES['Hx']='exchangable hydrogen'
+ELEMENT_FULLNAMES['Hx']='exchangeable hydrogen'
 
 for data in [ATOMIC_WEIGHTS, NEUTRON_SCATTERING_LENGTHS]:
     data['D']=data[(1,2)]
     data['Hx']=data[(1,1)]
+for data in [ELEMENT_CHARGES, XRAY_SCATTERING_FACTORS]:
+    data['Hx']=data['H']
 
 class Element():
     N=None
@@ -50,6 +52,8 @@ class Element():
             self._xdata=None
 
     def f_of_E(self, Ei):
+        if self._xdata is None:
+            return float('nan')
         E, fp, fpp=self._xdata
         fltr=(E>=Ei)
         if not fltr.any():

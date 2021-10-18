@@ -84,16 +84,16 @@ def enter_amino():
 
 
 RNA_ABRV=[
-    ["RNA-Adenine",     'C10H9Hx3O6N5P',      314.0],
-    ["RNA-Guanine",     'C10H8Hx4O7N5P',      326.3],
-    ["RNA-Cytosine",    'C9H10Hx2O7N3P',      285.6],
-    ["RNA-Uracil",      'C9H9Hx2O8N2P',       282.3],
+    ["RNA-Adenine",     'C10H8Hx3O6N5P',       314.0],
+    ["RNA-Guanine",     'C10H7Hx4O7N5P',      326.3],
+    ["RNA-Cytosine",    'C9H8Hx3O7N3P',      285.6],
+    ["RNA-Uracil",      'C9H8Hx2O8N2P',       282.3],
     ]
 DNA_ABRV=[
-    ["DNA-Adenine",     'C10H10Hx2O5N5P',     314.0],
-    ["DNA-Guanine",     'C10H9Hx3O6N5P',      326.3],
-    ["DNA-Cytosine",    'C9H9Hx3O6N3P',       285.6],
-    ["DNA-Thymine",     'C10H12Hx1O7N2P',     308.7],
+    ["DNA-Adenine",     'C10H9Hx2O5N5P',      314.0],
+    ["DNA-Guanine",     'C10H8Hx3O6N5P',      326.3],
+    ["DNA-Cytosine",    'C9H9Hx2O6N3P',       285.6],
+    ["DNA-Thymine",     'C10H11Hx1O7N2P',     308.7],
     ]
 def enter_rnadna():
     db=SLDDB(DB_FILE)

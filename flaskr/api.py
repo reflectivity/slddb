@@ -9,10 +9,8 @@ from slddb.material import Material, Formula
 def calc_api(args):
     if 'formula' in args and 'density' in args:
         f=Formula(args['formula'], sort=False)
-        db=SLDDB(DB_FILE)
         try:
-            material=Material([(db.elements.get_element(element), amount) for element, amount in f],
-                   dens=float(args['density']))
+            material=Material(f, dens=float(args['density']))
         except Exception as e:
             return repr(e)
         else:

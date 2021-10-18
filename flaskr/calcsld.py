@@ -1,10 +1,12 @@
 import sys
+import traceback
 
 from flask import render_template
 
 from slddb.constants import Cu_kalpha, Mo_kalpha, r_e, r_e_angstrom
 from slddb import SLDDB, DB_FILE
 from slddb.material import Material, Formula
+from slddb.element_table import get_element
 
 from numpy import nan_to_num
 import base64
@@ -34,12 +36,10 @@ def get_graph(E, real, imag, name='Iron'):
     data = base64.b64encode(buf.getbuffer()).decode("ascii")
     return f'<img style="width: 40em; max-width: 100%;" src="data:image/png;base64,{data}" />'
 
-db=SLDDB(DB_FILE)
-h2o=Material([(db.elements.get_element(element), amount) for element, amount in [('H', 2.0), ('O', 1.0)]],
+h2o=Material([(get_element(element), amount) for element, amount in [('H', 2.0), ('O', 1.0)]],
              dens=1.0)
-d2o=Material([(db.elements.get_element(element), amount) for element, amount in [('D', 2.0), ('O', 1.0)]],
+d2o=Material([(get_element(element), amount) for element, amount in [('D', 2.0), ('O', 1.0)]],
              fu_dens=h2o.fu_dens)
-del(db)
 
 def get_deuteration_graph(m: Material, name=None):
     # Generate a graph for matching H2O/D2O with the given material
@@ -61,10 +61,10 @@ def get_deuteration_graph(m: Material, name=None):
         elements=[]
         for element, amount in m.formula:
             if element.capitalize()=='Hx':
-                elements.append((db.elements.get_element('H'), 0.1*amount))
-                elements.append((db.elements.get_element('D'), 0.9*amount))
+                elements.append((get_element('H'), 0.1*amount))
+                elements.append((get_element('D'), 0.9*amount))
             else:
-                elements.append((db.elements.get_element(element), amount))
+                elements.append((get_element(element), amount))
         md=Material(elements, fu_dens=m.fu_dens)
         del(db)
         ax.plot([0,100], [m.rho_n.real*1e6, md.rho_n.real*1e6],
@@ -111,13 +111,13 @@ def calculate_selection(ID):
         if 'Hx' in dformula:
             Hidx=dformula.index('Hx')
             dformula[Hidx]=('D', dformula[Hidx][1])
-        deuterated=Material([(db.elements.get_element(element), amount) for element, amount in dformula],
+        deuterated=Material([(get_element(element), amount) for element, amount in dformula],
                              fu_dens=material.fu_dens)
         if 'Hx' in material.formula:
             eformula=Formula(material.formula)
             Hidx=eformula.index('Hx')
             eformula[Hidx]=('D', dformula[Hidx][1])
-            exchanged=Material([(db.elements.get_element(element), amount) for element, amount in eformula],
+            exchanged=Material([(get_element(element), amount) for element, amount in eformula],
                                fu_dens=material.fu_dens)
         else:
             exchanged=None
@@ -143,7 +143,6 @@ def calculate_selection(ID):
                            formula=res[0]['formula'], density=material.dens, mu=material.mu)
 
 def calculate_user(formula, density, mu, density_choice, mu_choice, name=None):
-    db=SLDDB(DB_FILE)
     kwrds={}
     if density==0:
         return render_template('sldcalc.html', error="Density can not be zero!")
@@ -161,8 +160,9 @@ def calculate_user(formula, density, mu, density_choice, mu_choice, name=None):
     elif mu_choice=='magn':
         kwrds['M']=mu
     try:
-        m=Material([(db.elements.get_element(element), amount) for element, amount in formula], **kwrds)
+        m=Material([(get_element(element), amount) for element, amount in formula], **kwrds)
     except Exception as e:
+        traceback.print_exc()
         return render_template('sldcalc.html', error=repr(e))
     else:
         E, rho_x=m.rho_vs_E()
@@ -177,7 +177,7 @@ def calculate_user(formula, density, mu, density_choice, mu_choice, name=None):
             if 'Hx' in dformula:
                 Hidx=dformula.index('Hx')
                 dformula[Hidx]=('D', dformula[Hidx][1])
-            deuterated=Material([(db.elements.get_element(element), amount) for element, amount in dformula],
+            deuterated=Material([(get_element(element), amount) for element, amount in dformula],
                                 fu_dens=m.fu_dens)
             script = '<table><tr><td colspan="2">' \
                      '<button type="button" class="collapsible">Toggle Contrast Matching/X-Ray</button>' \
@@ -187,7 +187,7 @@ def calculate_user(formula, density, mu, density_choice, mu_choice, name=None):
                 eformula=Formula(m.formula)
                 Hidx=eformula.index('Hx')
                 eformula[Hidx]=('D', dformula[Hidx][1])
-                exchanged=Material([(db.elements.get_element(element), amount) for element, amount in eformula],
+                exchanged=Material([(get_element(element), amount) for element, amount in eformula],
                                     fu_dens=m.fu_dens)
             else:
                 exchanged=None

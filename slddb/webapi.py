@@ -8,7 +8,7 @@ from urllib.error import URLError
 from . import SLDDB, DB_FILE
 from .dbconfig import WEBAPI_URL
 from .material import Material, Formula
-
+from .element_table import get_element
 
 class SLD_API():
     """
@@ -132,7 +132,7 @@ class SLD_API():
             return self.localmaterial(ID)
         else:
             f=Formula(res['formula'], sort=False)
-            out=Material([(self.db.elements.get_element(element), amount) for element, amount in f],
+            out=Material([(get_element(element), amount) for element, amount in f],
                        dens=float(res['density']))
             return out
 
@@ -146,6 +146,6 @@ class SLD_API():
         """
         self.check()
         f=Formula(formula, sort=False)
-        out=Material([(self.db.elements.get_element(element), amount) for element, amount in f],
+        out=Material([(get_element(element), amount) for element, amount in f],
                    dens=dens, fu_volume=fu_volume, rho_n=rho_n, mu=0.0, xsld=xsld, xE=xE)
         return out

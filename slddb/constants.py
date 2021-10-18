@@ -23,8 +23,14 @@ muB=9.274_010_0783e3 # kA/m Å³ - Bohr Magneton scaled to get kA/m from Ä³ FU
 
 #
 # Non-fundamental constant derived values with yet undocumented origin
-#
-Cu_kalpha=8.047823 # keV
-Mo_kalpha=17.4794 # keV
+# Transition energies from Deslattes, R.D.;
+# Deslattes, R.D., et al. Rev. Mod. Phys. 75, 35-99.  (2003)
+# https://doi.org/10.1103/RevModPhys.75.35
+Cu_kalpha1=8.04782 # keV
+Cu_kalpha2=8.02784 # keV
+Cu_kalpha=(2*Cu_kalpha1+Cu_kalpha2)/3.0 # keV
+Mo_kalpha1=17.4793 # keV
+Mo_kalpha2=17.3743 # keV
+Mo_kalpha=(2*Mo_kalpha1+Mo_kalpha2)/3. # keV
 
 rho_of_M=2.853e-9 # Å^-2 from kA/m

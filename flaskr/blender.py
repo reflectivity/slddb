@@ -1,6 +1,12 @@
+import os
+import tempfile
 from flask import redirect, url_for
+from werkzeug.utils import secure_filename
 
 from slddb import DB_FILE, SLDDB
+from slddb.material import Material
+from slddb.element_table import get_element
+from slddb.importers import CifImporter, PolymerSequence
 
 CALC_DEFAULT_FIELDS = dict(densinput='volume',mu=0.0,magninput='muB')
 
@@ -54,13 +60,13 @@ def collect_combination(ids, name_dict):
             try:
                 entry=db.search_material(name=name_dict[id], str_like=False)[0]
             except KeyError:
-                raise SequenceParseError(f"Not a valid identifier {id}")
+                possible_ids=name_dict.keys()
+                raise SequenceParseError(f"Not a valid identifier {id}, options are {''.join(possible_ids)}")
             except IndexError:
                 raise SequenceParseError(f"Molecule {name_dict[id]} not found in database")
             m=db.select_material(entry)
             loaded_ids[id]=m
         elements.append(loaded_ids[id])
-    print(';'.join([f'{id}={name_dict[id]} ({loaded_ids[id].formula})' for id in loaded_ids.keys()]))
     result=elements[0]
     for element in elements[1:]:
         # combine molecule matierials
@@ -86,20 +92,21 @@ def collect_blend(mtype, idstr):
     elif mtype=='db':
         return collect_blendIDs(idstr)
 
+hx2o=Material([(get_element(element), amount) for element, amount in [('Hx', 2.0), ('O', 1.0)]], dens=1.0)
 def collect_protein(acids):
     acids=clean_str(acids).upper()
     result=collect_combination(acids, AMINO_ABRV)
-    return result
+    return result+hx2o
 
 def collect_dna(bases):
     bases=clean_str(bases).upper()
     result=collect_combination(bases, DNA_ABRV)
-    return result
+    return result+hx2o
 
 def collect_rna(bases):
     bases=clean_str(bases).upper()
     result=collect_combination(bases, RNA_ABRV)
-    return result
+    return result+hx2o
 
 def collect_blendIDs(formula):
     db = SLDDB(DB_FILE)
@@ -116,9 +123,27 @@ def collect_blendIDs(formula):
             entry=db.search_material(ID=ID)[0]
             m=db.select_material(entry)
             loaded_ids[ID]=m
-        elements.append(loaded_ids[ID])
+        elements.append(number*loaded_ids[ID])
     result=elements[0]
     for element in elements[1:]:
         # combine molecule matierials
         result+=element
     return result
+
+def formula_from_cif(file_obj):
+    filename=secure_filename(file_obj.filename)
+    full_path=os.path.join(tempfile.gettempdir(), filename)
+    file_obj.save(full_path)
+    if filename.endswith('.gz'):
+        import gzip
+        txt=gzip.open(full_path, 'rb').read()
+        os.remove(full_path)
+        full_path=os.path.join(tempfile.gettempdir(), filename[:-3])
+        open(full_path, 'wb').write(txt)
+    data=CifImporter(full_path, validate=False)
+    os.remove(full_path)
+
+    if type(data.formula) is PolymerSequence:
+        return data.name, data.formula
+    else:
+        return None, None

@@ -49,7 +49,7 @@ def input_fill_cif(file_obj):
     os.remove(full_path)
 
     if type(data.formula) is PolymerSequence:
-        m=collect_protein('', data.formula)
+        m=collect_protein(data.formula)
         data['FU_volume']=m.fu_volume
         data.formula=m.formula
 

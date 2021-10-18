@@ -25,7 +25,7 @@ from .api import calc_api, select_api, search_api
 from .querydb import search_db, show_search
 from .calcsld import calculate_selection, calculate_user, validate_selection, invalidate_selection
 from .inputdb import input_form, input_fill_cif, input_material, edit_selection, update_material, input_fill_blend
-from .blender import calculate_blend
+from .blender import calculate_blend, formula_from_cif
 
 app=Flask("ORSO SLD Data Base", template_folder='flaskr/templates',
           static_folder='flaskr/static')
@@ -159,18 +159,22 @@ def bio_blender():
 @app.route('/bio_blender', methods=['POST'])
 def combine_blender():
     mtype=request.form.get('molecule_type', default='protein')
-    if request.form['submit'] == 'Calculate SLD':
+    submit_type=request.form.get('submit', default='upload')
+    if submit_type == 'Calculate SLD':
         try:
             return calculate_blend(mtype, request.form['name'], request.form['structure'])
         except Exception as e:
             return render_template('bio_blender.html',
                        error=repr(e)+'<br >'+"Raised when tried to parse composition = '%s'"%request.form['structure'])
-    else:
+    elif submit_type == 'Enter in Database':
         try:
             return input_fill_blend(mtype, request.form['name'], request.form['structure'])
         except Exception as e:
             return render_template('bio_blender.html',
                        error=repr(e)+'<br >'+"Raised when tried to parse composition = '%s'"%request.form['structure'])
+    else:
+        name, formula=formula_from_cif(request.files['cif_file'])
+        return render_template('bio_blender.html', fill_formula=formula, fill_name=name)
 
 @app.route('/api', methods=['GET'])
 def api_query():
