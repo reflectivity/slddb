@@ -6,7 +6,7 @@ from numpy import array
 
 from .masses import ATOMIC_WEIGHTS, ELEMENT_CHARGES, ELEMENT_FULLNAMES
 from .nlengths import NEUTRON_SCATTERING_LENGTHS
-from .xray_henke import XRAY_SCATTERING_FACTORS
+from .xray_nist import XRAY_SCATTERING_FACTORS
 
 ELEMENT_NAMES = dict([(value, key) for key, value in ELEMENT_CHARGES.items()])
 
