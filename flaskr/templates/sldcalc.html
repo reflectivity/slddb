@@ -433,7 +433,7 @@
                 </th></tr>
             {% else %}
             <tr><th>Compound</th><th colspan=2>{{material_name}}</th>
-                <th>
+                <th class="hide_mobile">
                     <a href="{{url_for('calculate_sld', formula=str(material.formula), density=material.dens, mu=material.mu, densinput='density', magninput='muB', name=material_name, _anchor='results_header')|safe}}" target="_blank">direct link</a>
                     <input type="hidden" name="return_link" value="{{url_for('calculate_sld', formula=str(material.formula), density=material.dens, mu=material.mu, densinput='density', magninput='muB', name=material_name, _anchor='results_header')|safe}}" />
                 </th></tr>
