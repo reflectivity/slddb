@@ -5,7 +5,7 @@ Manage database creation, insertion and access.
 import sqlite3
 from .dbconfig import DB_MATERIALS_CONVERTERS, DB_MATERIALS_NAME, \
     DB_MATERIALS_FIELDS, DB_MATERIALS_FIELD_DEFAULTS, db_lookup
-from .element_table import Elements
+from .element_table import get_element
 from .material import Material, Formula
 from .importers import importers
 
@@ -18,7 +18,6 @@ class SLDDB():
 
     def __init__(self, dbfile):
         self.db=sqlite3.connect(dbfile)
-        self.elements=Elements(self.db)
 
     def import_material(self, filename, name=None, commit=True):
         suffix=filename.rsplit('.',1)[1]
@@ -215,7 +214,7 @@ class SLDDB():
             fu_volume=None
         else:
             fu_volume=result['FU_volume']
-        m=Material([(self.elements.get_element(element), amount) for element, amount in formula],
+        m=Material(formula,
                    dens=result['density'],
                    fu_volume=fu_volume,
                    rho_n=result['SLD_n'],
@@ -258,8 +257,6 @@ class SLDDB():
 
     def create_database(self):
         self.create_table()
-        self.elements.create_table()
-        self.elements.fill_table()
         self.db.commit()
 
     def add_elements(self):
@@ -277,7 +274,7 @@ class SLDDB():
                               description=element.density_caveat,
                               density=element.density,
                               physical_state=state,
-                              data_origin='text book',
+                              data_origin='textbook',
                               ref_website='https://github.com/pkienzle/periodictable',
                               reference='Python module periodictable, \ndata source: ILL Neutron Data Booklet')
         self.db.commit()

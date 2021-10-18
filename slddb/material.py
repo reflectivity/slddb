@@ -7,6 +7,7 @@ import re
 from numpy import array, pi
 from collections import OrderedDict
 from .constants import u2g, r_e, r_e_angstrom, muB, rho_of_M, Cu_kalpha, E_to_lambda, fm2angstrom
+from .element_table import get_element
 
 SUBSCRIPT_DIGITS="₀₁₂₃₄₅₆₇₈₉"
 
@@ -183,6 +184,8 @@ class Material():
     def __init__(self, elements, dens=None, fu_volume=None, rho_n=None, mu=0., xsld=None, xE=None,
                  fu_dens=None, M=None,
                  ID=None):
+        if type(elements) is Formula:
+            elements=[(get_element(element), amount) for element, amount in elements]
         self.elements=elements
         # generate formula unit density using different priority of possible inputs
         if fu_volume is not None:
@@ -286,6 +289,8 @@ class Material():
     def fu_mass(self):
         m=0.
         for element, number in self.elements:
+            if element.mass is None:
+                raise ValueError(f'No mass known for element {element}')
             m+=number*element.mass
         return m
 
