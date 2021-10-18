@@ -33,8 +33,7 @@ curl=CUrl()
 cmail=CMail()
 
 WEBAPI_URL='https://slddb.esss.dk/slddb/'
-DB_FILE=os.path.join(configpath, 'slddb.db')
-print(DB_FILE)
+DB_FILE=os.path.join(configpath, 'local_database.db')
 
 DB_MATERIALS_NAME='materials'
 DB_MATERIALS_COLUMNS=[

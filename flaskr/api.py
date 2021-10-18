@@ -5,7 +5,7 @@ from slddb.dbconfig import DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA, db_loo
 from slddb.constants import Cu_kalpha, Mo_kalpha, r_e
 from slddb.material import Material, Formula
 
-print(f'from api {DB_FILE}')
+
 def calc_api(args):
     if 'formula' in args and 'density' in args:
         f=Formula(args['formula'], sort=False)
