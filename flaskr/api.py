@@ -42,14 +42,23 @@ def calc_api(args):
     out['name']=name
     out['formula']=str(material.formula)
     out['density']=material.dens
+    out['fu_dens']=material.fu_dens
+    out['fu_volume']=material.fu_volume
+    out['fu_mass']=material.fu_mass
+    out['fu_b']=repr(material.fu_b)
     out['rho_n']=repr(material.rho_n)
     out['rho_n_mag']=repr(material.rho_m)
+    out['mu']=material.mu
+    out['M']=material.M
     out['rho_Cu_kalpha']=repr(material.rho_of_E(Cu_kalpha))
     out['rho_Mo_kalpha']=repr(material.rho_of_E(Mo_kalpha))
     E,delta=material.rho_vs_E()
     out['xray_E']=E.tolist()
     out['xray_delta_real']=delta.real.tolist()
     out['xray_delta_imag']=delta.imag.tolist()
+    out['units']={'density': 'g/cm**3', 'fu_dens': '1/angstrom**3', 'fu_volume': 'angstrom**3', 'fu_mass': 'u',
+                  'fu_b': 'fm', 'rho_n': '1/angstrom**2', 'rho_n_mag': '1/angstrom**2', 'mu': 'muB', 'M': 'emu/cm**3',
+                  'xray_E': 'keV', 'xray_values': '1/angstrom**2'}
     return json.dumps(out, indent='    ')
 
 def select_api(args):

@@ -144,8 +144,16 @@ class SLD_API():
             res=api.custom('Fe', dens=7.8)
             print(material.dens, material.rho_n, material.f_of_E(8.0))
         """
-        self.check()
         f=Formula(formula, sort=False)
         out=Material([(get_element(element), amount) for element, amount in f],
                    dens=dens, fu_volume=fu_volume, rho_n=rho_n, mu=0.0, xsld=xsld, xE=xE)
+        return out
+
+    def bio_blender(self, sequence, molecule='protein'):
+        """
+        Get material for protein, DNA or RNA. Provide a letter sequence and molecule type ('protein', 'dna', 'rna').
+        """
+        opts={molecule: sequence, 'sldcalc': 'true'}
+        res = self.webquery(opts)
+        out=Material(Formula(res['formula']), fu_volume=res['fu_volume'])
         return out
