@@ -16,7 +16,7 @@ except ImportError:
 import slddb
 from slddb import __version__, dbconfig
 # for flask use database file in startup folder
-DB_FILE='/var/www/html/slddb/slddb.db';dbconfig.DB_FILE=DB_FILE;slddb.DB_FILE=DB_FILE
+DB_FILE='slddb.db';dbconfig.DB_FILE=DB_FILE;slddb.DB_FILE=DB_FILE
 from slddb.dbconfig import DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA, db_lookup
 from slddb.material import Formula
 from slddb import constants
@@ -26,14 +26,14 @@ from .querydb import search_db, show_search
 from .calcsld import calculate_selection, calculate_user, validate_selection, invalidate_selection
 from .inputdb import input_form, input_fill_cif, input_material, edit_selection, update_material
 
-app=Flask("ORSO SLD Data Base", template_folder='/var/www/html/slddb/flaskr/templates',
-          static_folder='/var/www/html/slddb/flaskr/static')
+app=Flask("ORSO SLD Data Base", template_folder='flaskr/templates',
+          static_folder='flaskr/static')
 
 try:
-    app.config['SECRET_KEY']=open('/var/www/html/slddb/flaskr/secret.key', 'rb').read()
+    app.config['SECRET_KEY']=open('flaskr/secret.key', 'rb').read()
 except IOError:
     pass
-app.config['SQLALCHEMY_DATABASE_URI']='sqlite:////var/www/html/slddb/flaskr/db.sqlite'
+app.config['SQLALCHEMY_DATABASE_URI']='sqlite:///flaskr/db.sqlite'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=True
 db=SQLAlchemy()
 db.init_app(app)

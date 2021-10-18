@@ -10,10 +10,12 @@ elif 'XDG_CONFIG_HOME' in os.environ:
     confighome = os.environ['XDG_CONFIG_HOME']
 else:
     confighome = os.path.join(os.environ['HOME'], '.config')
-confighome='/var/www/html/'
 configpath = os.path.join(confighome, 'slddb')
 if not os.path.exists(configpath):
-    os.makedirs(configpath)
+    try:
+        os.makedirs(configpath)
+    except OSError:
+        pass
 
 from .converters import CType, CLimited, CArray, CDate, CComplex, CFormula, CSelect, CMultiSelect, \
     CUrl, CMail, Cdoi, Ccas
