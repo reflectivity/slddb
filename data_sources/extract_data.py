@@ -84,7 +84,7 @@ def collect_nlengths():
             El=itms[0]
             key=El
         try:
-            b=complex(itms[2].replace('i', 'j'))
+            b=complex(itms[2].split('(', 1)[0].replace('i', 'j'))
         except ValueError:
             b=None
         nlengths[key]=b
@@ -151,5 +151,5 @@ def collect_xray_new():
 if __name__=='__main__':
     collect_weights()
     collect_nlengths()
-    collect_xray()
-    collect_xray_new()
+    #collect_xray()
+    #collect_xray_new()
