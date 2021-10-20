@@ -77,8 +77,7 @@ class SLDDB():
                 continue
             din[key]=db_lookup[key][1].convert(value)
 
-        if not ('density' in din or 'FU_volume' in din
-                or 'SLD_n' in din or ('SLD_x' in din and 'E_x' in din)):
+        if not any([din.get(name, None) is not None for name in ['density', 'FU_volume', 'SLD_n', 'SLD_x' ]]):
             raise ValueError("Not enough information to determine density")
 
         c=self.db.cursor()

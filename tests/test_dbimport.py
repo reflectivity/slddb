@@ -4,6 +4,7 @@ import json
 from glob import glob
 from slddb import SLDDB
 
+NO_IMPORT = ['7lzm.cif']
 
 class TestMaterialDB(unittest.TestCase):
     @classmethod
@@ -19,4 +20,6 @@ class TestMaterialDB(unittest.TestCase):
         fls=glob(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'test_data', '*.cif'))
 
         for fi in fls:
+            if os.path.basename(fi) in NO_IMPORT:
+                continue
             self.db.import_material(fi)

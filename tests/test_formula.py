@@ -1,14 +1,7 @@
 import unittest
-from slddb import SLDDB
 from slddb.material import Formula
 
 class TestFormula(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.db=SLDDB(':memory:')
-        cls.db.create_database()
-        cls.db.add_elements()
-
     def test_valid(self):
         Formula('NaCl')
         Formula('H2 O')

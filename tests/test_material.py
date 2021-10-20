@@ -1,12 +1,14 @@
 import unittest
 from numpy.testing import assert_array_equal
-from slddb.material import Material
+from slddb.material import Material, Formula
 from slddb.element_table import Element, element
 from slddb.constants import Cu_kalpha, Mo_kalpha, Cu_kalpha1, Mo_kalpha1
 
 # reference data uses Henke tables
 from slddb.element_table.xray_henke import XRAY_SCATTERING_FACTORS
 element.XRAY_SCATTERING_FACTORS = XRAY_SCATTERING_FACTORS
+# import other n_lengths for coverage
+from slddb.element_table.nlengths import NEUTRON_SCATTERING_LENGTHS
 # calculated using NIST calculator at https://www.ncnr.nist.gov/resources/activation/
 REFERENCE_RESULTS = {
     # compound: [neutron, xray Cu, xray Mo]
@@ -55,7 +57,28 @@ class TestMaterial(unittest.TestCase):
 
     def test_formula(self):
         m1=Material([(Element( 'Ni'), 1.0)], xsld=REFERENCE_RESULTS['Ni'][2], xE=Mo_kalpha)
-        self.assertAlmostEqual(str(m1.formula), 'Ni')
+        self.assertEqual(str(m1.formula), 'Ni')
+        self.assertEqual(m1.formula, Formula([('Ni', 1.0)]))
+
+    def test_combine(self):
+        m1=Material([(Element( 'Ni'), 1.0)], fu_volume=1.0)
+        m2=Material([(Element( 'Co'), 1.0)], fu_volume=1.0)
+        ms=m1+m2
+        mss=m1+m1
+        mp1=2.0*m1
+        mp2=m2*2.0
+        self.assertEqual(str(ms.formula), 'CoNi')
+        self.assertEqual(str(mss.formula), 'Ni2')
+        self.assertEqual(ms.fu_volume, 2.0)
+        self.assertEqual(mp1.fu_volume, 2.0)
+        self.assertEqual(mp2.fu_volume, 2.0)
+        fs=m1.formula+m2.formula+m2.formula
+        self.assertEqual(str(fs), 'Co2Ni')
+
+        with self.assertRaises(ValueError):
+            m1+'abc'
+        with self.assertRaises(ValueError):
+            'abc'*m1
 
     def test_fail(self):
         with self.assertRaises(ValueError):

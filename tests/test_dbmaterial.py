@@ -24,6 +24,10 @@ class TestMaterialDB(unittest.TestCase):
         self.db.update_material(res['ID'], description='updated description')
         res2 = self.db.search_material(name='Iron Oxide E1')[0]
         self.assertEqual(res2['description'], 'updated description')
+        with self.assertRaises(KeyError):
+            self.db.update_material(res['ID'], fail_key='updated description')
+        with self.assertRaises(ValueError):
+            self.db.update_material(res['ID'], density=None)
 
     def test_search(self):
         self.db.add_material('Iron Oxide 2', 'Fe2O3', density=5.24, tags=['inorganic'])
@@ -35,6 +39,11 @@ class TestMaterialDB(unittest.TestCase):
         self.assertEqual(res['formula'], 'Fe2O3')
         self.assertIsNone(res['FU_volume'])
         res=self.db.search_material(tags=['inorganic'])[0]
+
+    def test_exact_name(self):
+        self.db.add_material('Iron Oxide 3123', 'Fe2O3', density=5.24, tags=['inorganic'])
+        res=self.db.search_material(name='oxide 3', str_like=False)
+        self.assertEqual(len(res), 0)
 
     def test_count(self):
         self.db.add_material('Iron Oxide Count All', 'Fe2O3', density=5.2411111, tags=['inorganic'])
