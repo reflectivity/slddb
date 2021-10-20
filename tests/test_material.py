@@ -1,8 +1,19 @@
 import unittest
 from numpy.testing import assert_array_equal
 from slddb.material import Material
-from slddb.element_table import Element
-from slddb.constants import Cu_kalpha, Mo_kalpha
+from slddb.element_table import Element, element
+from slddb.constants import Cu_kalpha, Mo_kalpha, Cu_kalpha1, Mo_kalpha1
+
+# reference data uses Henke tables
+from slddb.element_table.xray_henke import XRAY_SCATTERING_FACTORS
+element.XRAY_SCATTERING_FACTORS = XRAY_SCATTERING_FACTORS
+# calculated using NIST calculator at https://www.ncnr.nist.gov/resources/activation/
+REFERENCE_RESULTS = {
+    # compound: [neutron, xray Cu, xray Mo]
+    'Ni': [9.406e-6-0.001e-6j, 64.390e-6-1.351e-6j, 72.969e-6-2.894e-6j], # dens=8.9
+    'Fe2O3': [7.176e-6-0j, 41.125e-6-3.635e-6j, 42.740e-6-0.956e-6j], # dens=5.24
+    'D2O': [6.393e-6-0j, 9.455e-6-0.032e-6j, 9.416e-6-0.006e-6j], # dens=1.11
+    }
 
 class TestMaterial(unittest.TestCase):
     def test_density(self):
@@ -29,21 +40,21 @@ class TestMaterial(unittest.TestCase):
             Material([(Element( 'Ni'), 1.0)], dens=5.0, fu_volume=10.950864)
 
     def test_rho_n(self):
-        m1=Material([(Element( 'Ni'), 1.0)], rho_n=9.40565e-06+0j)
+        m1=Material([(Element( 'Ni'), 1.0)], rho_n=REFERENCE_RESULTS['Ni'][0])
         m2=Material([(Element( 'Fe'), 2.0),
-                     (Element( 'O'), 3.0)], rho_n=7.17503e-06+0j)
-        self.assertAlmostEqual(m1.dens, 8.9, places=4)
-        self.assertAlmostEqual(m2.dens, 5.24, places=4)
+                     (Element( 'O'), 3.0)], rho_n=REFERENCE_RESULTS['Fe2O3'][0])
+        self.assertAlmostEqual(m1.dens, 8.9, places=3)
+        self.assertAlmostEqual(m2.dens, 5.24, places=3)
 
     def test_rho_x(self):
-        m1=Material([(Element( 'Ni'), 1.0)], xsld=7.2969e-05-2.8945e-06j, xE=Mo_kalpha)
+        m1=Material([(Element( 'Ni'), 1.0)], xsld=REFERENCE_RESULTS['Ni'][2], xE=Mo_kalpha)
         m2=Material([(Element( 'Fe'), 2.0),
-                     (Element( 'O'), 3.0)], xsld=4.1136e-05-3.6296e-06j, xE=Cu_kalpha)
+                     (Element( 'O'), 3.0)], xsld=REFERENCE_RESULTS['Fe2O3'][1], xE=Cu_kalpha)
         self.assertAlmostEqual(m1.dens, 8.9, places=3)
         self.assertAlmostEqual(m2.dens, 5.24, places=3)
 
     def test_formula(self):
-        m1=Material([(Element( 'Ni'), 1.0)], xsld=7.2969e-05-2.8945e-06j, xE=Mo_kalpha)
+        m1=Material([(Element( 'Ni'), 1.0)], xsld=REFERENCE_RESULTS['Ni'][2], xE=Mo_kalpha)
         self.assertAlmostEqual(str(m1.formula), 'Ni')
 
     def test_fail(self):
@@ -57,9 +68,9 @@ class TestMaterial(unittest.TestCase):
     def test_neutron_ni(self):
         m1=Material([(Element( 'Ni'), 1.0)], dens=8.9)
 
-        # compare with value from sld-calculator.appspot.com
-        self.assertAlmostEqual(m1.rho_n.real, 9.4057e-06)
-        self.assertAlmostEqual(m1.rho_n.imag, -1.1402e-09)
+        # compare with value from NIST
+        self.assertAlmostEqual(m1.rho_n.real, REFERENCE_RESULTS['Ni'][0].real)
+        self.assertAlmostEqual(m1.rho_n.imag, REFERENCE_RESULTS['Ni'][0].imag)
 
     def test_neutron_d2o(self):
         m1=Material([(Element( 'D'), 2.0),
@@ -67,18 +78,18 @@ class TestMaterial(unittest.TestCase):
         m2=Material([(Element( 'H[2]'), 2.0),
                      (Element( 'O'), 1.0)], dens=1.11)
 
-        # compare with value from sld-calculator.appspot.com
-        self.assertAlmostEqual(m1.rho_n.real, 6.3927e-06)
-        self.assertAlmostEqual(m1.rho_n.imag, -1.1398e-13)
+        # compare with value from NIST
+        self.assertAlmostEqual(m1.rho_n.real, REFERENCE_RESULTS['D2O'][0].real)
+        self.assertAlmostEqual(m1.rho_n.imag, REFERENCE_RESULTS['D2O'][0].imag)
         self.assertEqual(m1.rho_n, m2.rho_n)
 
     def test_neutron_fe2o3(self):
         m2=Material([(Element( 'Fe'), 2.0),
                      (Element( 'O'), 3.0)], dens=5.24)
 
-        # compare with value from sld-calculator.appspot.com
-        self.assertAlmostEqual(m2.rho_n.real, 7.1762e-06)
-        self.assertAlmostEqual(m2.rho_n.imag, -2.8139e-10)
+        # compare with value from NIST
+        self.assertAlmostEqual(m2.rho_n.real, REFERENCE_RESULTS['Fe2O3'][0].real)
+        self.assertAlmostEqual(m2.rho_n.imag, REFERENCE_RESULTS['Fe2O3'][0].imag)
 
     def test_xray_kalpha(self):
         m2=Material([(Element( 'Fe'), 2.0),
@@ -91,20 +102,20 @@ class TestMaterial(unittest.TestCase):
             self.assertAlmostEqual(sld.real,  4.1125e-05)
             self.assertAlmostEqual(sld.imag, -3.6347e-06)
             # Henke: 8047.82959 eV  delta=1.55382077E-05  beta=1.37184929E-06
-            self.assertAlmostEqual(m2.delta_of_E(Cu_kalpha), 1.55382E-05, places=5)
-            self.assertAlmostEqual(m2.beta_of_E(Cu_kalpha),  1.37185E-06, places=5)
+            self.assertAlmostEqual(m2.delta_of_E(Cu_kalpha1), 1.55382E-05, places=5)
+            self.assertAlmostEqual(m2.beta_of_E(Cu_kalpha1),  1.37185E-06, places=5)
             # Henke: 8047.83 eV  mu=8.93664 µm
-            self.assertAlmostEqual(m2.mu_of_E(Cu_kalpha), 1./8.93664e4, places=5)
+            self.assertAlmostEqual(m2.mu_of_E(Cu_kalpha1), 1./8.93664e4, places=5)
         with self.subTest('Mo', i=1):
             sld=m2.rho_of_E(Mo_kalpha)
             # sld-calculator.appspot.com: 4.274e-05  	-9.5604e-07
             self.assertAlmostEqual(sld.real,  4.274e-05)
             self.assertAlmostEqual(sld.imag, -9.5604e-07)
             # Henke: 17479.4004 eV  delta=3.4223483E-06  beta=7.66335759E-08
-            self.assertAlmostEqual(m2.delta_of_E(Mo_kalpha), 3.4223483E-06, places=5)
-            self.assertAlmostEqual(m2.beta_of_E(Mo_kalpha), 7.66335759E-08, places=5)
+            self.assertAlmostEqual(m2.delta_of_E(Mo_kalpha1), 3.4223483E-06, places=5)
+            self.assertAlmostEqual(m2.beta_of_E(Mo_kalpha1), 7.66335759E-08, places=5)
             # Henke: 17479.4 eV  mu=73.6570 µm
-            self.assertAlmostEqual(m2.mu_of_E(Mo_kalpha), 1./73.6570e4, places=5)
+            self.assertAlmostEqual(m2.mu_of_E(Mo_kalpha1), 1./73.6570e4, places=5)
 
     def test_xray_all(self):
         m2=Material([(Element( 'Fe'), 2.0),

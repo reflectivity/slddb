@@ -5,7 +5,7 @@ Defining the Element class that is used to hold all needed data for one element/
 from numpy import array
 
 from .masses import ATOMIC_WEIGHTS, ELEMENT_CHARGES, ELEMENT_FULLNAMES
-from .nlengths import NEUTRON_SCATTERING_LENGTHS
+from .nlengths_pt import NEUTRON_SCATTERING_LENGTHS
 from .xray_nist import XRAY_SCATTERING_FACTORS
 
 ELEMENT_NAMES = dict([(value, key) for key, value in ELEMENT_CHARGES.items()])
@@ -44,7 +44,10 @@ class Element():
         self.N=N
         self.name=ELEMENT_FULLNAMES[self.symbol]
         self.mass=ATOMIC_WEIGHTS[key]
-        self.b=NEUTRON_SCATTERING_LENGTHS[key]
+        try:
+            self.b=NEUTRON_SCATTERING_LENGTHS[key]
+        except KeyError:
+            raise ValueError(f'No neutorn scattering data for {key}')
 
         try:
             self._xdata=array(XRAY_SCATTERING_FACTORS[self.symbol])

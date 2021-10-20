@@ -4,6 +4,7 @@ Generate a python file that stores data collected from various sources.
 import os
 import periodictable
 import numpy as np
+from slddb.constants import sigma_to_b
 from urllib import request, error as urlerr
 
 def calc_mass(element, atoms, isotopes):
@@ -93,6 +94,29 @@ def collect_nlengths():
     output='NEUTRON_SCATTERING_LENGTHS='+repr(nlengths)+'\n'
     open(os.path.join('..', 'slddb', 'element_table', 'nlengths.py'), 'w').write(f'"""\n{header}\n"""\n\n{output}')
 
+def collect_nlengths_pt():
+    nlengths={}
+    for element in periodictable.elements:
+        Z=element.number  # charge
+
+        if element.neutron.b_c is not None:
+            b=element.neutron.b_c-1j*sigma_to_b*element.neutron.absorption
+            nlengths[element.symbol]=b
+
+        for N in element.isotopes:
+            abundance=element[N].abundance
+            if abundance > 0 and element[N].neutron.b_c is not None:
+                b=element[N].neutron.b_c-1j*sigma_to_b*element[N].neutron.absorption
+                key=(Z, N)
+                nlengths[key]=b
+
+    header = 'Rauch, H. and Waschkowski, W. (2003) Neutron Scattering Lengths in ILL Neutron Data Booklet (second edition), ' \
+             'A.-J. Dianoux, G. Lander, Eds. Old City Publishing, Philidelphia, PA. pp 1.1-1 to 1.1-17. ' \
+             '(https://www.ill.eu/fileadmin/user_upload/ILL/1_About_ILL/Documentation/NeutronDataBooklet.pdf)' \
+             'Imported from python periodictable package'
+    output='NEUTRON_SCATTERING_LENGTHS='+repr(nlengths)+'\n'
+    open(os.path.join('..', 'slddb', 'element_table', 'nlengths_pt.py'), 'w').write(f'"""\n{header}\n"""\n\n{output}')
+
 def collect_xray():
     xres={}
     for El in Z_by_name.keys():
@@ -149,7 +173,8 @@ def collect_xray_new():
 
 
 if __name__=='__main__':
-    collect_weights()
-    collect_nlengths()
+    #collect_weights()
+    #collect_nlengths()
+    collect_nlengths_pt()
     #collect_xray()
     #collect_xray_new()
