@@ -11,8 +11,11 @@ Contributers:
 
 __version__='1.0 beta4'
 
-from .database import SLDDB
-from .dbconfig import DB_FILE
-from .webapi import SLD_API
-
-api=SLD_API()
+try:
+    from .database import SLDDB
+    from .dbconfig import DB_FILE
+    from .webapi import SLD_API
+except ModuleNotFoundError:
+    pass
+else:
+    api=SLD_API()

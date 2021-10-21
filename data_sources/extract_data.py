@@ -4,7 +4,7 @@ Generate a python file that stores data collected from various sources.
 import os
 import periodictable
 import numpy as np
-from slddb.constants import sigma_to_b
+from slddb import constants
 from urllib import request, error as urlerr
 
 def calc_mass(element, atoms, isotopes):
@@ -100,13 +100,13 @@ def collect_nlengths_pt():
         Z=element.number  # charge
 
         if element.neutron.b_c is not None:
-            b=element.neutron.b_c-1j*sigma_to_b*element.neutron.absorption
+            b=element.neutron.b_c-1j*constants.sigma_to_b*element.neutron.absorption
             nlengths[element.symbol]=b
 
         for N in element.isotopes:
             abundance=element[N].abundance
             if abundance > 0 and element[N].neutron.b_c is not None:
-                b=element[N].neutron.b_c-1j*sigma_to_b*element[N].neutron.absorption
+                b=element[N].neutron.b_c-1j*constants.sigma_to_b*element[N].neutron.absorption
                 key=(Z, N)
                 nlengths[key]=b
 
@@ -116,6 +116,47 @@ def collect_nlengths_pt():
              'Imported from python periodictable package'
     output='NEUTRON_SCATTERING_LENGTHS='+repr(nlengths)+'\n'
     open(os.path.join('..', 'slddb', 'element_table', 'nlengths_pt.py'), 'w').write(f'"""\n{header}\n"""\n\n{output}')
+
+def collect_nabsorptions():
+    # datasets are large, so store as numpy array directly
+    nlengths={}
+    for element in periodictable.elements:
+        Z=element.number  # charge
+
+        resdir=os.path.join('..', 'slddb', 'element_table', 'nabs_geant4')
+        if not os.path.exists(resdir):
+            os.mkdir(resdir)
+
+        if os.path.exists(os.path.join('geant4', f'g4xs_{element.symbol}.txt')):
+            E,_,xs_a=np.loadtxt(os.path.join('geant4', f'g4xs_{element.symbol}.txt')).T
+            L=constants.h_Js/np.sqrt(E*constants.eV2J*constants.m_n)*constants.m2angstrom
+            fltr=(L>=0.05)&(L<=50.0)
+            b_abs=xs_a*constants.sigma_to_b_1A/L
+            order=L[fltr].argsort()
+            data=np.array([L[fltr][order], b_abs[fltr][order]])
+            fname=f'nabs_{element.symbol}.npz'
+            np.savez(os.path.join('..', 'slddb', 'element_table', 'nabs_geant4', fname), data)
+            nlengths[element.symbol]=fname
+
+        for N in element.isotopes:
+            abundance=element[N].abundance
+            if abundance > 0 and element[N].neutron.b_c is not None:
+                key=(Z, N)
+                if os.path.exists(os.path.join('geant4', f'g4xs_{element.symbol}{N}.txt')):
+                    E, _, xs_a=np.loadtxt(os.path.join('geant4', f'g4xs_{element.symbol}{N}.txt')).T
+                    L=constants.h_Js/np.sqrt(E*constants.eV2J*constants.m_n)*constants.m2angstrom
+                    fltr=(L >= 0.05) & (L <= 50.0)
+                    b_abs=xs_a*constants.sigma_to_b_1A/L
+                    order=L[fltr].argsort()
+                    data = np.array([L[fltr][order], b_abs[fltr][order]])
+                    fname = f'nabs_{element.symbol}{N}.npz'
+                    np.savez(os.path.join('..', 'slddb', 'element_table', 'nabs_geant4', fname), data)
+                    nlengths[key] = fname
+
+    header = 'Neutron cross sections extracted from Geant4 by the ESS dgcode framework (doi:10.1016/j.physb.2018.03.025).'
+    output='DATA_DIR="nabs_geant4"\n'
+    output+='NEUTRON_ABSORPTIONS='+repr(nlengths)+'\n'
+    open(os.path.join('..', 'slddb', 'element_table', 'nabs_geant4.py'), 'w').write(f'"""\n{header}\n"""\n\n{output}')
 
 def collect_xray():
     xres={}
@@ -173,8 +214,9 @@ def collect_xray_new():
 
 
 if __name__=='__main__':
-    #collect_weights()
-    #collect_nlengths()
+    collect_weights()
+    collect_nlengths()
     collect_nlengths_pt()
-    #collect_xray()
-    #collect_xray_new()
+    collect_nabsorptions()
+    collect_xray()
+    collect_xray_new()

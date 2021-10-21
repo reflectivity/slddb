@@ -1,12 +1,15 @@
 """
 Defining the Element class that is used to hold all needed data for one element/isotope.
 """
-
-from numpy import array
+import os
+from numpy import array, load
 
 from .masses import ATOMIC_WEIGHTS, ELEMENT_CHARGES, ELEMENT_FULLNAMES
 from .nlengths_pt import NEUTRON_SCATTERING_LENGTHS
+from .nabs_geant4 import NEUTRON_ABSORPTIONS, DATA_DIR as NABS_DATA_DIR
 from .xray_nist import XRAY_SCATTERING_FACTORS
+
+BASE_PATH=os.path.abspath(os.path.dirname(__file__))
 
 ELEMENT_NAMES = dict([(value, key) for key, value in ELEMENT_CHARGES.items()])
 
@@ -48,6 +51,10 @@ class Element():
             self.b=NEUTRON_SCATTERING_LENGTHS[key]
         except KeyError:
             raise ValueError(f'No neutorn scattering data for {key}')
+        if key in NEUTRON_ABSORPTIONS:
+            self._ndata=load(os.path.join(BASE_PATH, NABS_DATA_DIR, NEUTRON_ABSORPTIONS[key]))['arr_0']
+        else:
+            self._ndata=None
 
         try:
             self._xdata=array(XRAY_SCATTERING_FACTORS[self.symbol])
@@ -73,6 +80,25 @@ class Element():
                 f2=fp[fltr][1]-1j*fpp[fltr][1]
                 return ((E2-Ei)*f1+(Ei-E1)*f2)/(E2-E1)
 
+    def b_of_L(self, Li):
+        if self._xdata is None:
+            return self.b
+        L, b_abs=self._ndata
+        fltr=(L>=Li)
+        if not fltr.any():
+            return self.b
+        else:
+            # linear interpolation between two nearest points
+            L1=L[fltr][0]
+            try:
+                L2=L[fltr][1]
+            except IndexError:
+                return self.b.real-1j*b_abs[fltr][0]
+            else:
+                b_abs1=b_abs[fltr][0]
+                b_abs2=b_abs[fltr][1]
+                return self.b.real-1j*((L2-Li)*b_abs1+(Li-L1)*b_abs2)/(L2-L1)
+
     @property
     def E(self):
         return self._xdata[0]
@@ -88,6 +114,29 @@ class Element():
     @property
     def fpp(self):
         return self._xdata[2]
+
+    @property
+    def has_ndata(self):
+        return self._ndata is not None
+
+    @property
+    def Lamda(self):
+        # return neutron wavelength values for energy dependant absorption
+        if self.has_ndata:
+            return self._ndata[0]
+        else:
+            return array([0.05, 50.0])
+
+    @property
+    def b_abs(self):
+        return self._ndata[1]
+
+    @property
+    def b_lambda(self):
+        if self.has_ndata:
+            return self.b.real-1j*self._ndata[1]
+        else:
+            return array([self.b, self.b])
 
     def __str__(self):
         if self.N is None:
