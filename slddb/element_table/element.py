@@ -81,23 +81,24 @@ class Element():
                 return ((E2-Ei)*f1+(Ei-E1)*f2)/(E2-E1)
 
     def b_of_L(self, Li):
-        if self._xdata is None:
+        if self._ndata is None:
             return self.b
         L, b_abs=self._ndata
+        if Li>L[-1]:
+            return self.b.real-1j*b_abs[-1]
+        if Li<L[0]:
+            return self.b.real-1j*b_abs[0]
         fltr=(L>=Li)
-        if not fltr.any():
-            return self.b
+        # linear interpolation between two nearest points
+        L1=L[fltr][0]
+        try:
+            L2=L[fltr][1]
+        except IndexError:
+            return self.b.real-1j*b_abs[fltr][0]
         else:
-            # linear interpolation between two nearest points
-            L1=L[fltr][0]
-            try:
-                L2=L[fltr][1]
-            except IndexError:
-                return self.b.real-1j*b_abs[fltr][0]
-            else:
-                b_abs1=b_abs[fltr][0]
-                b_abs2=b_abs[fltr][1]
-                return self.b.real-1j*((L2-Li)*b_abs1+(Li-L1)*b_abs2)/(L2-L1)
+            b_abs1=b_abs[fltr][0]
+            b_abs2=b_abs[fltr][1]
+            return self.b.real-1j*((L2-Li)*b_abs1+(Li-L1)*b_abs2)/(L2-L1)
 
     @property
     def E(self):

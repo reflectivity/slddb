@@ -4,7 +4,7 @@ of x-ray and neutron SLDs for different applications.
 """
 
 import re
-from numpy import array, pi
+from numpy import array, pi, arange
 from collections import OrderedDict
 from .constants import u2g, r_e, r_e_angstrom, muB, rho_of_M, Cu_kalpha, Mo_kalpha, E_to_lambda, fm2angstrom, dens_H2O, dens_D2O
 from .element_table import get_element
@@ -318,6 +318,34 @@ class Material():
         return b
 
     @property
+    def has_ndata(self):
+        return any([element.has_ndata for element,number in self.elements])
+
+    def b_of_L(self, Li):
+        b=0.
+        for element, number in self.elements:
+            b+=number*element.b_of_L(Li)
+        return b
+
+    def rho_n_of_L(self, Li):
+        return self.b_of_L(Li)*self.fu_dens*fm2angstrom
+
+    def b_vs_L(self):
+        # generate full energy range data for Lambda,SLD
+        if not self.has_ndata:
+            # no energy dependant cross-sections
+            b=self.fu_b
+            return array([0.05, 50.0]), array([b, b])
+
+        L=[el for el, n in self.elements if el.has_ndata][0].Lamda
+        b=array([self.b_of_L(Li) for Li in L])
+        return L,b
+
+    def rho_n_vs_L(self):
+        L,b=self.b_vs_L()
+        return L, b*self.fu_dens*fm2angstrom
+
+    @property
     def formula(self):
         output=''
         for element, number in self.elements:
@@ -456,6 +484,12 @@ class Material():
         out['fu_b']=repr(self.fu_b)
         out['rho_n']=repr(self.rho_n)
         out['rho_n_mag']=self.rho_m
+        if self.has_ndata:
+            L, rho_n=self.rho_n_vs_L()
+            out['neutron_lambda']=L.tolist()
+            out['neutron_rho_real']=rho_n.real.tolist()
+            out['neutron_rho_imag'] = rho_n.imag.tolist()
+        out['d2o_match_point'] = 100.*self.match_point
         out['mu']=self.mu
         out['M']=self.M
         if xray_units=='n_db':
@@ -488,6 +522,9 @@ class Material():
             out['units']['xray_values']='r_e/angstrom**3'
         else:
             out['units']['xray_values']='1/angstrom**2'
+        if self.has_ndata:
+            out['units']['neutron_lambda']='angstrom'
+            out['units']['neutron_values'] = '1/angstrom**2'
         return out
 
     def __add__(self, other):

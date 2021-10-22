@@ -176,6 +176,17 @@ class TestWebAPI(unittest.TestCase):
             self.assertEqual(mat.__class__.__name__, 'Material')
         webapi.WEBAPI_URL=dbconfig.WEBAPI_URL
 
+    def test_bio_blender(self):
+        if not self.server_available:
+            return
+        mat = api.bio_blender('aa', molecule='protein')
+        self.assertEqual(mat.__class__.__name__, 'Material')
+        mat = api.bio_blender('aa', molecule='dna')
+        self.assertEqual(mat.__class__.__name__, 'Material')
+        mat = api.bio_blender('aa', molecule='rna')
+        self.assertEqual(mat.__class__.__name__, 'Material')
+
+
 class TestConfigPaths(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

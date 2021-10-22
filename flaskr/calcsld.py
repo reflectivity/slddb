@@ -92,6 +92,28 @@ def get_deuteration_graph(m: Material, name=None):
     data = base64.b64encode(buf.getbuffer()).decode("ascii")
     return f'<img style="width: 40em; max-width: 100%;" src="data:image/png;base64,{data}" />'
 
+def get_absorption_graph(m: Material, name=None):
+    # Generate a graph for matching H2O/D2O with the given material
+    if name is None:
+        name=str(m.formula)
+
+    fig = Figure()
+    ax = fig.subplots()
+    L,rho_n=m.rho_n_vs_L()
+    ax.semilogx(L, -rho_n.imag*1e6)
+    ax.set_xlabel('Wavelength [Å]')
+    ax.set_ylabel('-Im(SLD) (10⁻⁶ Å⁻²)')
+    ax.set_title('Wavelength dependant absorption part of %s'%name)
+    ax.set_xlim([0.2, 20.])
+    ax.grid()
+    # Save it to a temporary buffer.
+    buf = BytesIO()
+    fig.savefig(buf, format="png")
+    fig.tight_layout()
+    # Embed the result in the html output.
+    data = base64.b64encode(buf.getbuffer()).decode("ascii")
+    return f'<img style="width: 40em; max-width: 100%;" src="data:image/png;base64,{data}" />'
+
 def calculate_selection(ID):
     db=SLDDB(DB_FILE)
     res=db.search_material(ID=ID, filter_invalid=False)
@@ -136,6 +158,13 @@ def calculate_selection(ID):
                  '</td></tr><tr><td class="uncollapsed">%s</td></tr>' \
                  '<tr><td class="collapsed">%s</td></tr></table>'%(script,
                                                    get_deuteration_graph(material, name=res[0]['name']))
+    elif material.has_ndata:
+        # wavlength dependant absopriton
+        script = '<table><tr><td colspan="2">' \
+                 '<button type="button" class="collapsible">Toggle Neutron/X-Ray</button>' \
+                 '</td></tr><tr><td class="uncollapsed">%s</td></tr>' \
+                 '<tr><td class="collapsed">%s</td></tr></table>'%(script,
+                                                               get_absorption_graph(material, name=res[0]['name']))
     return render_template('sldcalc.html', material=material, material_name=res[0]['name'],
                            material_description=res[0]['description'], deuterated=deuterated,
                            exchanged=exchanged, match_point=match_point,
@@ -185,10 +214,6 @@ def calculate_user(formula, density, mu, density_choice, mu_choice, name=None):
                 dformula[Hidx]=('D', dformula[Hidx][1])
             deuterated=Material([(get_element(element), amount) for element, amount in dformula],
                                 fu_dens=m.fu_dens)
-            script = '<table><tr><td colspan="2">' \
-                     '<button type="button" class="collapsible">Toggle Contrast Matching/X-Ray</button>' \
-                     '</td></tr><tr><td class="uncollapsed">%s</td></tr>' \
-                     '<tr><td class="collapsed">%s</td></tr></table>'%(script, get_deuteration_graph(m, name=name))
             if 'Hx' in m.formula:
                 eformula=Formula(m.formula)
                 Hidx=eformula.index('Hx')
@@ -203,6 +228,18 @@ def calculate_user(formula, density, mu, density_choice, mu_choice, name=None):
         else:
             deuterated=None
             exchanged=None
+        if 'H' in m.formula or 'Hx' in m.formula or 'D' in m.formula:
+            script = '<table><tr><td colspan="2">' \
+                     '<button type="button" class="collapsible">Toggle Contrast Matching/X-Ray</button>' \
+                     '</td></tr><tr><td class="uncollapsed">%s</td></tr>' \
+                     '<tr><td class="collapsed">%s</td></tr></table>'%(script, get_deuteration_graph(m, name=name))
+        elif m.has_ndata:
+            # wavlength dependant absopriton
+            script = '<table><tr><td colspan="2">' \
+                     '<button type="button" class="collapsible">Toggle Neutron/X-Ray</button>' \
+                     '</td></tr><tr><td class="uncollapsed">%s</td></tr>' \
+                     '<tr><td class="collapsed">%s</td></tr></table>'%(script,
+                                                                       get_absorption_graph(m, name=name))
         return render_template('sldcalc.html', material=m, deuterated=deuterated,
                            exchanged=exchanged, match_point=match_point,
                            material_name=name or "User input",

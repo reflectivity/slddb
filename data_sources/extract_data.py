@@ -129,7 +129,7 @@ def collect_nabsorptions():
 
         if os.path.exists(os.path.join('geant4', f'g4xs_{element.symbol}.txt')):
             E,_,xs_a=np.loadtxt(os.path.join('geant4', f'g4xs_{element.symbol}.txt')).T
-            L=constants.h_Js/np.sqrt(E*constants.eV2J*constants.m_n)*constants.m2angstrom
+            L=constants.h_Js/np.sqrt(2*E*constants.eV2J*constants.m_n)*constants.m2angstrom
             fltr=(L>=0.05)&(L<=50.0)
             b_abs=xs_a*constants.sigma_to_b_1A/L
             order=L[fltr].argsort()
@@ -144,7 +144,7 @@ def collect_nabsorptions():
                 key=(Z, N)
                 if os.path.exists(os.path.join('geant4', f'g4xs_{element.symbol}{N}.txt')):
                     E, _, xs_a=np.loadtxt(os.path.join('geant4', f'g4xs_{element.symbol}{N}.txt')).T
-                    L=constants.h_Js/np.sqrt(E*constants.eV2J*constants.m_n)*constants.m2angstrom
+                    L = constants.h_Js/np.sqrt(2*E*constants.eV2J*constants.m_n)*constants.m2angstrom
                     fltr=(L >= 0.05) & (L <= 50.0)
                     b_abs=xs_a*constants.sigma_to_b_1A/L
                     order=L[fltr].argsort()

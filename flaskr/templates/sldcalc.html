@@ -385,8 +385,9 @@
           <br /><br />
           <div style="font-size: 75%; font-style: italic; width: 100%;">
               Physical constants are taken from <a href="https://doi.org/10.1063/5.0064853">CODATA Internationally recommended 2018</a> values.
-              Neutron scattering lengths use the values from <a href="https://doi.org/10.1080/10448639208218770">V. F. Sears</a> provided by
-              <a href="https://www.ncnr.nist.gov/resources/n-lengths/list.html">NIST</a>.
+              Neutron scattering lengths use the values from the
+              <a href="https://www.ill.eu/fileadmin/user_upload/ILL/1_About_ILL/Documentation/NeutronDataBooklet.pdf">
+                  ILL Neutron Data Booklet</a> provided by the python <a href="https://periodictable.readthedocs.io/en/latest/">periodictable</a> package.
               X-ray energy dependant scattering is base on the <a href="https://dx.doi.org/10.18434/T4HS32">NIST Standard Reference Database 66</a>.
           </div>
           </div>
@@ -452,7 +453,7 @@
             <tr><td style="text-align:right;">Neutron nuclear SLD (10⁻⁶ Å⁻²)</td>
               <td id="neutron_entry_real">{{"%.5f"%(1e6*material.rho_n.real)}}</td>
               <td id="neutron_entry_imag">{{"%.5f"%(1e6*material.rho_n.imag)}}i</td>
-              <td class="hide_mobile"></td></tr>
+              <td class="hide_mobile">{% if material.has_ndata %}@1.8 Å{% endif %}</td></tr>
             {% if deuterated %}
             <tr><td style="text-align:right;">Material Deuteration</td><td colspan="2">
                 <input type="range" min="0" max="100" value="0" class="slider" id="deuteration_amount" step="1" onchange="deuterateSlider(this.value)" style="width: 90px;">

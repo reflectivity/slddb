@@ -197,14 +197,16 @@ class TestMaterial(unittest.TestCase):
         repr(m2)
 
     def test_dict_conversion(self):
-        m2=Material([(Element( 'Mo'), 1.0),
+        m1=Material([(Element( 'Mo'), 1.0),
                      (Element( 'Fe'), 2.0),
                      (Element( 'O'), 3.2)], dens=5.24, ID=13)
-        m2.export(xray_units='sld')
-        m2.export(xray_units='n_db')
-        m2.export(xray_units='edens')
+        m1.export(xray_units='sld')
+        m1.export(xray_units='n_db')
+        m1.export(xray_units='edens')
         with self.assertRaises(ValueError):
-            m2.export(xray_units='test')
+            m1.export(xray_units='test')
+        m2=Material('B[10]4C', dens=2.55)
+        m2.export()
 
     def test_missing_data(self):
         with self.assertRaises(ValueError):
@@ -213,10 +215,23 @@ class TestMaterial(unittest.TestCase):
         self.assertEqual(e.f_of_E(1e10), 0.+0j)
 
     def test_element_properties(self):
-        e=Element( 'Mo')
+        e=Element('Mo')
         self.assertEqual(e.E.shape, e.f.shape)
         self.assertEqual(e.E.shape, e.fp.shape)
         self.assertEqual(e.E.shape, e.fpp.shape)
+        self.assertEqual(e.Lamda.shape, e.b_lambda.shape)
+        n=Element('Gd')
+        self.assertEqual(n.Lamda.shape, n.b_abs.shape)
+        self.assertEqual(n.Lamda.shape, n.b_lambda.shape)
+
+    def test_lambda_interpolation(self):
+        n = Element('B')
+        self.assertAlmostEqual(n.b.imag, n.b_of_L(1.798).imag, 2)
+        n.b_of_L(0)
+        n.b_of_L(1000)
+        m = Material('B', dens=2.5)
+        self.assertAlmostEqual(m.rho_n.imag, m.rho_n_of_L(1.798).imag, 2)
+        Material('O', dens=2.5).b_vs_L()
 
     def test_element_strings(self):
         e=Element('H')

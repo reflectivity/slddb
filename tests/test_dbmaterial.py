@@ -97,6 +97,9 @@ class TestMaterialDB(unittest.TestCase):
         self.assertAlmostEqual(mat.dens, 11.4)
         res=self.db.search_material(FU_volume=10.5)
         mat=self.db.select_material(res[0])
+        self.db.invalidate_material(res[0]['ID'], 'testuser')
+        res=self.db.search_material(FU_volume=10.5, filter_invalid=False)
+        mat=self.db.select_material(res[0])
 
     def test_validate_item(self):
         self.db.add_material('To Validate', 'Pb', density=11.4)
