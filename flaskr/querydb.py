@@ -5,7 +5,7 @@ from slddb import SLDDB, DB_FILE
 from slddb.dbconfig import DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA, db_lookup
 
 main_fields=['name', 'formula', 'tags']
-advanced_fields=['physical_state', 'description','reference', 'CAS_No', 'temperature', 'comments', 'data_origin']
+advanced_fields=['ID', 'physical_state', 'description','reference', 'CAS_No', 'temperature', 'comments', 'data_origin']
 
 def fill_input(field, args):
     conv=db_lookup[field][1]

@@ -6,7 +6,7 @@ of x-ray and neutron SLDs for different applications.
 import re
 from numpy import array, pi
 from collections import OrderedDict
-from .constants import u2g, r_e, r_e_angstrom, muB, rho_of_M, Cu_kalpha, E_to_lambda, fm2angstrom
+from .constants import u2g, r_e, r_e_angstrom, muB, rho_of_M, Cu_kalpha, Mo_kalpha, E_to_lambda, fm2angstrom, dens_H2O, dens_D2O
 from .element_table import get_element
 
 SUBSCRIPT_DIGITS="₀₁₂₃₄₅₆₇₈₉"
@@ -135,7 +135,7 @@ class Formula(list):
                 elements[ele]+=amount
             else:
                 elements[ele]=amount
-        self[:]=[items for items in elements.items()]
+        self[:]=[items for items in elements.items() if items[1]!=0]
         if self._do_sort:
             self.sort()
 
@@ -162,6 +162,18 @@ class Formula(list):
         out.merge_same()
         return out
 
+    def __sub__(self, other):
+        sother=-1*other
+        out=Formula(self[:]+sother[:], sort=self.sort)
+        out.merge_same()
+        return out
+
+    def __mul__(self, other):
+        return Formula([(el[0], other*el[1]) for el in self], sort=self.sort)
+
+    def __rmul__(self, other):
+        return self*other
+
 class PolymerSequence(str):
     """
     Used to represent a chain of amino acids. Currently, no checking
@@ -183,7 +195,9 @@ class Material():
 
     def __init__(self, elements, dens=None, fu_volume=None, rho_n=None, mu=0., xsld=None, xE=None,
                  fu_dens=None, M=None,
-                 ID=None):
+                 ID=None, name=None, extra_data=None):
+        if type(elements) is str:
+            elements=Formula(elements)
         if type(elements) is Formula:
             elements=[(get_element(element), amount) for element, amount in elements]
         self.elements=elements
@@ -212,6 +226,8 @@ class Material():
         else:
             self.mu=mu
         self.ID=ID
+        self.name=name
+        self.extra_data=extra_data or {}
 
     @property
     def fu_volume(self):
@@ -322,8 +338,148 @@ class Material():
                 out+=SUBSCRIPT_DIGITS[int(digit)]
         return out
 
+    @property
+    def deuterated(self):
+        # returns a copy of this material with all hydrogens replaced by deuterium but same fu_volume
+        dformula = Formula(self.formula)
+        if 'H' in dformula:
+            Hidx=dformula.index('H')
+            dformula[Hidx]=('D', dformula[Hidx][1])
+        if 'Hx' in dformula:
+            Hidx=dformula.index('Hx')
+            dformula[Hidx]=('D', dformula[Hidx][1])
+        dformula.merge_same()
+        if self.name is None:
+            dname=None
+        else:
+            dname='d'+self.name
+        return Material(dformula, fu_dens=self.fu_dens, name=dname, extra_data=self.extra_data)
+
+    def deuterate(self, fraction):
+        """
+        Return a partially deuterated molecule with fraction of D instead of H.
+        """
+        return (1.0-fraction)*self+fraction*self.deuterated
+
+    @property
+    def edeuterated(self):
+        # returns a copy of this material with all non-exchangable hydrogens replaced by deuterium but same fu_volume
+        dformula = Formula(self.formula)
+        if 'H' in dformula:
+            Hidx=dformula.index('H')
+            dformula[Hidx]=('D', dformula[Hidx][1])
+        dformula.merge_same()
+        if self.name is None:
+            dname=None
+        else:
+            dname='d'+self.name
+        return Material(dformula, fu_dens=self.fu_dens, name=dname, extra_data=self.extra_data)
+
+    @property
+    def exchanged(self):
+        # returns a copy of this material with all Hx replaced by deuterium but same fu_volume
+        eformula = Formula(self.formula)
+        if 'Hx' in eformula:
+            Hidx=eformula.index('Hx')
+            eformula[Hidx]=('D', eformula[Hidx][1])
+        eformula.merge_same()
+        if self.name is None:
+            dname=None
+        else:
+            dname='e'+self.name
+        return Material(eformula, fu_dens=self.fu_dens, name=dname, extra_data=self.extra_data)
+
+    @property
+    def not_exchanged(self):
+        # returns a copy of this material with all Hx replaced by normal hydrogen but same fu_volume
+        eformula = Formula(self.formula)
+        if 'Hx' in eformula:
+            Hidx=eformula.index('Hx')
+            eformula[Hidx]=('H', eformula[Hidx][1])
+        eformula.merge_same()
+        if self.name is None:
+            dname=None
+        else:
+            dname='e'+self.name
+        return Material(eformula, fu_dens=self.fu_dens, name=dname, extra_data=self.extra_data)
+
+    def exchange(self, D_fraction, D2O_fraction, exchange=0.9):
+        """
+        Return a partially deuterated modlecule within H2O/D2O solution given amount of exchange.
+        """
+        # fractionally deuterated molecule without Hx
+        hd=(1.0-D_fraction)*self.not_exchanged.formula+D_fraction*self.deuterated.formula
+        # fully exchanged molecule
+        exchange_diff=self.exchanged.formula-self.not_exchanged.formula
+        exh2o=hd-D_fraction*exchange_diff
+        exd2o=hd-(D_fraction-1.0)*exchange_diff
+        # partial exchanged molecule
+        in_h2o=(1.0-exchange)*hd+exchange*exh2o
+        in_d2o=(1.0-exchange)*hd+exchange*exd2o
+        res_formula=(1.0-D2O_fraction)*in_h2o+D2O_fraction*in_d2o
+        res_formula.merge_same()
+        return Material(res_formula, fu_volume=self.fu_volume)
+
+    def export(self, xray_units='sld'):
+        """
+        Export material data to dictionary.
+
+        xray_units: one of "edens", "n_db" or "sld"
+        """
+        if not xray_units in ['sld', 'edens', 'n_db']:
+            raise ValueError(f'Not a valid xray unit {xray_units}, use "edens", "n_db" or "sld"')
+        out={}
+        out['ID']=self.ID
+        out.update(self.extra_data)
+        out['name']=self.name
+        out['formula']=str(self.formula)
+        out['density']=self.dens
+        out['fu_dens']=self.fu_dens
+        out['fu_volume']=self.fu_volume
+        out['fu_mass']=self.fu_mass
+        out['fu_b']=repr(self.fu_b)
+        out['rho_n']=repr(self.rho_n)
+        out['rho_n_mag']=self.rho_m
+        out['mu']=self.mu
+        out['M']=self.M
+        if xray_units=='n_db':
+            out['delta_Cu_kalpha']=self.delta_of_E(Cu_kalpha)
+            out['beta_Cu_kalpha']=self.beta_of_E(Cu_kalpha)
+            out['delta_Mo_kalpha']=self.delta_of_E(Mo_kalpha)
+            out['beta_Mo_kalpha']=self.beta_of_E(Mo_kalpha)
+            E, delta=self.delta_vs_E()
+            E, beta=self.beta_vs_E()
+            out['xray_E']=E.tolist()
+            out['xray_delta']=delta.tolist()
+            out['xray_beta']=beta.tolist()
+        else:
+            if xray_units=='edens':
+                factor=1.0e5/r_e
+            else:
+                factor=1.0
+            out['rho_Cu_kalpha']=repr(factor*self.rho_of_E(Cu_kalpha))
+            out['rho_Mo_kalpha']=repr(factor*self.rho_of_E(Mo_kalpha))
+            E, rho=self.rho_vs_E()
+            out['xray_E']=E.tolist()
+            out['xray_real']=(factor*rho).real.tolist()
+            out['xray_imag']=(factor*rho).imag.tolist()
+        out['units']={'density': 'g/cm**3', 'fu_dens': '1/angstrom**3', 'fu_volume': 'angstrom**3', 'fu_mass': 'u',
+                      'fu_b': 'fm', 'rho_n': '1/angstrom**2', 'rho_n_mag': '1/angstrom**2', 'mu': 'muB', 'M': 'emu/cm**3',
+                      'xray_E': 'keV'}
+        if xray_units=='n_db':
+            out['units']['xray_values']='1'
+        elif xray_units=='edens':
+            out['units']['xray_values']='r_e/angstrom**3'
+        else:
+            out['units']['xray_values']='1/angstrom**2'
+        return out
+
     def __add__(self, other):
         # add two materials by adding the chemical formula and FU_volume of each element.
+        if self.elements==[]:
+            return other
+        if other.elements==[]:
+            return self
         if type(other)!=type(self):
             raise ValueError('Can only combine two Material instances.')
         fout=dict(self.elements)
@@ -344,6 +500,8 @@ class Material():
         as well as the FU_volume are multiplied with the same amount.
         """
         if type(other) in [int, float]:
+            if other<=0:
+                raise ValueError("Can only mulitply material with positive number")
             fout=[(ele, number*other) for ele, number in self.elements]
             return Material(fout, fu_volume=self.fu_volume*other,
                             mu=self.mu*other)
@@ -361,10 +519,16 @@ class Material():
         return output
 
     def __repr__(self):
-        output='Material('
+        output=''
+        if self.name:
+            output+=f'{self.name}='
+        output+='Material('
         output+=str([(ei.symbol, num) for ei, num in self.elements])
-        output+=', fu_volume=%s'%(1./self.fu_dens)
+        output+=f', fu_volume={self.fu_volume}'
         if self.ID:
-            output+=', ID=%i'%self.ID
+            output+=f', ID={self.ID}'
         output+=')'
         return output
+
+H2O=Material(Formula('H2O'), dens=dens_H2O)
+D2O=Material(Formula('D2O'), dens=dens_D2O)

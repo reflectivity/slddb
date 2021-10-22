@@ -39,3 +39,7 @@ Mo_kalpha2=17.3743 # keV
 Mo_kalpha=(2*Mo_kalpha1+Mo_kalpha2)/3. # keV
 
 rho_of_M=2.853e-9 # Å^-2 from kA/m
+
+# Standard water densities for contrast matching calculations (25 C°)
+dens_H2O=0.99707 # Density of heavy water, TSING-LIEN CHANG & LÜ-HO TUNG, Nature 163, page737 (1949)
+dens_D2O=1.10440 # https://doi.org/10.1038/163737a0

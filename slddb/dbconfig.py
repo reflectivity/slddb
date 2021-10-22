@@ -91,21 +91,3 @@ db_lookup=dict([(field, (i, converter, default, unit))
                               DB_MATERIALS_CONVERTERS,
                               DB_MATERIALS_FIELD_DEFAULTS,
                               DB_MATERIALS_FIELD_UNITS))])
-
-# stores all chemical elements together with their stable isotopes and
-# an index to the scattering length data row index
-DB_ELEMENTS_NAME='elements'
-DB_ELEMENTS_FIELDS=    ['Z',  'Symbol', 'Name', 'Weight', 'Isotopes',
-                        'n_scat', 'x_scat']
-DB_ELEMENTS_CONVERTERS=[pint, cstr,     cstr,   cposfloat,   cstr,
-                        cint,     cint]
-
-# for neutrons store isotope specific data similar to elements
-DB_ISOTOPES_NAME='isotopes'
-DB_ISOTOPES_FIELDS=    ['ID', 'Z',  'N',  'Weight',  'n_scat']
-DB_ISOTOPES_CONVERTERS=[pint, cint, cint, cposfloat,    cint]
-
-# stores scattering data (neutron and x-ray) for the elements/isotopes
-DB_SLDATA_NAME='scattering_data'
-DB_SLDATA_FIELDS=    ['ID', 'data']
-DB_SLDATA_CONVERTERS=[pint, carray]

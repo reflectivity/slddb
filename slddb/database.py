@@ -213,13 +213,24 @@ class SLDDB():
             fu_volume=None
         else:
             fu_volume=result['FU_volume']
+        extra_data={}
+        if result['invalid'] is not None:
+            extra_data['WARNING'] = 'This entry has been invalidated by ORSO on %s, please contact %s for more information.'%(
+                result['invalid'], result['invalid_by'])
+        extra_data['ID'] = int(result['ID'])
+        extra_data['ORSO_validated'] = result['validated'] is not None
+        extra_data['reference'] = result.get('reference', '')
+        extra_data['doi'] = result.get('doi', '')
+
         m=Material(formula,
                    dens=result['density'],
                    fu_volume=fu_volume,
                    rho_n=result['SLD_n'],
                    xsld=result['SLD_x'], xE=result['E_x'],
                    mu=result['mu'],
-                   ID=result['ID'])
+                   ID=result['ID'],
+                   name=result['name'],
+                   extra_data=extra_data)
 
         ustr='UPDATE %s SET selected = selected + 1 WHERE ID == ?'%DB_MATERIALS_NAME
         c=self.db.cursor()

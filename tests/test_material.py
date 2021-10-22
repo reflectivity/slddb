@@ -174,6 +174,16 @@ class TestMaterial(unittest.TestCase):
         str(m2)
         repr(m2)
 
+    def test_dict_conversion(self):
+        m2=Material([(Element( 'Mo'), 1.0),
+                     (Element( 'Fe'), 2.0),
+                     (Element( 'O'), 3.2)], dens=5.24, ID=13)
+        m2.export(xray_units='sld')
+        m2.export(xray_units='n_db')
+        m2.export(xray_units='edens')
+        with self.assertRaises(ValueError):
+            m2.export(xray_units='test')
+
     def test_missing_data(self):
         with self.assertRaises(ValueError):
             Element()
