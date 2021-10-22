@@ -359,7 +359,9 @@ class Material():
         """
         Return a partially deuterated molecule with fraction of D instead of H.
         """
-        return (1.0-fraction)*self+fraction*self.deuterated
+        fh=self.formula
+        fd=self.deuterated.formula
+        return Material((1.0-fraction)*fh+fraction*fd, fu_dens=self.fu_dens, extra_data=self.extra_data)
 
     @property
     def edeuterated(self):
@@ -490,10 +492,6 @@ class Material():
 
     def __add__(self, other):
         # add two materials by adding the chemical formula and FU_volume of each element.
-        if self.elements==[]:
-            return other
-        if other.elements==[]:
-            return self
         if type(other)!=type(self):
             raise ValueError('Can only combine two Material instances.')
         fout=dict(self.elements)

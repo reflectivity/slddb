@@ -1,5 +1,6 @@
 import unittest
 from numpy.testing import assert_array_equal
+from numpy import isnan
 from slddb.material import Material, Formula
 from slddb.element_table import Element, element
 from slddb.constants import Cu_kalpha, Mo_kalpha, Cu_kalpha1, Mo_kalpha1
@@ -60,6 +61,13 @@ class TestMaterial(unittest.TestCase):
         self.assertEqual(str(m1.formula), 'Ni')
         self.assertEqual(m1.formula, Formula([('Ni', 1.0)]))
 
+    def test_creation(self):
+        m1 = Material([(Element( 'Ni'), 1.0)], dens=1.0)
+        m2 = Material('Ni', dens=1.0)
+        m3 = Material(Formula('Ni'), dens=1.0)
+        with self.assertRaises(TypeError):
+            m4 = Material(123.4, dens=1.0)
+
     def test_combine(self):
         m1=Material([(Element( 'Ni'), 1.0)], fu_volume=1.0)
         m2=Material([(Element( 'Co'), 1.0)], fu_volume=1.0)
@@ -80,6 +88,12 @@ class TestMaterial(unittest.TestCase):
         with self.assertRaises(ValueError):
             'abc'*m1
 
+    def test_formula_calculations(self):
+        f1=Formula('O')
+        f2=Formula('H')
+        self.assertEqual(2*f2+f1, Formula('H2O'))
+        self.assertEqual(2*f2-f2, f2)
+
     def test_fail(self):
         with self.assertRaises(ValueError):
             m1=Material([(Element('Ni'), 1.0)])
@@ -87,6 +101,9 @@ class TestMaterial(unittest.TestCase):
             m2=Material([(Element('Pu'), 1.0)], dens=20.0)
         with self.assertRaises(ValueError):
             m3=Material([(Element('Po'), 1.0)], dens=20.0)
+        mok=Material('Ni', dens=1.0)
+        with self.assertRaises(ValueError):
+            -1*mok
 
     def test_neutron_ni(self):
         m1=Material([(Element( 'Ni'), 1.0)], dens=8.9)
@@ -173,6 +190,11 @@ class TestMaterial(unittest.TestCase):
                      (Element( 'O'), 3.2)], dens=5.24, ID=13)
         str(m2)
         repr(m2)
+        m2=Material([(Element( 'Mo'), 1.0),
+                     (Element( 'Fe'), 2.0),
+                     (Element( 'O'), 3.2)], dens=5.24, ID=None, name='MoFeO')
+        str(m2)
+        repr(m2)
 
     def test_dict_conversion(self):
         m2=Material([(Element( 'Mo'), 1.0),
@@ -197,9 +219,50 @@ class TestMaterial(unittest.TestCase):
         self.assertEqual(e.E.shape, e.fpp.shape)
 
     def test_element_strings(self):
-        e=Element( 'H')
+        e=Element('H')
         str(e)
         repr(e)
-        e=Element( 'H[2]')
+        e=Element('H[2]')
         str(e)
         repr(e)
+
+    def test_deuteration(self):
+        m1=Material('H2O', dens=1.0)
+        m2=Material('D2O', fu_dens=m1.fu_dens)
+        m3=Material('HHxO', fu_dens=m1.fu_dens, name='exchangable')
+        m4=Material('HDO', fu_dens=m1.fu_dens)
+        self.assertEqual(m1.deuterated.formula, m2.formula)
+        self.assertAlmostEqual(m1.deuterated.fu_dens, m2.fu_dens)
+        self.assertEqual(m3.deuterated.formula, m2.formula)
+        self.assertAlmostEqual(m3.deuterated.fu_dens, m2.fu_dens)
+        self.assertEqual(m1.deuterate(0.5).formula, m4.formula)
+        self.assertAlmostEqual(m1.deuterate(0.5).fu_dens, m4.fu_dens)
+        self.assertEqual(m3.edeuterated.formula, Formula('DHxO'))
+        m5=Material('HHxO', fu_dens=m1.fu_dens).edeuterated # check the case of name=None
+
+    def test_exchange(self):
+        m1=Material('H2O', dens=1.0)
+        m3=Material('HHxO', fu_dens=m1.fu_dens)
+        m3a=Material('HHxO', fu_dens=m1.fu_dens, name='test')
+        m4=Material('HDO', dens=1.0)
+        self.assertEqual(m1.formula, m3.not_exchanged.formula)
+        self.assertEqual(m4.formula, m3.exchanged.formula)
+        self.assertAlmostEqual(m3a.not_exchanged.fu_dens, m1.fu_dens)
+        self.assertAlmostEqual(m3a.exchanged.fu_dens, m1.fu_dens)
+
+    def test_match_point(self):
+        m1=Material('H2O', dens=1.0)
+        m2=Material('D2O', fu_dens=m1.fu_dens)
+        # replace D2O with one that has equal volume
+        from slddb import material
+        material.H2O=m1
+        material.D2O=m2
+        self.assertAlmostEqual((m1+m2).match_point, 0.5)
+        self.assertAlmostEqual((3*m1+m2).match_point, 0.25)
+        self.assertAlmostEqual((m1+3*m2).match_point, 0.75)
+
+        m3=Material('HDHx2O2', fu_dens=m1.fu_dens/2.)
+        self.assertAlmostEqual(m3.match_point, 0.5/1.1)
+        m4=Material('D3O', fu_dens=m1.fu_dens)
+        self.assertTrue(isnan(m4.match_point))
+
