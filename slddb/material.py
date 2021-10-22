@@ -420,6 +420,20 @@ class Material():
         res_formula.merge_same()
         return Material(res_formula, fu_volume=self.fu_volume)
 
+    @property
+    def match_point(self):
+        # return the fraction of H2O required to match the material contrast
+        rh2o=H2O.rho_n.real
+        rd2o=D2O.rho_n.real
+        rh=self.exchange(0., 0.).rho_n.real
+        rd=self.exchange(0., 1.).rho_n.real
+        mp=(rh2o-rh)/(rd+rh2o-rh-rd2o)
+        if mp<=1.0 and mp>=0.0:
+            return mp
+        else:
+            # there is no match point
+            return float('nan')
+
     def export(self, xray_units='sld'):
         """
         Export material data to dictionary.
