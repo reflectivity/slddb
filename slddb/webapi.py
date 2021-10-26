@@ -2,6 +2,7 @@ import json
 import os, pathlib
 import datetime
 import warnings
+import ssl
 
 from urllib import request, parse
 from urllib.error import URLError
@@ -70,7 +71,8 @@ class SLD_API():
             return
 
     def download_db(self):
-        res=request.urlopen(WEBAPI_URL+self.db_suburl)
+        context=ssl._create_unverified_context()
+        res=request.urlopen(WEBAPI_URL+self.db_suburl, context=context)
         data=res.read()
         if not data.startswith(b'SQLite format 3'):
             raise ValueError('Error when downloading new database')
@@ -81,8 +83,8 @@ class SLD_API():
 
     def webquery(self, dict):
         data=parse.urlencode(dict)
-        #req=request.Request(WEBAPI_URL, data=data, method='GET')  # this will make the method "POST"
-        webdata=request.urlopen(WEBAPI_URL+'api?'+data)
+        context=ssl._create_unverified_context()
+        webdata=request.urlopen(WEBAPI_URL+'api?'+data, context=context)
         return json.loads(webdata.read()) # return decoded data
 
     def localquery(self, dict):
