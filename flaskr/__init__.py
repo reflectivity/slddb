@@ -258,15 +258,35 @@ def periodic_table():
     element_f={}
     element_fMo={}
     element_weight={}
+    if 'plot_scale' in request.args:
+        scale_colors={}
+        scale_type=request.args['plot_scale']
+    else:
+        scale_type=None
+        scale_colors=None
     for Z, ele in ELEMENT_NAMES.items():
         try:
             element=get_element(ele)
         except ValueError:
+            if scale_type is not None:
+                scale_colors[Z] = (0,0,0)
             continue
         bi = element.b
         fi = element.f_of_E(constants.Cu_kalpha)
         fMoi = element.f_of_E(constants.Mo_kalpha)
         mi = element.mass
+        if scale_type=='neutron':
+            scale_colors[Z]=(100+int(bi.real*125./13), 100+int(bi.real*125./13), 130+int(bi.real*125./10))
+        elif scale_type=='xray':
+            try:
+                scale_colors[Z] = (75+int(fi.real*2), 75+int(fi.real*1.5), 75+int(fi.real*1.5))
+            except ValueError:
+                scale_colors[Z] = (0, 0, 0)
+        elif scale_type=='xrayMo':
+            try:
+                scale_colors[Z] = (75+int(fMoi.real*1.5), 75+int(fMoi.real*2.0), 75+int(fMoi.real*1.5))
+            except ValueError:
+                scale_colors[Z] = (0, 0, 0)
         if bi is not None:
             element_b[Z]=f'{bi.real:.3f}-{-bi.imag:.3f}i'
         if fi is not None:
@@ -274,11 +294,11 @@ def periodic_table():
             element_fMo[Z] = f'{fMoi.real:.3f}-{-fMoi.imag:.3f}i'
         if mi is not None:
             element_weight[Z] = mi
-
     return render_template('periodic_table.html', elements=elements, group_colors=group_colors,
                            element_names=ELEMENT_NAMES, element_colors=element_colors,
                            element_fullnames=element_fullnames, element_weight=element_weight,
-                           element_b=element_b, element_f=element_f, element_fMo=element_fMo)
+                           element_b=element_b, element_f=element_f, element_fMo=element_fMo,
+                           scale_colors=scale_colors)
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True) # primary keys are required by SQLAlchemy

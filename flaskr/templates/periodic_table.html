@@ -82,16 +82,23 @@
               <tr>
                   {%for column in range(18)%}
                     {% if (row,column) in elements %}
-                        {% if row<7 %}
-                        <td onmouseover="show_element({{elements[row,column][0]}})" onclick="copy_element({{elements[row,column][0]}})" style="border: solid 1px; width: 3.7vw; height: 2.1vw;
-                        background: radial-gradient(circle,
-                        rgba({{group_colors[column][0]}}, {{group_colors[column][1]}}, {{group_colors[column][2]}}, 1) 0%,
-                        rgba({{int(group_colors[column][0]*0.8)}}, {{int(group_colors[column][1]*0.8)}}, {{int(group_colors[column][2]*0.8)}}, 1) 100%);">
+                        {% if scale_colors %}
+                            <td onmouseover="show_element({{elements[row,column][0]}})" onclick="copy_element({{elements[row,column][0]}})" style="border: solid 1px; width: 3.7vw; height: 2.1vw;
+                            background: radial-gradient(circle,
+                            rgba({{scale_colors[elements[row,column][0]][0]}}, {{scale_colors[elements[row,column][0]][1]}}, {{scale_colors[elements[row,column][0]][2]}}, 1) 0%,
+                            rgba({{int(scale_colors[elements[row,column][0]][0]*0.8)}}, {{int(scale_colors[elements[row,column][0]][1]*0.8)}}, {{int(scale_colors[elements[row,column][0]][2]*0.8)}}, 1) 100%);">
                         {% else %}
-                        <td onmouseover="show_element({{elements[row,column][0]}})" onclick="copy_element({{elements[row,column][0]}})" style="border: solid 1px; width: 3.7vw; height: 2.1vw;
-                        background: radial-gradient(circle,
-                        rgba({{group_colors[18][0]}}, {{group_colors[18][1]}}, {{group_colors[18][2]}}, 1) 0%,
-                        rgba({{int(group_colors[18][0]*0.8)}}, {{int(group_colors[18][1]*0.8)}}, {{int(group_colors[18][2]*0.8)}}, 1) 100%);">
+                            {% if row<7 %}
+                            <td onmouseover="show_element({{elements[row,column][0]}})" onclick="copy_element({{elements[row,column][0]}})" style="border: solid 1px; width: 3.7vw; height: 2.1vw;
+                            background: radial-gradient(circle,
+                            rgba({{group_colors[column][0]}}, {{group_colors[column][1]}}, {{group_colors[column][2]}}, 1) 0%,
+                            rgba({{int(group_colors[column][0]*0.8)}}, {{int(group_colors[column][1]*0.8)}}, {{int(group_colors[column][2]*0.8)}}, 1) 100%);">
+                            {% else %}
+                            <td onmouseover="show_element({{elements[row,column][0]}})" onclick="copy_element({{elements[row,column][0]}})" style="border: solid 1px; width: 3.7vw; height: 2.1vw;
+                            background: radial-gradient(circle,
+                            rgba({{group_colors[18][0]}}, {{group_colors[18][1]}}, {{group_colors[18][2]}}, 1) 0%,
+                            rgba({{int(group_colors[18][0]*0.8)}}, {{int(group_colors[18][1]*0.8)}}, {{int(group_colors[18][2]*0.8)}}, 1) 100%);">
+                            {% endif %}
                         {% endif %}
                       {{elements[row,column][1]}}
                     {% else %}
@@ -102,5 +109,11 @@
               {%endfor%}
           </table>
       </div>
+        <div style="font-size: 1.5vw; margin: 1em;">
+        Color elements by <a href="{{url_for('periodic_table')}}" style="border: solid 1px; text-decoration: none; padding: 0.1em 0.2em 0.1em 0.2em; background-color: #dddddd;">groups</a>
+            <a href="{{url_for('periodic_table', plot_scale='neutron')}}" style="border: solid 1px; text-decoration: none; padding: 0.1em 0.2em 0.1em 0.2em; background-color: #aaaadd;">b-neutron</a>
+            <a href="{{url_for('periodic_table', plot_scale='xray')}}" style="border: solid 1px; text-decoration: none; padding: 0.1em 0.2em 0.1em 0.2em; background-color: #ddaaaa;">Cu kɑ</a>
+            <a href="{{url_for('periodic_table', plot_scale='xrayMo')}}" style="border: solid 1px; text-decoration: none; padding: 0.1em 0.2em 0.1em 0.2em; background-color: #aaddaa;">Mo kɑ</a>
+        </div>
     </center>
 {% endblock %}
