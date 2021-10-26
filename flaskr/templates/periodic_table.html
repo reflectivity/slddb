@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block nav_about %}active_about{% endblock %}
+
+{% block content %}
+    <script>
+    var ele_names = {{ element_names| safe }}
+    var ele_fullnames = {{ element_fullnames| safe }}
+    var ele_weight = {{ element_weight| safe }}
+    var ele_b = {{ element_b| safe }}
+    var ele_f = {{ element_f| safe }}
+    var ele_fMo = {{ element_fMo| safe }}
+    var ele_colors = {{ element_colors| safe }}
+
+    function show_element(element) {
+            document.getElementById("ElementDisplay").style.display = 'block';
+            document.getElementById("ElementSymbol").innerHTML = ele_names[element];
+            document.getElementById("ElementSymbol").style.background = `radial-gradient(circle, rgba(${ele_colors[element][0]},${ele_colors[element][1]},${ele_colors[element][2]},1) 0%, #ffffff 100%)`;
+            document.getElementById("ElementName").innerHTML = ele_fullnames[element];
+            document.getElementById("ElementCharge").innerHTML = element.toString();
+            if (ele_weight.hasOwnProperty(element)) {
+                document.getElementById("ElementWeigth").innerHTML = ele_weight[element].toFixed(1);
+            } else {
+                document.getElementById("ElementWeigth").innerHTML = 'unknown';
+            }
+            if (ele_b.hasOwnProperty(element)) {
+                document.getElementById("ElementB").innerHTML = ele_b[element];
+            } else {
+                document.getElementById("ElementB").innerHTML = 'unknown';
+            }
+            if (ele_f.hasOwnProperty(element)) {
+                document.getElementById("ElementF").innerHTML = ele_f[element];
+            } else {
+                document.getElementById("ElementF").innerHTML = 'unknown';
+            }
+            if (ele_fMo.hasOwnProperty(element)) {
+                document.getElementById("ElementFMo").innerHTML = ele_fMo[element];
+            } else {
+                document.getElementById("ElementFMo").innerHTML = 'unknown';
+            }
+            }
+
+    function copy_element(element){
+        var out = '';
+            out=out.concat(ele_fullnames[element], '(', ele_names[element], '):\n');
+            out=out.concat('Z=', element.toString(), '\n');
+            if (ele_weight.hasOwnProperty(element)) {
+                out=out.concat('weight=', ele_weight[element].toFixed(1), '\n');
+            }
+            if (ele_b.hasOwnProperty(element)) {
+                out=out.concat('b-neutron=',  ele_b[element], '\n');
+            }
+            if (ele_f.hasOwnProperty(element)) {
+                out=out.concat('f-xray Cu=',  ele_f[element], '\n');
+            }
+            if (ele_fMo.hasOwnProperty(element)) {
+                out=out.concat('f-xray Mo=',  ele_fMo[element], '\n');
+            }
+        navigator.clipboard.writeText(out);
+        }
+    </script>
+
+    <center>
+      <div style="width: 70vw; height: 40vw; text-align: center; vertical-align: top; position: relative;">
+          <div id="ElementDisplay" style="position: absolute; z-index: 5; width: 36vw; height: 11vw; text-align: center;
+          border: solid 1px; left: 9vw; top: 1vw; display: none;">
+              <div id="ElementCharge" style="width: 2vw; height: 4vw; font-size: 1.5vw; text-align: left; position: absolute; left: 0.2vw; top: 0; z-index: 6;"></div>
+              <div id="ElementWeigth" style="width: 20%; height: 1.8vw; font-size: 1.5vw; text-align: right; position: absolute; left: -0.2vw; bottom: 0; z-index: 6;"></div>
+              <div id="ElementSymbol" style="width: 20%; height: 100%; font-size: 4.5vw; text-align: center; line-height: 11vw; position: absolute; left: 0; top: 0;"></div>
+              <div style="width: 80%; height: 100%; font-size: 1.5vw; line-height: 1.0; position: absolute; left: 20%; bottom: 0;">
+                  <table style="width: 100%; height: 100%;">
+                      <tr><td id="ElementName" colspan="2"></td><td rowspan="6" style="font-size: 1.2vw; font-align: center;"><br /><br />click on<br />element<br />to copy<br />data to<br />clipboard</td><tr>
+                      <tr><td></td><td></td></tr>
+                      <tr><td>b-neutron</td><td id="ElementB"></td></tr>
+                      <tr><td>f-xray Cu kɑ</td><td id="ElementF"></td></tr>
+                      <tr><td>f-xray Mo kɑ</td><td id="ElementFMo"></td></tr>
+                  </table>
+              </div>
+          </div>
+          <table style="width: 100%; height: 100%;">
+              {%for row in range(10)%}
+              <tr>
+                  {%for column in range(18)%}
+                    {% if (row,column) in elements %}
+                        {% if row<7 %}
+                        <td onmouseover="show_element({{elements[row,column][0]}})" onclick="copy_element({{elements[row,column][0]}})" style="border: solid 1px; width: 3.7vw; height: 2.1vw;
+                        background: radial-gradient(circle,
+                        rgba({{group_colors[column][0]}}, {{group_colors[column][1]}}, {{group_colors[column][2]}}, 1) 0%,
+                        rgba({{int(group_colors[column][0]*0.8)}}, {{int(group_colors[column][1]*0.8)}}, {{int(group_colors[column][2]*0.8)}}, 1) 100%);">
+                        {% else %}
+                        <td onmouseover="show_element({{elements[row,column][0]}})" onclick="copy_element({{elements[row,column][0]}})" style="border: solid 1px; width: 3.7vw; height: 2.1vw;
+                        background: radial-gradient(circle,
+                        rgba({{group_colors[18][0]}}, {{group_colors[18][1]}}, {{group_colors[18][2]}}, 1) 0%,
+                        rgba({{int(group_colors[18][0]*0.8)}}, {{int(group_colors[18][1]*0.8)}}, {{int(group_colors[18][2]*0.8)}}, 1) 100%);">
+                        {% endif %}
+                      {{elements[row,column][1]}}
+                    {% else %}
+                        <td style="border: none; width: 3.7vw; height: 1.0vw;">
+                    {% endif %}</td>
+                  {%endfor%}
+              </tr>
+              {%endfor%}
+          </table>
+      </div>
+    </center>
+{% endblock %}
