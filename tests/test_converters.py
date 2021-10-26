@@ -200,17 +200,12 @@ class TestConverter(unittest.TestCase):
         testing.assert_array_equal(b, conv.revert(conv.convert(b)))
 
     def test_class(self):
-        with self.assertRaises(NotImplementedError):
-            Converter()
-
         class Test(Converter):
             def __init__(self):
                 pass
 
-        t=Test()
-        with self.assertRaises(NotImplementedError):
-            t.convert(12)
-        self.assertEqual(t.revert(13), 13)
+        with self.assertRaises(TypeError):
+            t=Test()
 
     def test_validate(self):
         conv=CType(float, float)

@@ -8,6 +8,7 @@ from .dbconfig import DB_MATERIALS_CONVERTERS, DB_MATERIALS_NAME, \
 from .element_table import get_element
 from .material import Material, Formula
 from .importers import importers
+from .comparators import Comparator
 
 class SLDDB():
     """
@@ -89,8 +90,7 @@ class SLDDB():
         if commit:
             self.db.commit()
 
-    def search_material(self, join_and=True, serializable=False, filter_invalid=True, limit=100, offset=0,
-                        str_like=True, **data):
+    def search_material(self, join_and=True, serializable=False, filter_invalid=True, limit=100, offset=0, **data):
         for key, value in data.items():
             if not key in DB_MATERIALS_FIELDS:
                 raise KeyError('%s is not a valid data field'%key)
@@ -110,31 +110,22 @@ class SLDDB():
             qstr=''
             qlst=[]
             for key, value in data.items():
-                cval=db_lookup[key][1].convert(value)
-                if type(value) in (list, tuple):
-                    if len(value)==0:
-                        continue
-                    qstr+='('
-                    for itm in value:
-                        qstr+='%s LIKE ?'%key
-                        qstr+=' AND '
-                        qlst.append('%%%s%%'%repr(itm))
-                    cval=qlst.pop(-1)
-                    qstr=qstr[:-5]+')'
-                elif type(cval) is str:
-                    if str_like:
-                        qstr+='%s LIKE ?'%key
-                        cval='%%%s%%'%cval
-                    else:
-                        qstr+='%s == ?'%key
+                if isinstance(value, Comparator):
+                    # user has supplied a comparator instead of a value
+                    cmp:Comparator=value
+                    cmp.key=key
                 else:
-                    qstr+='%s == ?'%key
-                qlst.append(cval)
+                    # use comparator for specific validator
+                    cmp:Comparator=db_lookup[key][1].comparator(value, key)
+                qstr+=cmp.query_string()
+                qlst_add=cmp.query_args()
+                qlst += qlst_add
 
-                if join_and:
-                    qstr+=' AND '
-                else:
-                    qstr+='  OR '
+                if len(qlst_add)>0:
+                    if join_and:
+                        qstr+=' AND '
+                    else:
+                        qstr+='  OR '
             qstr=qstr[:-5]
         c=self.db.cursor()
         c.execute(sstr+qstr+' ORDER BY validated DESC, selected DESC, accessed DESC LIMIT %i,%i'%(offset, limit), qlst)
@@ -175,28 +166,22 @@ class SLDDB():
             qstr=''
             qlst=[]
             for key, value in data.items():
-                cval=db_lookup[key][1].convert(value)
-                if type(value) in (list, tuple):
-                    if len(value)==0:
-                        continue
-                    qstr+='('
-                    for itm in value:
-                        qstr+='%s LIKE ?'%key
-                        qstr+=' AND '
-                        qlst.append('%%%s%%'%repr(itm))
-                    cval=qlst.pop(-1)
-                    qstr=qstr[:-5]+')'
-                elif type(cval) is str:
-                    qstr+='%s LIKE ?'%key
-                    cval='%%%s%%'%cval
+                if isinstance(value, Comparator):
+                    # user has supplied a comparator instead of a value
+                    cmp:Comparator=value
+                    cmp.key=key
                 else:
-                    qstr+='%s == ?'%key
-                qlst.append(cval)
+                    # use comparator for specific validator
+                    cmp:Comparator=db_lookup[key][1].comparator(value, key)
+                qstr+=cmp.query_string()
+                qlst_add=cmp.query_args()
+                qlst += qlst_add
 
-                if join_and:
-                    qstr+=' AND '
-                else:
-                    qstr+='  OR '
+                if len(qlst_add)>0:
+                    if join_and:
+                        qstr+=' AND '
+                    else:
+                        qstr+='  OR '
             qstr=qstr[:-5]
         c=self.db.cursor()
         c.execute(sstr+qstr, qlst)

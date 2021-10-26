@@ -107,7 +107,9 @@ def search_query():
             if db_lookup[key][1].html_list:
                 value=request.form.getlist(key)
             try:
-                db_lookup[key][1].convert(value)
+                cmp=db_lookup[key][1].comparator(value, key)
+                cmp.query_args()
+                cmp.query_string()
             except Exception as e:
                 return show_search(error=repr(e)+'<br >'+"Raised when tried to parse %s = %s"%(key, value))
             else:

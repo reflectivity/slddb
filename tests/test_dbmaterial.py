@@ -1,7 +1,7 @@
 import unittest
 import json
 from slddb import SLDDB
-
+from slddb.comparators import ExactString, GenericComparator
 
 class TestMaterialDB(unittest.TestCase):
     @classmethod
@@ -42,7 +42,7 @@ class TestMaterialDB(unittest.TestCase):
 
     def test_exact_name(self):
         self.db.add_material('Iron Oxide 3123', 'Fe2O3', density=5.24, tags=['inorganic'])
-        res=self.db.search_material(name='oxide 3', str_like=False)
+        res=self.db.search_material(name=ExactString('oxide 3'))
         self.assertEqual(len(res), 0)
 
     def test_count(self):

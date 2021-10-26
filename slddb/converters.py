@@ -2,23 +2,27 @@
 Classes for conversion of specific data into sqlite types and back.
 """
 import re
+from abc import ABC, abstractmethod
 from numpy import array, frombuffer
 from datetime import datetime
 from .material import Formula
+from .comparators import GenericComparator, FormulaComparator, FuzzyFloat
 
 SQLITE_TYPES=[int, float, str, bytes]
 SQLITE_STR={int: 'INT', float: 'REAL', str: 'TEXT', bytes: 'BLOB'}
 
-class Converter():
+class Converter(ABC):
     """
     Base class for all other converters, can't be used stand alone.
     """
     sql_type="TEXT" # if subclass does not define the SQLite type assume TEXT for compatibility
     html_list=False # only used for types that require to query a list in html requests
+    comparator=GenericComparator
+    html_title=None
 
+    @abstractmethod
     def __init__(self):
-        raise NotImplementedError(
-            "Converters has to be used from a derived class")
+        "Converters is an abstract class"
 
     def validate(self, data):
         # Default behavior is to just try to convert.
@@ -29,8 +33,9 @@ class Converter():
         else:
             return True
 
+    @abstractmethod
     def convert(self, data):
-        raise NotImplementedError("Sub-class has to implement convert method")
+        """Converts data to SQLite format"""
 
     def revert(self, db_data):
         # Default behavior is to return the database data directly
@@ -42,7 +47,11 @@ class Converter():
 
     def html_input(self, field, value):
         # return a string containing the input key for html entry template
-        return f'<input type="text" name="{field}" id="compound {field}" value="{value}">'
+        if self.html_title:
+            return f'<input type="text" name="{field}" id="compound {field}" value="{value}" ' \
+                   f'title = "{self.html_title}">'
+        else:
+            return f'<input type="text" name="{field}" id="compound {field}" value="{value}">'
 
 
 class CType(Converter):
@@ -53,6 +62,9 @@ class CType(Converter):
         if dbtype not in SQLITE_TYPES:
             raise TypeError("Type %s is not a valid SQLite type"%
                             dbtype.__name__)
+        if fromtype is float:
+            self.comparator=FuzzyFloat
+            self.html_title='when searching: value|value+/-10%|range: 13.4|~13.4|13-14'
         self._dbtype=dbtype
         if db_repstr is None:
             self.sql_type=SQLITE_STR[dbtype]
@@ -101,6 +113,8 @@ class CDate(Converter):
                ' placeholder="date: {year}-{month}-{day} {hours}:{minutes}:{seconds}" title="2021-01-10 00:00:00" />'
 
 class CFormula(Converter):
+    comparator = FormulaComparator
+
     def __init__(self):
         pass
 
@@ -113,7 +127,7 @@ class CFormula(Converter):
 
     def html_input(self, field, value):
         return f'<input type="text" name="{field}" id="compound {field}" value="{value}"'\
-               ' placeholder="Fe2O3 / H[2]2O / H2(C2H4)4" title="Chemical Formula: Fe2O3 / H[2]2O / H2(C2H4)4" />'
+               ' placeholder="Fe2O3 / H[2]2O / H2(C2H4)4" title="Chemical Formula: Fe2O3 / H[2]2O / H2(C2H4)4 / ~F" />'
 
 class ValidatedString(CType):
     regex=None
@@ -250,7 +264,8 @@ class CLimited(CType):
 
     def html_input(self, field, value):
         return f'<input type="text" name="{field}" id="compound {field}" value="{value}"'\
-               f' placeholder="{self._low_lim}<value<{self._up_lim}"/>'
+               f' placeholder="{self._low_lim}<value<{self._up_lim}"' \
+               f' title="when searching: value|value+/-10%|range: 13.4|~13.4|13-14" />'
 
 class CComplex(CArray):
     def __init__(self):

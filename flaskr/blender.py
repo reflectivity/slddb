@@ -7,6 +7,7 @@ from slddb import DB_FILE, SLDDB
 from slddb.material import Material
 from slddb.element_table import get_element
 from slddb.importers import CifImporter, PolymerSequence
+from slddb.comparators import ExactString
 
 CALC_DEFAULT_FIELDS = dict(densinput='volume',mu=0.0,magninput='muB')
 
@@ -58,7 +59,7 @@ def collect_combination(ids, name_dict):
     for id in ids:
         if not id in loaded_ids:
             try:
-                entry=db.search_material(name=name_dict[id], str_like=False)[0]
+                entry=db.search_material(name=ExactString(name_dict[id]))[0]
             except KeyError:
                 possible_ids=name_dict.keys()
                 raise SequenceParseError(f"Not a valid identifier {id}, options are {''.join(possible_ids)}")
