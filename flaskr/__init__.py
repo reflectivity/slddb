@@ -231,6 +231,17 @@ def download_api():
 
 @app.route('/periodic_table')
 def periodic_table():
+    if 'sld_element' in request.args:
+        db = slddb.SLDDB(DB_FILE)
+        try:
+            res = db.search_material(formula=request.args['sld_element'], name=ELEMENT_FULLNAMES[request.args['sld_element']])
+        except ValueError:
+            res=[]
+        if len(res)>0:
+            return redirect(url_for('calculate_sld', ID=res[0]['ID']))
+        else:
+            flash(f'No SLD for {ELEMENT_FULLNAMES[request.args["sld_element"]]}')
+
     col_ranges=[(1,1), (2,6), (2,6), (2, 16), (2,16), (2, 15), (2, 15)]
     elements={}
     Z=1
