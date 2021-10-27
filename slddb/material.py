@@ -458,11 +458,16 @@ class Material():
         rh=self.exchange(0., 0.).rho_n.real
         rd=self.exchange(0., 1.).rho_n.real
         mp=(rh2o-rh)/(rd+rh2o-rh-rd2o)
-        if mp<=1.0 and mp>=0.0:
-            return mp
-        else:
-            # there is no match point
-            return float('nan')
+        return mp
+
+    def match_exchange(self, D_fraction=0.0, exchange=0.9):
+        # return the D2O match point for a given deuteration and exchange fraction
+        rh2o=H2O.rho_n.real
+        rd2o=D2O.rho_n.real
+        rh=self.exchange(D_fraction, 0., exchange=exchange).rho_n.real
+        rd=self.exchange(D_fraction, 1., exchange=exchange).rho_n.real
+        mp=(rh2o-rh)/(rd+rh2o-rh-rd2o)
+        return mp
 
     def export(self, xray_units='sld'):
         """
