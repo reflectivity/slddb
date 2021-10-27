@@ -279,5 +279,5 @@ class TestMaterial(unittest.TestCase):
         m3=Material('HDHx2O2', fu_dens=m1.fu_dens/2.)
         self.assertAlmostEqual(m3.match_point, 0.5/1.1)
         m4=Material('D3O', fu_dens=m1.fu_dens)
-        self.assertTrue(isnan(m4.match_point))
+        self.assertTrue(m4.match_point>1.0)
 
