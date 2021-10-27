@@ -9,7 +9,7 @@ Contributers:
     Artur Glavic <artur.glavic@psi.ch>
 """
 
-__version__='1.0 beta5'
+__version__='1.0 beta6'
 
 try:
     from .database import SLDDB
