@@ -283,7 +283,7 @@
             {% endif %}
       </center><p></p>
       {% else %}
-        <p style="text-align:center; margin-top: 5em;">
+        <p class="hide_mobile" style="text-align:center; margin-top: 5em;">
           <a href="{{url_for('periodic_table')}}"><img src="{{url_for('static', filename='periodic_table.png')}}" style="width: 12em;"></a><br/>
           You can look up the reference elemental data in the <a href="{{url_for('periodic_table')}}">periodic table</a>.
             </p>
@@ -294,8 +294,8 @@
       </center>
       {% if material %}
         <center><button type="submit" form="preferences" style="background-color: #aaaacc; border: none; cursor: pointer; padding: 0.5em;">
-          Save current view as default (stores Cookie)</button><br/>
-            You can look up the reference elemental data in the <a href="{{url_for('periodic_table')}}">periodic table</a>.
+          Save current view as default (stores Cookie)</button>
+            <p class="hide_mobile">You can look up the reference elemental data in the <a href="{{url_for('periodic_table')}}">periodic table</a>.</p>
         </center>
       {% endif %}
     </td>

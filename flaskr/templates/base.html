@@ -12,14 +12,13 @@
         <tr style="height: 6em;">
           <td class="sides"><img src="https://github.com/reflectivity/logo/raw/master/aglavic/ORSO_Logo_clean.png" style="width: 11em"></td>
           <td style="background-color: #fafafa">
-              <img src="https://github.com/reflectivity/logo/raw/master/aglavic/ORSO_Logo_clean.png" class="top_logo" style="width: 8em; float: left; margin: 10px;">
-              <center><h1 style="margin: 1.5em 0pt 0pt 0px;">SLD Database</h1>{{ slddb_version }}</center>
-          <br/>
+              <img src="https://github.com/reflectivity/logo/raw/master/aglavic/ORSO_Logo_clean.png" class="top_logo">
+              <div class="top_header"><h1>SLD Database</h1>{{ slddb_version }}</div>
             <ul>
               <li class="{% block nav_start_page %}{% endblock %}"><a href="{{ url_for('start_page') }}">Query Database</a></li>
               <li class="{% block nav_calculate_sld %}{% endblock %}"><a href="{{ url_for('calculate_sld') }}">Calculate SLD</a></li>
               <li class="{% block nav_bio_blender %}{% endblock %}"><a href="{{ url_for('bio_blender') }}">BioBlender</a></li>
-              <li class="{% block nav_input_page %}{% endblock %}"><a href="{{ url_for('input_page') }}">Enter Material</a></li>
+              <li class="{% block nav_input_page %}{% endblock %} hide_mobile"><a href="{{ url_for('input_page') }}">Enter Material</a></li>
               <li  class="{% block nav_about %}about{% endblock %}"><a href="{{ url_for('about_page') }}">About</a></li>
               {% if current_user.is_authenticated %}
                   <li  class="login"><a href="{{ url_for('logout') }}">{{current_user.name}} - Logout</a></li>

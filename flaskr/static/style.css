@@ -43,8 +43,19 @@ td.center {
     background-color: #fafafa;
 }
 
+div.top_header {
+    margin: 1em 0px 1em 0px;
+    text-align: center;
+}
+.top_header h1 {
+    margin: 0px 0px 0px 0px;
+}
+
 img.top_logo {
       display: none;
+      width: 8em;
+      float: left;
+      margin: 10px;
 }
 
 a {
@@ -192,15 +203,18 @@ li a:hover {
 
     img.top_logo {
           display: block;
+          width: 5.5em;
+    }
+    div.top_header {
+        margin: 0.5em 0px 0.5em 0px;
     }
 }
 
+/* phone in portrait */
 @media only screen and (max-width: 530px) {
     li, li.login, li.about {
-        float: none;
     }
     li.login, li.about {
-        float: none;
         display: none;
     }
     .hide_mobile {
@@ -210,6 +224,18 @@ li a:hover {
         overflow: visible;
         overflow-x: auto;
     }
+    div.top_header {
+        margin: 0px 0px 0px 0px;
+    }
+    img.top_logo {
+          width: 3.5em;
+    }
+input, select, button {
+    font-size: 150%;
+}
+select, input[type=text], input[type=number] {
+   width: 8em;
+}
 }
 
 /* special buttons to be aware of */
