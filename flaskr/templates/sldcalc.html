@@ -143,8 +143,6 @@
                   ILL Neutron Data Booklet</a> provided by the python <a href="https://periodictable.readthedocs.io/en/latest/">periodictable</a> package.
               X-ray energy dependant scattering is base on the <a href="https://dx.doi.org/10.18434/T4HS32">NIST Standard Reference Database 66</a>.
           </div>
-              <br />
-              Look up elemental data in the <a href="{{url_for('periodic_table')}}">periodic table.</a>
           </div>
       </td>
 
@@ -214,7 +212,10 @@
                 <input type="range" min="0" max="100" value="0" class="slider" id="deuteration_amount" step="1" onchange="deuterateSlider(this.value)" style="width: 90px;">
                 <input type="number" min="0" max="100" value="0" class="slider_value" id="deuteration_amount_value"
                        onchange="deuterateValue(this.value)" onkeyup="if (event.key=='Enter') {deuterateValue(this.value)}" style="width: 40px;">%
-            </td><td class="hide_mobile"></td></tr>
+            </td><td class="hide_mobile" style="text-align:center;"><div class="tooltip">🛈<div class="tooltiptext">
+                Deuteration is calculated using the provided molecule volume and replacing hydrogen by deuterium.
+                This calculation does no include the effect of bond length changes that can lead to 1-2% changes in molecular volume.</div></div>
+                </td></tr>
             {% endif %}
             {% if exchanged %}
             <tr><td style="text-align:right;">Amount Hx-exchange</td><td colspan="2">
@@ -227,7 +228,8 @@
                 <input type="number" min="0" max="100" value="0" class="slider_value" id="d2o_amount_value"
                        onchange="d2oValue(this.value)" onkeyup="if (event.key=='Enter') {d2oValue(this.value)}" style="width: 40px;">%
             </td><td class="hide_mobile"></td></tr>
-            <tr><td style="text-align:right;">Match Point</td><td colspan="2" id="match_point_value">{{"%.2f"%match_point}}% D<sub>2</sub>O</td><td class="hide_mobile"></td></tr>
+            <tr><td style="text-align:right;">Match Point</td><td colspan="2" id="match_point_value">{{"%.2f"%match_point}}% D<sub>2</sub>O</td><td class="hide_mobile" style="text-align:center;"><div class="tooltip">🛈<div class="tooltiptext">
+                The match point is the amount of D<sub>2</sub>O required to match the molecule contrast for a given level of deuteration and exchange.</div></div></td></tr>
             {% endif %}
             {% if material.rho_m!=0 %}
             <tr><td style="text-align:right;"><select id="magnresult" name="magnresult" onchange="switch_magn()">
@@ -280,6 +282,11 @@
              <br /><a id="download_link" href="{{url_for('api_download', sldcalc='true', xray_unit='edens', formula=str(material.formula), density=material.dens, name=material_name)|safe}}">Download full record as JSON</a>
             {% endif %}
       </center><p></p>
+      {% else %}
+        <p style="text-align:center; margin-top: 5em;">
+          <a href="{{url_for('periodic_table')}}"><img src="{{url_for('static', filename='periodic_table.png')}}" style="width: 12em;"></a><br/>
+          You can look up the reference elemental data in the <a href="{{url_for('periodic_table')}}">periodic table</a>.
+            </p>
       {% endif %}
 
       <center>
@@ -287,7 +294,9 @@
       </center>
       {% if material %}
         <center><button type="submit" form="preferences" style="background-color: #aaaacc; border: none; cursor: pointer; padding: 0.5em;">
-          Save current view as default (stores Cookie)</button></center>
+          Save current view as default (stores Cookie)</button><br/>
+            You can look up the reference elemental data in the <a href="{{url_for('periodic_table')}}">periodic table</a>.
+        </center>
       {% endif %}
     </td>
 

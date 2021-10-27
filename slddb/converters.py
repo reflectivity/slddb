@@ -127,7 +127,17 @@ class CFormula(Converter):
 
     def html_input(self, field, value):
         return f'<input type="text" name="{field}" id="compound {field}" value="{value}"'\
-               ' placeholder="Fe2O3 / H[2]2O / H2(C2H4)4" title="Chemical Formula: Fe2O3 / H[2]2O / H2(C2H4)4 / ~F" />'
+               ' placeholder="Fe2O3 / H[2]2O / H2(C2H4)4" title="Chemical Formula: Fe2O3 / H[2]2O / H2(C2H4)4 / ~F" />' \
+               '<div class="tooltip">🛈<div class="tooltiptext">' \
+               'Chemical formula of a compound can be provided in various ways. It will typically be a sequence of ' \
+               'chemical elements followed each by a number.<br/>Isotopes are written with the mass number N in square brackets. ' \
+               '<i>D</i> is also accepted for H[2].' \
+               '<br/>Repreating groups can be provided by a sub-formula in round brackets followed by a number of repetitions. ' \
+               '<br/>For organic molecules that exchange hydrogen atoms with their environment, such exchangable hydrogens are written separately as <i>Hx</i> element.' \
+               '<br/>In searches the match is exect (besides re-ordering the elements), a rough search can be indicated by ' \
+               'adding a tilde (~) before the formula.<br/>Examples:<br/>' \
+               'Fe2O3 / H[2]2O / H2(C2H4)4 / ~F' \
+               '</div></div>'
 
 class ValidatedString(CType):
     regex=None

@@ -249,3 +249,34 @@ li.error {
   display: none;
   overflow: hidden;
 }
+
+/* Tooltip container */
+.tooltip {
+  position: relative;
+  display: inline-block;
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 18em;
+  background-color: #fff;
+  color: #000;
+  text-align: center;
+  padding: 5px 5px;
+  border: solid 1px;
+  border-radius: 6px;
+  top: 100%;
+  left: 50%;
+  margin-left: -9em; /* Use half of the width (120/2 = 60), to center the tooltip */
+  white-space: normal;
+
+  /* Position the tooltip text - see examples below! */
+  position: absolute;
+  z-index: 10;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}

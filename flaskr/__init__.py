@@ -20,14 +20,13 @@ DB_FILE='slddb.db';dbconfig.DB_FILE=DB_FILE;slddb.DB_FILE=DB_FILE
 from slddb.dbconfig import DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA, db_lookup
 from slddb.material import Formula
 from slddb import constants
-from slddb.element_table.element import ELEMENT_NAMES, ELEMENT_FULLNAMES
-from slddb.element_table import get_element
 
 from .api import calc_api, select_api, search_api
 from .querydb import search_db, show_search
 from .calcsld import calculate_selection, calculate_user, validate_selection, invalidate_selection
 from .inputdb import input_form, input_fill_cif, input_material, edit_selection, update_material, input_fill_blend
 from .blender import calculate_blend, formula_from_cif
+from .periodic_table import get_periodic_table
 
 app=Flask("ORSO SLD Data Base", template_folder='flaskr/templates',
           static_folder='flaskr/static')
@@ -96,6 +95,7 @@ def search_query_post():
 @app.route('/search', methods=['POST'])
 def search_query():
     query={}
+    offset=0
 
     invalids=False
     for key, value in request.form.items():
@@ -231,85 +231,8 @@ def download_api():
 
 @app.route('/periodic_table')
 def periodic_table():
-    if 'sld_element' in request.args:
-        db = slddb.SLDDB(DB_FILE)
-        try:
-            res = db.search_material(formula=request.args['sld_element'], name=ELEMENT_FULLNAMES[request.args['sld_element']])
-        except ValueError:
-            res=[]
-        if len(res)>0:
-            return redirect(url_for('calculate_sld', ID=res[0]['ID']))
-        else:
-            flash(f'No SLD for {ELEMENT_FULLNAMES[request.args["sld_element"]]}')
-
-    col_ranges=[(1,1), (2,6), (2,6), (2, 16), (2,16), (2, 15), (2, 15)]
-    elements={}
-    Z=1
-    for row in range(7):
-        for left in range(col_ranges[row][0]):
-            elements[row, left]=(Z, ELEMENT_NAMES[Z])
-            Z+=1
-        if row>4:
-            for sub in range(14):
-                elements[row+3, 2+sub]=(Z, ELEMENT_NAMES[Z])
-                Z+=1
-        for right in range(col_ranges[row][1]):
-            elements[row, 18-col_ranges[row][1]+right]=(Z, ELEMENT_NAMES[Z])
-            Z+=1
-    group_colors={0: (200, 255, 200), 17: (240, 180, 240)}
-    group_colors[1] = (200, 255, 200)
-    for g in range(2,12):
-        group_colors[g]=(255, 200, 200)
-    for g in range(12,17):
-        group_colors[g]=(200, 200, 255)
-    group_colors[18] = (255, 255, 150)
-    element_colors=dict([(Z, list(group_colors[col])) if row<7 else (Z, list(group_colors[18])) for (row, col),(Z, _) in elements.items()])
-    element_fullnames=dict([(Z, ELEMENT_FULLNAMES[ele].capitalize()) for Z,ele in ELEMENT_NAMES.items()])
-    element_b={}
-    element_f={}
-    element_fMo={}
-    element_weight={}
-    if 'plot_scale' in request.args:
-        scale_colors={}
-        scale_type=request.args['plot_scale']
-    else:
-        scale_type=None
-        scale_colors=None
-    for Z, ele in ELEMENT_NAMES.items():
-        try:
-            element=get_element(ele)
-        except ValueError:
-            if scale_type is not None:
-                scale_colors[Z] = (0,0,0)
-            continue
-        bi = element.b
-        fi = element.f_of_E(constants.Cu_kalpha)
-        fMoi = element.f_of_E(constants.Mo_kalpha)
-        mi = element.mass
-        if scale_type=='neutron':
-            scale_colors[Z]=(100+int(bi.real*125./13), 100+int(bi.real*125./13), 130+int(bi.real*125./10))
-        elif scale_type=='xray':
-            try:
-                scale_colors[Z] = (75+int(fi.real*2), 75+int(fi.real*1.5), 75+int(fi.real*1.5))
-            except ValueError:
-                scale_colors[Z] = (0, 0, 0)
-        elif scale_type=='xrayMo':
-            try:
-                scale_colors[Z] = (75+int(fMoi.real*1.5), 75+int(fMoi.real*2.0), 75+int(fMoi.real*1.5))
-            except ValueError:
-                scale_colors[Z] = (0, 0, 0)
-        if bi is not None:
-            element_b[Z]=f'{bi.real:.3f}-{-bi.imag:.3f}i'
-        if fi is not None:
-            element_f[Z] = f'{fi.real:.3f}-{-fi.imag:.3f}i'
-            element_fMo[Z] = f'{fMoi.real:.3f}-{-fMoi.imag:.3f}i'
-        if mi is not None:
-            element_weight[Z] = mi
-    return render_template('periodic_table.html', elements=elements, group_colors=group_colors,
-                           element_names=ELEMENT_NAMES, element_colors=element_colors,
-                           element_fullnames=element_fullnames, element_weight=element_weight,
-                           element_b=element_b, element_f=element_f, element_fMo=element_fMo,
-                           scale_colors=scale_colors)
+    return get_periodic_table(requested_element=request.args.get('sld_element', default=None),
+                              plot_scale=request.args.get('plot_scale', default=None))
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True) # primary keys are required by SQLAlchemy
