@@ -145,7 +145,10 @@ def formula_from_pdb(file_obj, sequence=1):
         full_path=os.path.join(tempfile.gettempdir(), filename[:-3])
         open(full_path, 'wb').write(txt)
     if full_path.endswith('.cif'):
-        data=CifImporter(full_path, validate=False, sequence=sequence)
+        try:
+            data=CifImporter(full_path, validate=False, sequence=sequence)
+        except IndexError:
+            return None, None
         os.remove(full_path)
         if type(data.formula) is PolymerSequence:
             return data.name, data.formula

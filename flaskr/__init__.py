@@ -179,7 +179,7 @@ def combine_blender():
             return render_template('bio_blender.html',
                        error=repr(e)+'<br >'+"Raised when tried to parse composition = '%s'"%request.form['structure'])
     else:
-        name, formula=formula_from_pdb(request.files['pdb_file'], sequence=request.args.get('sequence', 1))
+        name, formula=formula_from_pdb(request.files['pdb_file'], sequence=int(request.form.get('sequence', 1)))
         return render_template('bio_blender.html', fill_formula=formula, fill_name=name)
 
 @app.route('/api', methods=['GET'])
