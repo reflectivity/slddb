@@ -42,9 +42,10 @@ Example Database IDs: (3*125)(4*51)">{{ request.form.get('structure','') }}{% if
     </center></form>
       <p style="text-align:center;">
       <form method="POST" enctype="multipart/form-data">
-          Fill from PDB CIF file<br />
-          <input type="file" accept=".cif,.cif.gz" id="cif_file" name="cif_file" onchange="form.submit()" style="display: none;">
-          <input type="button" value="Choose File" onclick="document.getElementById('cif_file').click();" />
+          Fill from PDB CIF/FASTA file<br />
+          <input type="file" accept=".cif,.cif.gz,.fasta,.fna,.ffn,.faa,.frn,.fa" id="pdb_file" name="pdb_file" onchange="form.submit()" style="display: none;">
+          <input type="button" value="Choose File" onclick="document.getElementById('pdb_file').click();" />
+          (sequence <input type="number" value="1" min="1" max="99" style="width: 8em;" name="sequence" />)
       </form>
       </p>
     </td>

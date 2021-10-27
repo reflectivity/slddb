@@ -40,6 +40,8 @@ def calc_api(args):
     else:
         return 'Could not calculate, missing formula and density or protein/dna/rna sequence'
     material.name=name
+    if args.get('material_description', default='')!='':
+        material.extra_data['description']=args['material_description']
     out = material.export(xray_units=args.get('xray_unit', 'edens'))
     return json.dumps(out, indent='    ')
 

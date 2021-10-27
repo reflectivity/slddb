@@ -279,7 +279,7 @@
             {% if material.ID %}
             <br /><a id="download_link" href="{{url_for('api_download', ID=material.ID, xray_unit='edens')|safe}}">Download full record as JSON</a>
             {% else %}
-             <br /><a id="download_link" href="{{url_for('api_download', sldcalc='true', xray_unit='edens', formula=str(material.formula), density=material.dens, name=material_name)|safe}}">Download full record as JSON</a>
+             <br /><a id="download_link" href="{{url_for('api_download', sldcalc='true', xray_unit='edens', formula=str(material.formula), density=material.dens, name=material_name, material_description=material_description)|safe}}">Download full record as JSON</a>
             {% endif %}
       </center><p></p>
       {% else %}

@@ -206,6 +206,7 @@ class SLDDB():
         extra_data['ORSO_validated'] = result['validated'] is not None
         extra_data['reference'] = result.get('reference', '')
         extra_data['doi'] = result.get('doi', '')
+        extra_data['description'] = result.get('description', '')
 
         m=Material(formula,
                    dens=result['density'],

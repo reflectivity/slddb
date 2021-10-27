@@ -8,7 +8,7 @@ from .dbconfig import db_lookup
 
 class Importer(dict):
     """
-    Base class for importing database entries. Includes checkes for correctness used by all importers.
+    Base class for importing database entries. Includes checks for correctness used by all importers.
     """
     formula=None
 
@@ -37,6 +37,10 @@ class Importer(dict):
 class CifImporter(Importer):
     suffix='cif'
 
+    def __init__(self, filename, validate=True, sequence=1):
+        self.sequence=sequence
+        super().__init__(filename, validate=validate)
+
     @staticmethod
     def float_werr(value):
         # Convert CIF entry that might have an uncertainty to float
@@ -59,7 +63,7 @@ class CifImporter(Importer):
         elif '_entity_poly.pdbx_seq_one_letter_code' in block:
             txt=block['_entity_poly.pdbx_seq_one_letter_code']
             if type(txt) is list:
-                formula=PolymerSequence('\n\n'.join(txt))
+                formula=PolymerSequence(txt[self.sequence-1])
             else:
                 formula=PolymerSequence(txt)
             output['tags']=['biology', 'polymer']

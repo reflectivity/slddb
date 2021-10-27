@@ -1,6 +1,7 @@
 import json
 import zipfile
 import os
+import time
 from io import BytesIO
 from flask import Flask
 from flask import request, render_template, send_file, flash, redirect, url_for, make_response
@@ -25,7 +26,7 @@ from .api import calc_api, select_api, search_api
 from .querydb import search_db, show_search
 from .calcsld import calculate_selection, calculate_user, validate_selection, invalidate_selection
 from .inputdb import input_form, input_fill_cif, input_material, edit_selection, update_material, input_fill_blend
-from .blender import calculate_blend, formula_from_cif
+from .blender import calculate_blend, formula_from_pdb
 from .periodic_table import get_periodic_table
 
 app=Flask("ORSO SLD Data Base", template_folder='flaskr/templates',
@@ -152,7 +153,8 @@ def calculate_sld():
         else:
             return calculate_user(f, float(request.args['density'] or 1.0), float(request.args['mu'] or 0),
                                   request.args['densinput'], request.args['magninput'],
-                                  name=request.args.get('name', default=None))
+                                  name=request.args.get('name', default=None),
+                                  material_description=request.args.get('description', default=""))
     else:
         return render_template('sldcalc.html')
 
@@ -177,7 +179,7 @@ def combine_blender():
             return render_template('bio_blender.html',
                        error=repr(e)+'<br >'+"Raised when tried to parse composition = '%s'"%request.form['structure'])
     else:
-        name, formula=formula_from_cif(request.files['cif_file'])
+        name, formula=formula_from_pdb(request.files['pdb_file'], sequence=request.args.get('sequence', 1))
         return render_template('bio_blender.html', fill_formula=formula, fill_name=name)
 
 @app.route('/api', methods=['GET'])
@@ -199,8 +201,13 @@ def api_download():
     mem_json=BytesIO()
     mem_json.write(record.encode('utf-8'))
     mem_json.seek(0)
-    result=send_file(mem_json, mimetype='application/json', as_attachment=True,
-                     attachment_filename=f'orso_slddb_{request.args.get("ID", "query")}.json', conditional=True)
+    if 'ID' in request.args:
+        result = send_file(mem_json, mimetype='application/json', as_attachment=True,
+                           attachment_filename=f'orso_slddb_{request.args["ID"]}.json', conditional=True)
+    else:
+        result = send_file(mem_json, mimetype='application/json', as_attachment=True,
+                           attachment_filename=f'orso_slddb_query_{time.strftime("%Y%H%M%S")}.json',
+                           conditional=True, cache_timeout=0)
     return result
 
 @app.route('/download_db')

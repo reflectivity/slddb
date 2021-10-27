@@ -79,9 +79,9 @@ def clean_str(string):
 
 def calculate_blend(mtype, name, idstr):
     result=collect_blend(mtype, idstr)
-
     return redirect(url_for('calculate_sld', formula=str(result.formula), density=result.fu_volume,
-                            name=name or mtype, **CALC_DEFAULT_FIELDS))
+                            name=name or mtype, description=result.extra_data.get('description', None),
+                            **CALC_DEFAULT_FIELDS))
 
 def collect_blend(mtype, idstr):
     if mtype=='protein':
@@ -96,18 +96,21 @@ def collect_blend(mtype, idstr):
 hx2o=Material([(get_element(element), amount) for element, amount in [('Hx', 2.0), ('O', 1.0)]], dens=1.0)
 def collect_protein(acids):
     acids=clean_str(acids).upper()
-    result=collect_combination(acids, AMINO_ABRV)
-    return result+hx2o
+    result=collect_combination(acids, AMINO_ABRV)+hx2o
+    result.extra_data['description']=f'protein, {len(acids)} resiudes'
+    return result
 
 def collect_dna(bases):
     bases=clean_str(bases).upper()
-    result=collect_combination(bases, DNA_ABRV)
-    return result+hx2o
+    result=collect_combination(bases, DNA_ABRV)+hx2o
+    result.extra_data['description']=f'DNA, {len(bases)} resiudes'
+    return result
 
 def collect_rna(bases):
     bases=clean_str(bases).upper()
-    result=collect_combination(bases, RNA_ABRV)
-    return result+hx2o
+    result=collect_combination(bases, RNA_ABRV)+hx2o
+    result.extra_data['description']=f'RNA, {len(bases)} resiudes'
+    return result
 
 def collect_blendIDs(formula):
     db = SLDDB(DB_FILE)
@@ -131,7 +134,7 @@ def collect_blendIDs(formula):
         result+=element
     return result
 
-def formula_from_cif(file_obj):
+def formula_from_pdb(file_obj, sequence=1):
     filename=secure_filename(file_obj.filename)
     full_path=os.path.join(tempfile.gettempdir(), filename)
     file_obj.save(full_path)
@@ -141,10 +144,29 @@ def formula_from_cif(file_obj):
         os.remove(full_path)
         full_path=os.path.join(tempfile.gettempdir(), filename[:-3])
         open(full_path, 'wb').write(txt)
-    data=CifImporter(full_path, validate=False)
-    os.remove(full_path)
-
-    if type(data.formula) is PolymerSequence:
-        return data.name, data.formula
+    if full_path.endswith('.cif'):
+        data=CifImporter(full_path, validate=False, sequence=sequence)
+        os.remove(full_path)
+        if type(data.formula) is PolymerSequence:
+            return data.name, data.formula
+        else:
+            return None, None
     else:
-        return None, None
+        txt=open(full_path, 'r').read()
+        blocks=[]
+        block_start=txt.find('>')
+        while block_start!=-1:
+            block_end=txt.find('>', block_start+1)
+            blocks.append((block_start, block_end))
+            block_start=block_end
+        if sequence>len(blocks):
+            return None,None
+        block=txt[blocks[sequence-1][0]:blocks[sequence-1][1]].splitlines()
+        head='';data=''
+        for line in block:
+            if line.startswith('>'):
+                head+=line[1:]
+            else:
+                data+=line+'\n'
+            head_items=head.split('|')
+        return head_items[0], data.strip()

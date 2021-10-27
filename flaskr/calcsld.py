@@ -176,7 +176,7 @@ def calculate_selection(ID):
                            invalid=res[0]['invalid'], invalid_by=res[0]['invalid_by'],
                            formula=res[0]['formula'], density=material.dens, mu=material.mu)
 
-def calculate_user(formula, density, mu, density_choice, mu_choice, name=None):
+def calculate_user(formula, density, mu, density_choice, mu_choice, name=None, material_description=""):
     kwrds={}
     if density==0:
         return render_template('sldcalc.html', error="Density can not be zero!")
@@ -243,7 +243,7 @@ def calculate_user(formula, density, mu, density_choice, mu_choice, name=None):
         return render_template('sldcalc.html', material=m, deuterated=deuterated,
                            exchanged=exchanged, match_point=match_point,
                            material_name=name or "User input",
-                           material_description="", script=script, xray_E=E.tolist(),
+                           material_description=material_description, script=script, xray_E=E.tolist(),
                            xray_rho_real=nan_to_num(rho_x.real).tolist(),
                            xray_rho_imag=nan_to_num(rho_x.imag).tolist(),
                            xray_delta=nan_to_num(delta).tolist(), xray_beta=nan_to_num(beta).tolist())
