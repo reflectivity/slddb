@@ -238,6 +238,33 @@ select, input[type=text], input[type=number] {
 }
 }
 
+/* phone in landscape */
+@media only screen and (max-height: 480px) {
+    td.sides {
+      display: none;
+    }
+    tr.hide_mobile {
+        display: none;
+    }
+    .desktop_scroll {
+        overflow: visible;
+        overflow-x: auto;
+    }
+    div.top_header {
+        margin: 0px 0px 0px 0px;
+    }
+    img.top_logo {
+        display: block;
+        width: 3.5em;
+    }
+input, select, button {
+    font-size: 150%;
+}
+select, input[type=text], input[type=number] {
+   width: 8em;
+}
+}
+
 /* special buttons to be aware of */
 .danger {
   background-color: #fdd;
