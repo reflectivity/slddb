@@ -532,7 +532,7 @@ class Material():
         if type(other)!=type(self):
             raise ValueError('Can only combine two Material instances.')
         fout=dict(self.elements)
-        for ele, number in other.ELEMENTS:
+        for ele, number in other.elements:
             if ele in fout:
                 fout[ele]+=number
             else:
