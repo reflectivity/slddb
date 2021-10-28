@@ -257,7 +257,7 @@ class Material():
 
     def rho_of_E(self, E):
         f=self.f_of_E(E)
-        return f*r_e*self.fu_dens*fm2angstrom # Å^-1
+        return f*r_e*self.fu_dens*fm2angstrom # Å^-2
 
     def delta_of_E(self, E):
         rho=self.rho_of_E(E)

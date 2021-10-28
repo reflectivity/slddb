@@ -19,7 +19,7 @@
         {%for field in main_fields%}
           <tr><td style="text-align: right;">{{field.capitalize()}}</td><td>{{ get_input(field)|safe }}</td></tr>
         {%endfor%}
-        <tr><td colspan="2"><button type="button" class="collapsible">Expand Full Search</button></td></tr>
+        <tr><td colspan="2"><button type="button" class="collapsible"><b>˅˅˅˅</b> Expand Full Search <b>˅˅˅˅</b></button></td></tr>
         {%for field in advanced_fields%}
           <tr><td class="collapsed" style="text-align: right;">{{field.capitalize()}}</td><td class="collapsed">{{ get_input(field)|safe }}</td></tr>
         {%endfor%}

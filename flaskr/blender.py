@@ -79,7 +79,8 @@ def clean_str(string):
 
 def calculate_blend(mtype, name, idstr):
     result=collect_blend(mtype, idstr)
-    return redirect(url_for('calculate_sld', formula=str(result.formula), density=result.fu_volume,
+    return redirect(url_for('calculate_sld', _anchor='results_header',
+                            formula=str(result.formula), density=result.fu_volume,
                             name=name or mtype, description=result.extra_data.get('description', None),
                             **CALC_DEFAULT_FIELDS))
 

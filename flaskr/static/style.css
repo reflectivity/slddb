@@ -285,15 +285,19 @@ li.error {
 
 .collapsible {
   background-color: #ddd;
-  color: #aaa;
+  color: #444;
   cursor: pointer;
   width: 100%;
   border: none;
   text-align: center;
   outline: none;
 }
-.active, .collapsible:hover {
+.active {
   color: #444;
+  border-bottom: 1px solid #fff;
+  border-right: 1px solid #fff;
+  border-top: 1px solid;
+  border-left: 1px solid;
 }
 
 /* Style the collapsible content. Note: hidden by default */

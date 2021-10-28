@@ -17,14 +17,14 @@
           in the associated database entry.
         </p>
       </div>
-    </td><td style="width: 40em; height: 1px; align: center; vertical-align: top;">
+    </td><td style="width: 1em; height: 1px; align: center; vertical-align: top;">
     <form action="{{ url_for('combine_blender') }}" method="post"><center>
-      <table class="noborder" style="width: 23em;">
+      <table class="noborder" style="">
         <tr><th style="width: 35em;">Compound Name:</th></tr>
           <tr><td style="text-align: center;"><input type="text" id="name" name="name" value="{{ request.form.get('name','') }}{% if fill_name %}{{ fill_name }}{% endif %}"></tr>
-        <tr><th style="width: 35em;">Molecule Structure:</th></tr>
+        <tr><th style="">Molecule Structure:</th></tr>
           <tr><td style="text-align: center;">
-            <textarea id="structure" name="structure" rows="8" cols="75" style="min-width: 30em;"
+            <textarea id="structure" name="structure" rows="8" style="width: 30em; min-width: 15em;"
             placeholder="Either a string of letters (protein/RNA/DNA) or sequence of (scalar*ID).
 
 Example Protein: ardbwt

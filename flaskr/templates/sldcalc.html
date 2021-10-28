@@ -169,12 +169,9 @@
     </center></form>
 
     <p></p>
-        <form action="{{ url_for('start_page') }}"><center>
-          <button type="submit" >back to database query</button>
-        </center></form>
-
 
       {% if material %}
+        <center><a href="{{ url_for('start_page') }}">back to database query</a></center>
       <center>
       <h2 style="margin: 15px 0px 5px;" id="results_header">Result of SLD calculation:</h2>
             <form action="{{ url_for('set_preference') }}" id="preferences" method="POST" onkeydown="return event.key != 'Enter';">
@@ -276,11 +273,15 @@
             {% endif %}
         </table>
             </form>
+            <div style="margin-top: 0.3em; text-align: right;">
             {% if material.ID %}
-            <br /><a id="download_link" href="{{url_for('api_download', ID=material.ID, xray_unit='edens')|safe}}">Download full record as JSON</a>
+            <a id="download_link" href="{{url_for('api_download', ID=material.ID, xray_unit='edens')|safe}}">
             {% else %}
-             <br /><a id="download_link" href="{{url_for('api_download', sldcalc='true', xray_unit='edens', formula=str(material.formula), density=material.dens, name=material_name, material_description=material_description)|safe}}">Download full record as JSON</a>
+            <a id="download_link" href="{{url_for('api_download', sldcalc='true', xray_unit='edens', formula=str(material.formula),
+                     density=material.dens, name=material_name, material_description=material_description)|safe}}">
             {% endif %}
+                Download full record as JSON<img src="{{url_for('static', filename='JSON_vector_logo.svg')}}" style="height: 0.7em;" /></a>
+            </div>
       </center><p></p>
       {% else %}
         <p class="hide_mobile" style="text-align:center; margin-top: 5em;">
@@ -293,7 +294,8 @@
       {{script|safe}}
       </center>
       {% if material %}
-        <center><button type="submit" form="preferences" style="background-color: #aaaacc; border: none; cursor: pointer; padding: 0.5em;">
+        <center><button type="submit" form="preferences" style="background-color: #aaaacc; border: none; cursor: pointer; padding: 0.5em;"
+          title="Store the selected units for density, magnetism and x-ray results as well as active plot into cookies for future queries">
           Save current view as default (stores Cookie)</button>
             <p class="hide_mobile">You can look up the reference elemental data in the <a href="{{url_for('periodic_table')}}">periodic table</a>.</p>
         </center>

@@ -76,7 +76,7 @@ def get_periodic_table(requested_element=None, plot_scale=None):
         except ValueError:
             res=[]
         if len(res)>0:
-            return redirect(url_for('calculate_sld', ID=res[0]['ID']))
+            return redirect(url_for('calculate_sld', _anchor='results_header', ID=res[0]['ID']))
         else:
             flash(f'No SLD for {ELEMENT_FULLNAMES[requested_element]}')
     scale_colors=PLOT_SCALES[plot_scale]

@@ -125,14 +125,14 @@ def calculate_selection(ID):
             or any([tag in res[0].get('tags', []) for tag in
                     ['polymer', 'biology', 'membrane', 'lipid', 'small organic', 'surfactant', 'protein']]):
         script = '<table><tr><td colspan="2">' \
-                 '<button type="button" class="collapsible">Toggle Contrast Matching/X-Ray</button>' \
+                 '<button type="button" class="collapsible">Toggle graph: Contrast Matching/X-Ray</button>' \
                  '</td></tr><tr><td class="uncollapsed">%s</td></tr>' \
                  '<tr><td class="collapsed">%s</td></tr></table>'%(script,
                                                    get_deuteration_graph(material, name=res[0]['name']))
     elif material.has_ndata:
         # wavlength dependant absopriton
         script = '<table><tr><td colspan="2">' \
-                 '<button type="button" class="collapsible">Toggle Neutron/X-Ray</button>' \
+                 '<button type="button" class="collapsible">Toggle graph: Neutron Absorption/X-Ray</button>' \
                  '</td></tr><tr><td class="uncollapsed">%s</td></tr>' \
                  '<tr><td class="collapsed">%s</td></tr></table>'%(script,
                                                                get_absorption_graph(material, name=res[0]['name']))
@@ -187,13 +187,13 @@ def calculate_user(formula, density, mu, density_choice, mu_choice, name=None, m
             exchanged=None
         if 'H' in material.formula or 'Hx' in material.formula or 'D' in material.formula:
             script = '<table><tr><td colspan="2">' \
-                     '<button type="button" class="collapsible">Toggle Contrast Matching/X-Ray</button>' \
+                     '<button type="button" class="collapsible">Toggle graph: Contrast Matching/X-Ray</button>' \
                      '</td></tr><tr><td class="uncollapsed">%s</td></tr>' \
                      '<tr><td class="collapsed">%s</td></tr></table>'%(script, get_deuteration_graph(material, name=name))
         elif material.has_ndata:
             # wavlength dependant absopriton
             script = '<table><tr><td colspan="2">' \
-                     '<button type="button" class="collapsible">Toggle Neutron/X-Ray</button>' \
+                     '<button type="button" class="collapsible">Toggle graph: Neutron Absorption/X-Ray</button>' \
                      '</td></tr><tr><td class="uncollapsed">%s</td></tr>' \
                      '<tr><td class="collapsed">%s</td></tr></table>'%(script,
                                                                        get_absorption_graph(material, name=name))
