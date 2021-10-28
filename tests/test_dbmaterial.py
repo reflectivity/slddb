@@ -1,7 +1,7 @@
 import unittest
 import json
 from slddb import SLDDB
-from slddb.comparators import ExactString, GenericComparator
+from slddb.comparators import ExactString
 
 class TestMaterialDB(unittest.TestCase):
     @classmethod
@@ -40,10 +40,26 @@ class TestMaterialDB(unittest.TestCase):
         self.assertIsNone(res['FU_volume'])
         res=self.db.search_material(tags=['inorganic'])[0]
 
-    def test_exact_name(self):
-        self.db.add_material('Iron Oxide 3123', 'Fe2O3', density=5.24, tags=['inorganic'])
+    def test_comparators(self):
+        self.db.add_material('Iron Oxide 3123', 'Fe2O32', density=99.123, tags=['inorganic'])
         res=self.db.search_material(name=ExactString('oxide 3'))
         self.assertEqual(len(res), 0)
+        res=self.db.search_material(name=ExactString('Iron Oxide 3123'))
+        self.assertEqual(len(res), 1)
+        # tests FormulaComparator
+        res=self.db.search_material(formula='O32')
+        self.assertEqual(len(res), 0)
+        res=self.db.search_material(formula='~O32')
+        self.assertEqual(len(res), 1)
+        # tests FuzzyFloat
+        res=self.db.search_material(density='99.123')
+        self.assertEqual(len(res), 1)
+        res=self.db.search_material(density='99.124')
+        self.assertEqual(len(res), 0)
+        res=self.db.search_material(density='~99.124')
+        self.assertEqual(len(res), 1)
+        res=self.db.search_material(density='99-100')
+        self.assertEqual(len(res), 1)
 
     def test_count(self):
         self.db.add_material('Iron Oxide Count All', 'Fe2O3', density=5.2411111, tags=['inorganic'])
@@ -59,7 +75,9 @@ class TestMaterialDB(unittest.TestCase):
         self.assertEqual(2, res)
         res=self.db.count_material(name='count all', tags=['inorganic'])
         self.assertEqual(1, res)
-        res=self.db.count_material()
+        res=self.db.count_material(name=ExactString('count all'), tags=['inorganic'])
+        self.assertEqual(0, res)
+        self.db.count_material()
 
     def test_serializable_search(self):
         self.db.add_material('Iron Oxide 3', 'Fe2O3', density=5.24)
