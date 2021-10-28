@@ -18,10 +18,13 @@ is also included here.
         :target: https://github.com/reflectivity/slddb/actions/workflows/pytest.yml
         :alt: Unit testing
 
+.. image:: https://github.com/reflectivity/slddb/actions/workflows/codeql-analysis.yml/badge.svg
+        :target: https://github.com/reflectivity/slddb/actions/workflows/codeql-analysis.yml
+        :alt: CodeQL
+
 .. image:: https://coveralls.io/repos/github/reflectivity/slddb/badge.svg?branch=master
         :target: https://coveralls.io/github/reflectivity/slddb?branch=master
         :alt: Coverage Level
-
 
 Features
 --------
