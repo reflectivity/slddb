@@ -378,5 +378,5 @@ def set_preference():
     for key, value in request.form.items():
         if key in ['return_link']:
             continue
-        resp.set_cookie(key, value)
+        resp.set_cookie(key, value, samesite='Strict')
     return resp

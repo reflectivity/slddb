@@ -10,9 +10,9 @@
   </header>
       <table class="main">
         <tr style="height: 6em;">
-          <td class="sides"><img src="https://github.com/reflectivity/logo/raw/master/aglavic/ORSO_Logo_clean.png" style="width: 11em"></td>
+          <td class="sides"><img src="{{url_for('static', filename='ORSO_Logo_clean.png')}}" style="width: 11em"></td>
           <td style="background-color: #fafafa">
-              <img src="https://github.com/reflectivity/logo/raw/master/aglavic/ORSO_Logo_clean.png" class="top_logo">
+              <img src="{{url_for('static', filename='ORSO_Logo_clean.png')}}" class="top_logo">
               <div class="top_header"><h1>SLD Database</h1>{{ slddb_version }}</div>
             <ul>
               <li class="{% block nav_start_page %}{% endblock %}"><a href="{{ url_for('start_page') }}">Query Database</a></li>
