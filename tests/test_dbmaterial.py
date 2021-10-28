@@ -4,6 +4,8 @@ from slddb import SLDDB
 from slddb.comparators import ExactString
 
 class TestMaterialDB(unittest.TestCase):
+    db:SLDDB
+
     @classmethod
     def setUpClass(cls):
         cls.db=SLDDB(':memory:')
@@ -30,7 +32,7 @@ class TestMaterialDB(unittest.TestCase):
             self.db.update_material(res['ID'], density=None)
 
     def test_search(self):
-        self.db.add_material('Iron Oxide 2', 'Fe2O3', density=5.24, tags=['inorganic'])
+        self.db.add_material('Iron Oxide 2', 'Fe2O3', density=5.24, tags=['metal alloy'])
         self.db.add_material('Nickel 1', 'Ni', density="8.9")
 
         res=self.db.search_material(name='oxide 2')[0]
@@ -38,7 +40,11 @@ class TestMaterialDB(unittest.TestCase):
         self.assertEqual(res['name'], 'Iron Oxide 2')
         self.assertEqual(res['formula'], 'Fe2O3')
         self.assertIsNone(res['FU_volume'])
-        res=self.db.search_material(tags=['inorganic'])[0]
+        res=self.db.search_material(tags=['metal alloy'])[0]
+        self.assertEqual(res['density'], 5.24)
+        self.assertEqual(res['name'], 'Iron Oxide 2')
+        self.assertEqual(res['formula'], 'Fe2O3')
+        self.assertIsNone(res['FU_volume'])
 
     def test_comparators(self):
         self.db.add_material('Iron Oxide 3123', 'Fe2O32', density=99.123, tags=['inorganic'])
@@ -115,9 +121,11 @@ class TestMaterialDB(unittest.TestCase):
         self.assertAlmostEqual(mat.dens, 11.4)
         res=self.db.search_material(FU_volume=10.5)
         mat=self.db.select_material(res[0])
+        self.assertEqual(mat.fu_volume, 10.5)
         self.db.invalidate_material(res[0]['ID'], 'testuser')
         res=self.db.search_material(FU_volume=10.5, filter_invalid=False)
         mat=self.db.select_material(res[0])
+        self.assertEqual(mat.fu_volume, 10.5)
 
     def test_validate_item(self):
         self.db.add_material('To Validate', 'Pb', density=11.4)
@@ -148,7 +156,7 @@ class TestMaterialDB(unittest.TestCase):
         res2=self.db.search_material(tags=['magnetic', 'metal'])
         del res2[0]['accessed']
         self.assertEqual(res, res2)
-        res2=self.db.search_material(tags=['metal alloy'])
+        res2=self.db.search_material(tags=['polymer'])
         self.assertEqual(len(res2), 0)
         res2=self.db.search_material(name='Tag it', tags=[])
         self.assertNotEqual(len(res2), 0)

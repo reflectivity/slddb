@@ -45,7 +45,7 @@ class GenericComparator(Comparator):
 
     def query_args(self):
         if type(self.value) in (list, tuple):
-            return [f'%%{vi}%%' for vi in self.value]
+            return [f"%%'{vi}'%%" for vi in self.value]
         elif type(self.value) is str:
             return [f'%%{self.value}%%']
         else:
