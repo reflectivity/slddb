@@ -7,18 +7,21 @@ The objects are stored in a dictionary for faster lookup as well as keeping the 
 
 from .element import Element
 
-_ELEMENTS={}
+
+_ELEMENTS = {}
+
+
 def get_element(value):
     if value in _ELEMENTS:
         return _ELEMENTS[value]
     if type(value) is int:
-        res=Element(Z=value)
+        res = Element(Z=value)
         if res.symbol in _ELEMENTS:
             return _ELEMENTS[res.symbol]
         else:
-            _ELEMENTS[res.symbol]=res
+            _ELEMENTS[res.symbol] = res
         return res
     else:
-        res=Element(symbol=value)
-        _ELEMENTS[value]=res
+        res = Element(symbol=value)
+        _ELEMENTS[value] = res
     return res

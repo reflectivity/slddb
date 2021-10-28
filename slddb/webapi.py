@@ -1,5 +1,6 @@
 import json
-import os, pathlib
+import os
+import pathlib
 import datetime
 import warnings
 import ssl
@@ -11,7 +12,8 @@ from .dbconfig import WEBAPI_URL
 from .material import Material, Formula
 from .element_table import get_element
 
-class SLD_API():
+
+class SLD_API:
     """
       Python API for users of the SLDDB data.
 
@@ -38,25 +40,26 @@ class SLD_API():
         sldx: Å^{-2}
         fu_volume: Å³
     """
-    db_suburl='download_db'
-    max_age=1
+    db_suburl = 'download_db'
+    max_age = 1
+    db: SLDDB = None
 
     def __init__(self):
-        self.first_access=True
-        self.use_webquery=True # only try webquery once, if error occures switch to local database
+        self.first_access = True
+        self.use_webquery = True  # only try webquery once, if error occures switch to local database
 
     def check(self):
         # make sure the local database file is up to date, if not try to download newest version
         if self.first_access:
-            now=datetime.datetime.now()
+            now = datetime.datetime.now()
             try:
-                stat=pathlib.Path(DB_FILE).stat()
+                stat = pathlib.Path(DB_FILE).stat()
             except FileNotFoundError:
                 self.download_db()
             else:
-                mtime=datetime.datetime.fromtimestamp(stat.st_ctime)
+                mtime = datetime.datetime.fromtimestamp(stat.st_ctime)
                 try:
-                    mtime=max(mtime, datetime.datetime.fromtimestamp(stat.st_mtime))
+                    mtime = max(mtime, datetime.datetime.fromtimestamp(stat.st_mtime))
                 except AttributeError:
                     pass
                 if (now-mtime).days>self.max_age:
@@ -65,15 +68,16 @@ class SLD_API():
                     except URLError as err:
                         warnings.warn("Can't download new version of databse; "+str(err))
                         return
-            self.db=SLDDB(DB_FILE) # after potential update, make connection with local database
-            self.first_access=False
+            self.db = SLDDB(DB_FILE)  # after potential update, make connection with local database
+            self.first_access = False
         else:
             return
 
     def download_db(self):
-        context=ssl._create_unverified_context()
-        res=request.urlopen(WEBAPI_URL+self.db_suburl, context=context)
-        data=res.read()
+        # noinspection PyUnresolvedReferences
+        context = ssl._create_unverified_context()
+        res = request.urlopen(WEBAPI_URL+self.db_suburl, context=context)
+        data = res.read()
         if not data.startswith(b'SQLite format 3'):
             raise ValueError('Error when downloading new database')
         if os.path.isfile(DB_FILE):
@@ -81,17 +85,19 @@ class SLD_API():
         with open(DB_FILE, 'wb') as fh:
             fh.write(data)
 
-    def webquery(self, dict):
-        data=parse.urlencode(dict)
-        context=ssl._create_unverified_context()
-        webdata=request.urlopen(WEBAPI_URL+'api?'+data, context=context)
-        return json.loads(webdata.read()) # return decoded data
+    @staticmethod
+    def webquery(qdict):
+        data = parse.urlencode(qdict)
+        # noinspection PyUnresolvedReferences
+        context = ssl._create_unverified_context()
+        webdata = request.urlopen(WEBAPI_URL+'api?'+data, context=context)
+        return json.loads(webdata.read())  # return decoded data
 
-    def localquery(self, dict):
-         return self.db.search_material(**dict)
+    def localquery(self, qdict):
+        return self.db.search_material(**qdict)
 
     def localmaterial(self, ID):
-        res=self.db.search_material(ID=ID)
+        res = self.db.search_material(ID=ID)
         return self.db.select_material(res[0])
 
     def search(self, **opts):
@@ -108,10 +114,10 @@ class SLD_API():
 
         self.check()
         try:
-            res=self.webquery(opts)
+            res = self.webquery(opts)
         except URLError:
-            self.use_webquery=False
-            res=self.localquery(opts)
+            self.use_webquery = False
+            res = self.localquery(opts)
         return res
 
     def material(self, ID):
@@ -128,17 +134,18 @@ class SLD_API():
 
         self.check()
         try:
-            res=self.webquery({'ID': int(ID)})
+            res = self.webquery({'ID': int(ID)})
         except URLError:
-            self.use_webquery=False
+            self.use_webquery = False
             return self.localmaterial(ID)
         else:
-            f=Formula(res['formula'], sort=False)
-            out=Material([(get_element(element), amount) for element, amount in f],
-                       dens=float(res['density']))
+            f = Formula(res['formula'], sort=False)
+            out = Material([(get_element(element), amount) for element, amount in f],
+                           dens=float(res['density']))
             return out
 
-    def custom(self, formula, dens=None, fu_volume=None, rho_n=None, mu=0., xsld=None, xE=None):
+    @staticmethod
+    def custom(formula, dens=None, fu_volume=None, rho_n=None, mu=0., xsld=None, xE=None):
         """
         Returns the material object for a certain material as specified by caller.
 
@@ -146,16 +153,16 @@ class SLD_API():
             res=api.custom('Fe', dens=7.8)
             print(material.dens, material.rho_n, material.f_of_E(8.0))
         """
-        f=Formula(formula, sort=False)
-        out=Material([(get_element(element), amount) for element, amount in f],
-                   dens=dens, fu_volume=fu_volume, rho_n=rho_n, mu=0.0, xsld=xsld, xE=xE)
+        f = Formula(formula, sort=False)
+        out = Material([(get_element(element), amount) for element, amount in f],
+                       dens=dens, fu_volume=fu_volume, rho_n=rho_n, mu=mu, xsld=xsld, xE=xE)
         return out
 
     def bio_blender(self, sequence, molecule='protein'):
         """
         Get material for protein, DNA or RNA. Provide a letter sequence and molecule type ('protein', 'dna', 'rna').
         """
-        opts={molecule: sequence, 'sldcalc': 'true'}
+        opts = {molecule: sequence, 'sldcalc': 'true'}
         res = self.webquery(opts)
-        out=Material(Formula(res['formula']), fu_volume=res['fu_volume'])
+        out = Material(Formula(res['formula']), fu_volume=res['fu_volume'])
         return out

@@ -5,11 +5,12 @@ Classes to represent comparisons in SQLite queries.
 from .material import Formula
 from abc import ABC, abstractmethod
 
+
 class Comparator(ABC):
 
     def __init__(self, value, key=None):
-        self.key=key
-        self.value=value
+        self.key = key
+        self.value = value
 
     @abstractmethod
     def query_string(self):
@@ -25,11 +26,13 @@ class Comparator(ABC):
         be equal to the number of question marks returned by query_string.
         """
 
+
 class GenericComparator(Comparator):
     """
     Comparator used for the generic case. Makes a simple comparison
     based on the type of the argument.
     """
+
     def query_string(self):
         if type(self.value) in (list, tuple):
             if len(self.value)==0:
@@ -51,6 +54,7 @@ class GenericComparator(Comparator):
         else:
             return [self.value]
 
+
 class ExactString(Comparator):
     """
     Perform an exact string comparison.
@@ -61,6 +65,7 @@ class ExactString(Comparator):
 
     def query_args(self):
         return [self.value]
+
 
 class FormulaComparator(Comparator):
     """
@@ -78,8 +83,9 @@ class FormulaComparator(Comparator):
             formula = Formula(self.value[1:])
             return [f'%%{formula}%%']
         else:
-            formula=Formula(self.value)
+            formula = Formula(self.value)
             return [str(formula)]
+
 
 class FuzzyFloat(Comparator):
     """
@@ -95,9 +101,9 @@ class FuzzyFloat(Comparator):
             return f'{self.key} == ?'
 
     def query_args(self):
-        svalue=str(self.value)
+        svalue = str(self.value)
         if svalue.startswith('~'):
-            value=float(svalue[1:])
+            value = float(svalue[1:])
             return [value*0.9, value*1.1]
         elif len(svalue.split('-'))==2:
             return list(map(float, svalue.split('-')))
