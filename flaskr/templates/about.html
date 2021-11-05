@@ -2,9 +2,13 @@
 
 {% block nav_about %}active_about{% endblock %}
 
+{% block extra_styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='layout_about.css') }}">
+{% endblock %}
+
 {% block content %}
 <center>
-    <div style="max-width: 42em; font-size: 115%; text-align: justify; hyphens: auto;">
+    <div class="center_about">
     <p>
         This is a database for materials for scattering length density (SLD)
         calculations for neutron and x-ray reflectometry and small angle scattering.
@@ -18,8 +22,8 @@
         In addition to the manual search on this website we provide a simple API
         that can be called by other software and provides data as JSON text.
     </p>
-    <div style="background-color: #ddd; padding: 12px; box-shadow: 3px 3px #aaa;">
-        <h4 style="margin: 0px;">Application Programmers Interface (API) Usage:</h4><br />
+    <div class="center2_about">
+        <h4 class="nomargin">Application Programmers Interface (API) Usage:</h4><br />
 
         Manual calculation of SLD from formula and density values:<br/>
         <a href="{{ url_for('api_query', _external=True, formula="Fe2O3", density=7.8, sldcalc="true") }}">
@@ -46,7 +50,7 @@
         <a href="{{ url_for('api_query', _external=True, ID=24, xray_unit="sld") }}">
         <i>{{ url_for('api_query', _external=True, ID="XXX", xray_unit="edens") }}</i><br /><br /></a>
         Units for x-ray results are:
-            <ol type="1" style="margin: 0pt;">
+            <ol type="1" class="nomargin">
                 <li><i>edens</i>: electron density (rₑ/Å³)</li><br />
                 <li><i>sld</i>: scattering length density (1/Å²)</li><br />
                 <li><i>n_db</i>: optical constants (δ/β) for refractive index (n=1-δ+iβ) (1)</li>
@@ -57,7 +61,7 @@
     </div>
 
         <br/><br/>
-        <a href="{{ url_for('download_api') }}" style="text-shadow: 1px 1px #888;">Download Python library that implements the API.</a>
+        <a href="{{ url_for('download_api') }}" id="api_download">Download Python library that implements the API.</a>
     </div>
 </center>
 {% endblock %}

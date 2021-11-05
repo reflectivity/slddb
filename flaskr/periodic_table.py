@@ -22,13 +22,13 @@ for row in range(7):
         ELEMENTS[row, 18-COL_RANGES[row][1]+right] = (Z, ELEMENT_NAMES[Z])
         Z += 1
 
-GROUP_COLORS={0: (200, 255, 200), 17: (240, 180, 240)}
-GROUP_COLORS[1] = (200, 255, 200)
+GROUP_COLORS={0: [200, 255, 200], 17: [240, 180, 240]}
+GROUP_COLORS[1] = [200, 255, 200]
 for g in range(2,12):
-    GROUP_COLORS[g]=(255, 200, 200)
+    GROUP_COLORS[g]=[255, 200, 200]
 for g in range(12,17):
-    GROUP_COLORS[g]=(200, 200, 255)
-GROUP_COLORS[18] = (255, 255, 150)
+    GROUP_COLORS[g]=[200, 200, 255]
+GROUP_COLORS[18] = [255, 255, 150]
 ELEMENT_COLORS=dict([(Z, list(GROUP_COLORS[col])) if row<7 else (Z, list(GROUP_COLORS[18])) for (row, col), (Z, _) in ELEMENTS.items()])
 FULLNAMES_OF_Z=dict([(Z, ELEMENT_FULLNAMES[ele].capitalize()) for Z, ele in ELEMENT_NAMES.items()])
 
@@ -42,23 +42,23 @@ for Z, ele in ELEMENT_NAMES.items():
     try:
         element = get_element(ele)
     except ValueError:
-        PLOT_SCALES['neutron'][Z] = (0, 0, 0)
-        PLOT_SCALES['xray'][Z] = (0, 0, 0)
-        PLOT_SCALES['xrayMo'][Z] = (0, 0, 0)
+        PLOT_SCALES['neutron'][Z] = [0, 0, 0]
+        PLOT_SCALES['xray'][Z] = [0, 0, 0]
+        PLOT_SCALES['xrayMo'][Z] = [0, 0, 0]
         continue
     bi = element.b
     fi = element.f_of_E(Cu_kalpha)
     fMoi = element.f_of_E(Mo_kalpha)
     mi = element.mass
-    PLOT_SCALES['neutron'][Z] = (100+int(bi.real*125./13), 100+int(bi.real*125./13), 130+int(bi.real*125./10))
+    PLOT_SCALES['neutron'][Z] = [100+int(bi.real*125./13), 100+int(bi.real*125./13), 130+int(bi.real*125./10)]
     try:
-        PLOT_SCALES['xray'][Z] = (75+int(fi.real*2), 75+int(fi.real*1.5), 75+int(fi.real*1.5))
+        PLOT_SCALES['xray'][Z] = [75+int(fi.real*2), 75+int(fi.real*1.5), 75+int(fi.real*1.5)]
     except ValueError:
-        PLOT_SCALES['xray'][Z] = (0, 0, 0)
+        PLOT_SCALES['xray'][Z] = [0, 0, 0]
     try:
-        PLOT_SCALES['xrayMo'][Z] = (75+int(fMoi.real*1.5), 75+int(fMoi.real*2.0), 75+int(fMoi.real*1.5))
+        PLOT_SCALES['xrayMo'][Z] = [75+int(fMoi.real*1.5), 75+int(fMoi.real*2.0), 75+int(fMoi.real*1.5)]
     except ValueError:
-        PLOT_SCALES['xrayMo'][Z] = (0, 0, 0)
+        PLOT_SCALES['xrayMo'][Z] = [0, 0, 0]
     if bi is not None:
         ELEMENT_B[Z] = f'{bi.real:.3f}-{-bi.imag:.3f}i'
     if fi is not None:

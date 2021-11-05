@@ -1,27 +1,33 @@
 {% extends 'base.html' %}
 
+{% block extra_styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='layout_search.css') }}">
+{% endblock %}
+
 {% block nav_start_page %}active{% endblock %}
 
 {% block content %}
-  <table style="width: 100%; height: 100%; table-layout: fixed;">
-    <tr><td style="text-align: right; vertical-align: center; width: 40%; overflow: auto;">
-      <div class="hide_mobile" style="font-size: 105%; text-align: justify; margin: 5px 1em 5px 1em; max-height: 18em; hyphens: auto;">
+  <table class="fullfixed">
+    <tr><td class="left_info">
+      <div class="hide_mobile">
         On this page you can query materials that have been entered into our database. The search is carried out
         for a combination of all entered fields.
         <br />If you search without a value for any field the complete database is returned. You can select any
         database entry to use in the SLD calculator or use the calculator directly with a known elemental composition
         and density.
       </div>
-    </td><td style="width: 23em; height: 1px; align: center;">
+    </td><td class="center_search">
     <form action="{{ url_for('search_query') }}" method="post"><center>
-      <table class="noborder" style="width: 23em;">
-        <tr><th style="width: 8.3em;">Field</th><th>search for value</th></tr>
+      <table class="noborder">
+        <tr><th class="field">Field</th><th>search for value</th></tr>
         {%for field in main_fields%}
-          <tr><td style="text-align: right;">{{field.capitalize()}}</td><td>{{ get_input(field)|safe }}</td></tr>
+          <tr><td class="alighright">{{field.capitalize()}}</td><td>{{ get_input(field)|safe }}</td></tr>
         {%endfor%}
-        <tr><td colspan="2"><button type="button" class="collapsible"><b>˅˅˅˅</b> Expand Full Search <b>˅˅˅˅</b></button></td></tr>
+        <tr><td colspan="2"><button type="button" id="collapse_button" class="collapsible"
+                                    data-shown="{% if advanced_search %}true{% else %}false{% endif %}">
+          <b>˅˅˅˅</b> Expand Full Search <b>˅˅˅˅</b></button></td></tr>
         {%for field in advanced_fields%}
-          <tr><td class="collapsed" style="text-align: right;">{{field.capitalize()}}</td><td class="collapsed">{{ get_input(field)|safe }}</td></tr>
+          <tr><td class="collapsed" class="alighright">{{field.capitalize()}}</td><td class="collapsed">{{ get_input(field)|safe }}</td></tr>
         {%endfor%}
         <tr><td colspan="2"><center><input type="submit" name="Submit" value="Submit"><input type="hidden" value="{{offset or 0}}" name="offset"></center></td> </tr>
     {% if orso_user %}
@@ -33,32 +39,32 @@
     {% endif %}
       </table>
     </center></form></td>
-      <td style="text-align: center; vertical-align: center; width: 40%;">
-          <img class="hide_mobile" src="{{ url_for('static', filename='orso_db.png') }}" style="max-width: 90%; max-height: 17em;">
+      <td class="right_info">
+          <img class="hide_mobile" src="{{ url_for('static', filename='orso_db.png') }}">
       </td>
     </tr>
     {% if query_result %}
-    <tr class="hide_mobile"><td class="hide_mobile" style="text-align: right;">
-          <h4 style="margin: 0px;">Results of database query:</h4>
-        </td><td class="hide_mobile" colspan="2" style="text-align: center; width: 60%">
-        <div style="background-color: #dfd; padding: 5px; border: 1px; width: 6em; display:inline; white-space: nowrap;">ORSO validated</div>
-        <div style="background-color: #fff; padding: 5px; border: 1px; width: 6em; display:inline; white-space: nowrap;">Used Before</div>
-        <div style="background-color: #ddd; padding: 5px; border: 1px; width: 6em; display:inline; white-space: nowrap;">Never Selected</div>
+    <tr class="hide_mobile"><td class="hide_mobile alignright">
+          <h4 class="nomargin">Results of database query:</h4>
+        </td><td class="query_info_labels" colspan="2">
+        <div class="orso_validated">ORSO validated</div>
+        <div class="entry_used">Used Before</div>
+        <div class="entry_unused">Never Selected</div>
         {% if orso_user %}
-        <div style="background-color: #fdd; padding: 5px; border: 1px; width: 6em; display:inline; white-space: nowrap;">Invalid</div>
+        <div class="orso_invalid">Invalid</div>
         {% endif %}
       </td>
     </tr>
     {% endif %}
     {% if unsuccessful_query %}
         <tr class="hide_mobile">
-          <td class="hide_mobile" colspan="3" style="text-align: center;">
-            <h4 style="margin: 0px;">Did not find any database entry for query:</h4>
+          <td class="hide_mobile" colspan="3" class="aligncenter">
+            <h4 class="nomargin">Did not find any database entry for query:</h4>
           </td>
         </tr>
     {% endif %}
-  <tr><td colspan="3" style="width: 100%; height: 100%;">
-    <div class="desktop_scroll" style="width: 100%; height: 100%; min-height: 250px;">
+  <tr><td colspan="3" class="full">
+    <div class="fullauto desktop_scroll">
   {% if unsuccessful_query %}
       <center>
         {%for key,value in unsuccessful_query.items()%}
@@ -81,7 +87,7 @@
       </thead>
       <tbody>
       {%for row in query_result%}
-        <tr style="background-color: {{row['color']}}">
+        <tr class="{{row['color_class']}}">
           <td><button type="submit" name="ID" id="ID" value="{{row['ID']}}">select</button></td>
           {%for field in flt_fields%}
             {% if ("%s"%row[field]).startswith('http://') or ("%s"%row[field]).startswith('https://') %}
@@ -114,27 +120,6 @@
   {% endif %}</div>
     </td></tr>
   </table>
-<script>
-    var but_coll  = document.getElementsByClassName("collapsible")[0];
-
-    but_coll.addEventListener("click", function() {
-        this.classList.toggle("active");
-        var coll_itms = document.getElementsByClassName("collapsed");
-        for (var i = 0; i < coll_itms.length; i++) {
-          var content = coll_itms[i];
-          if (content.style.display === "table-cell") {
-            content.style.display = "none";
-          } else {
-            content.style.display = "table-cell";
-          }
-        }});
-    {% if advanced_search %}
-    var coll_itms = document.getElementsByClassName("collapsed");
-    for (var i = 0; i < coll_itms.length; i++) {
-      var content = coll_itms[i];
-      content.style.display = "table-cell";
-      }
-    {% endif %}
-  </script>
+<script src="{{url_for('static', filename='collapsible.js')}}"></script>
 
 {% endblock %}

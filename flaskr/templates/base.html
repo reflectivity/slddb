@@ -1,7 +1,9 @@
 <!doctype html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <title>ORSO SLD Data base {% block title %}{% endblock %}</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='general_style.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='layout_base.css') }}">
+{% block extra_styles %}{% endblock %}
 <section class="content">
   <header>
     <meta charset="utf-8" />
@@ -9,9 +11,9 @@
     {% block header %}{% endblock %}
   </header>
       <table class="main">
-        <tr style="height: 6em;">
-          <td class="sides"><img src="{{url_for('static', filename='ORSO_Logo_clean.png')}}" style="width: 11em"></td>
-          <td style="background-color: #fafafa">
+        <tr class="menu_table">
+          <td class="sides"><img src="{{url_for('static', filename='ORSO_Logo_clean.png')}}"></td>
+          <td class="greybg">
               <img src="{{url_for('static', filename='ORSO_Logo_clean.png')}}" class="top_logo">
               <div class="top_header"><h1>SLD Database</h1>{{ slddb_version }}</div>
             <ul>
@@ -32,14 +34,14 @@
           </td>
           <td class="sides"></td>
         </tr>
-          <tr><td class="sides"></td><td style="vertical-align: text-top;" class="center">
-            <div style="width: 100%; height: 100%; overflow: auto;">
+          <tr><td class="sides"></td><td class="greybg aligntop">
+            <div class="fullauto">
    {% block content %} {% endblock %}
             </div>
       </td><td class="sides"></td></tr>
         {% with messages = get_flashed_messages() %}
           {% if messages or error %}
-        <tr style="height: 2em; margin: 8px;"><td class="sides"></td><td class="error">
+        <tr class="error"><td class="sides"></td><td class="error">
             <center>
             <ul class="error">
             {% for message in messages %}
@@ -53,8 +55,10 @@
         </td><td class="sides"></td></tr>
           {% endif %}
         {% endwith %}
-        <tr style="height: 12px;" class="hide_mobile"><td class="sides"></td><td style="background-color: #ddd; text-align: center;">
-            Open Reflectometry Standards Organization scattering length density database. Written by <a href="mailto:artur.glavic@psi.ch">Artur Glavic</a> from Paul Scherrer Institut (PSI).</td>
+        <tr class="bottom" class="hide_mobile bottom"><td class="sides"></td>
+            <td class="bottom_center">
+            Open Reflectometry Standards Organization scattering length density database. Written by
+                <a href="mailto:artur.glavic@psi.ch">Artur Glavic</a> from Paul Scherrer Institut (PSI).</td>
             <td class="sides"></td></tr>
       </table>
 </section>

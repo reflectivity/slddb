@@ -2,9 +2,13 @@
 
 {% block nav_input_page %}active{% endblock %}
 
+{% block extra_styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='layout_input.css') }}">
+{% endblock %}
+
 {% block content %}
-    <table style="width: 100%; height: 100%;"><tr>
-      <td class="hide_mobile" style="width: 35%; min-width: 13em; font-size: 115%; text-align: justify; vertical-align: top; padding: 10% 20pt 20pt 20px; hyphens: auto;">
+    <table class="full"><tr>
+      <td class="hide_mobile left_info">
           Here you can enter new materials into the database.
           Each material will get its unique ID and if relevant will be reviewed by ORSO and then validated.
           Please provide as much information as possible, especially suitable references to allow us
@@ -15,26 +19,26 @@
           <i>SLD_n</i> or <i>SLD_x</i> with energy <i>E_x</i>.</small>
       </td>
 
-    <td style="width: 22em; align: center; vertical-align: top;">
+    <td class="center_input">
     {% if editing_entry %}
-        <div style="background-color: #ffaaaa;">
+        <div class="edit_warning">
             You are editing SLD DB entry ID={{ editing_entry }},
             please be careful when editing.
             (Editing will void previous validation.)
         </div>
     {% endif %}
     <form method="POST" action="{{ url_for('eval_input') }}"><center>
-        <table class="withborder" style="width: 22em; margin-bottom: 10px;">
-          <tr><td style="border: none; text-align: right;">Your email (hidden)</td>
-              <td style="border: none;">{{ get_input("created_by")|safe }}</td></tr>
+        <table class="withborder">
+          <tr><td class="alignright">Your email (hidden)</td>
+              <td>{{ get_input("created_by")|safe }}</td></tr>
         </table>
-      <table class="noborder" style="width: 22em;">
+      <table class="noborder">
           <tr><th>Compound field:</th><th>Value:</th></tr>
     {%for field in fields%}
-          <tr><td style="text-align: right;">{{field}} {{get_unit(field)}}</td>
+          <tr><td class="alignright">{{field}} {{get_unit(field)}}</td>
               <td>{{ get_input(field)|safe }}</td></tr>
     {%endfor%}
-        <tr><td colspan="2" style="border: none;"><center>
+        <tr><td colspan="2"><center>
             {% if editing_entry %}
             <input type="hidden" name="ID" value="{{ editing_entry }}">
             <input type="submit" name="material" value="Update">
@@ -45,10 +49,10 @@
       </table>
     </center></form></td>
 
-      <td class="hide_mobile" style="width: 35%; text-align: left; vertical-align: top; padding: 150pt 0pt 0pt 20px;">
+      <td class="hide_mobile right_info">
       <form method="POST" enctype="multipart/form-data">
           Upload CIF file<br />
-          <input type="file" accept=".cif,.cif.gz" id="cif_file" name="cif_file" onchange="form.submit()" style="display: none;">
+          <input type="file" accept=".cif,.cif.gz" id="cif_file" name="cif_file" onchange="form.submit()">
           <input type="button" value="Choose File" onclick="document.getElementById('cif_file').click();" />
       </form></td>
     </tr></table>

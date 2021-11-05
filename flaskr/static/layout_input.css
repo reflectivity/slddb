@@ -1,0 +1,43 @@
+td.left_info {
+    width: 35%;
+    min-width: 13em;
+    font-size: 115%;
+    text-align: justify;
+    vertical-align: top;
+    padding: 10% 20pt 20pt 20px;
+    hyphens: auto;
+}
+
+td.center_input {
+    width: 22em;
+    align: center;
+    vertical-align: top;
+}
+
+td.center_input table.withborder {
+    width: 22em;
+    margin-bottom: 10px;
+}
+
+td.center_input table.noborder {
+    width: 22em;
+}
+
+td.center_input table.withborder td {
+    border: none;
+}
+
+td.right_info {
+    width: 35%;
+    text-align: left;
+    vertical-align: top;
+    padding: 150pt 0pt 0pt 20px;
+}
+
+div.edit_warning {
+    background-color: #ffaaaa;
+}
+
+#cif_file {
+    display: none;
+}

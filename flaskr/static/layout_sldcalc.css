@@ -1,0 +1,113 @@
+td.left_info {
+    width: 40%;
+    font-size: 105%;
+    text-align: justify;
+    vertical-align: top;
+    padding: 3em 1em 20pt 1em;
+    hyphens: auto;
+}
+
+td.left_info div {
+    overflow: auto;
+}
+
+div.italic_small {
+    font-size: 75%;
+    font-style: italic;
+    width: 100%;
+}
+
+td.center_calc {
+    width: 18em;
+    align: center;
+    vertical-align: top;
+}
+
+td.center_search table.noborder {
+    width: 18em;
+}
+
+td.right_info {
+    width: 40%;
+    text-align: left;
+    vertical-align: top;
+    padding: 3em 20pt 20pt 20px;
+}
+
+td.right_info div {
+    min-width: 15em;
+    background-color: #ddd;
+    padding: 12px;
+    box-shadow: 3px 3px #aaa;
+}
+
+#densinput, #magninput,
+  #cu_select, #mo_select, #user_select {
+    width: 150px;
+}
+
+#results_header {
+    margin: 15px 0px 5px;
+}
+
+#material_description {
+    max-width: 10em;
+    overflow: auto;
+}
+
+#deuteration_amount_value, #exchange_amount_value, #d2o_amount_value {
+    width: 40px;
+}
+
+#deuteration_amount, #exchange_amount, #d2o_amount {
+    width: 90px;
+}
+
+#user_select_tr {
+    border-top: solid 2px #888;
+}
+
+#xray_energy {
+    width: 120px;
+}
+
+#xray_energy_value {
+    width: 60px;
+}
+
+div.download_link {
+    margin-top: 0.3em;
+    text-align: right;
+}
+
+div.download_link img{
+    height: 0.7em;
+}
+
+p.periodic_table {
+    text-align:center;
+    margin-top: 5em;
+}
+
+p.periodic_table img {
+    width: 12em;
+}
+
+buttom.preferences {
+    background-color: #aaaacc;
+    border: none;
+    cursor: pointer;
+    padding: 0.5em;
+}
+
+#sld_formula {
+    text-align: center;
+}
+
+#formula_1 {
+    width: 13.5em;
+}
+#formula_2 {
+    margin-top: 1.0em;
+    width: 10em;
+}

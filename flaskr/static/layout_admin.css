@@ -1,0 +1,17 @@
+
+#user_name {
+    border: solid 1px;
+    margin: 2px;
+    box-shadow: none;
+    background-color: #fff;
+}
+
+#user_email {
+    border: solid 1px;
+    margin: 2px;
+    width: 200px;
+}
+
+tr.not_activated {
+    color: #ff0000;
+}

@@ -41,13 +41,13 @@ def search_db(query, invalids=False, offset=0):
     hidden_columns=[True for field in DB_MATERIALS_FIELDS]
     advanced_search=any([key in advanced_fields for key in query.keys()])
     for row in res:
-        row['color']='#fff'
+        row['color_class']=''
         if row['selected']==0:
-            row['color']='#ddd'
+            row['color_class']='entry_used'
         if row['validated'] is not None:
-            row['color']='#dfd'
+            row['color_class']='orso_validated'
         if row['invalid'] is not None:
-            row['color']='#fdd'
+            row['color_class']='orso_invalid'
         for i, field in enumerate(DB_MATERIALS_FIELDS):
             if row[field] is not None and field not in DB_MATERIALS_HIDDEN_DATA:
                 hidden_columns[i]=False

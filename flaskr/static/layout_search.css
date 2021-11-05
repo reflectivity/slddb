@@ -1,0 +1,64 @@
+
+td.left_info {
+    text-align: right;
+    vertical-align: center;
+    width: 40%;
+    overflow: auto;
+}
+
+td.left_info div {
+    font-size: 105%;
+    text-align: justify;
+    margin: 5px 1em 5px 1em;
+    max-height: 18em;
+    hyphens: auto;
+}
+
+td.center_search {
+    width: 23em;
+    height: 1px;
+    align: center;
+}
+
+td.center_search table.noborder {
+    width: 23em;
+}
+
+td.center_search th.field{
+    width: 8.3em;
+}
+
+td.right_info {
+    text-align: center;
+    vertical-align: center;
+    width: 40%;
+}
+
+td.right_info img.hide_mobile {
+    max-width: 90%;
+    max-height: 17em;
+}
+
+td.query_info_labels {
+    .hide_mobile;
+    text-align: center;
+    width: 60%
+}
+
+td.query_info_labels div {
+    padding: 5px;
+    border: 1px;
+    width: 6em;
+    display:inline;
+    white-space: nowrap;
+}
+
+.orso_validated {background-color: #dfd;}
+.entry_used {background-color: #fff;}
+.entry_unused {background-color: #ddd;}
+.orso_invalid {background-color: #fdd;}
+
+div.desktop_scroll {
+    min-height: 250px;
+}
+

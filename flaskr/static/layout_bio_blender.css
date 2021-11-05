@@ -1,0 +1,50 @@
+td.left_info {
+    text-align: right;
+    vertical-align: center;
+    width: 40%;
+    overflow: auto;
+}
+
+td.left_info div{
+    font-size: 105%;
+    text-align: justify;
+    margin: 5px 1em 5px 1em;
+    max-height: 18em;
+    hyphens: auto;
+}
+
+
+td.center_blend {
+    width: 1em;
+    height: 1px;
+    align: center;
+    vertical-align: top;
+}
+
+td.right_info {
+    text-align: center;
+    vertical-align: center;
+    width: 40%;
+}
+
+td.right_info img{
+    max-width: 90%;
+    max-height: 17em;
+}
+
+#structure {
+    width: 30em;
+    min-width: 15em;
+}
+
+#compound_name {
+    width: 35em;
+}
+
+#sequence {
+    width: 8em;
+}
+
+#pdb_file {
+display: none;
+}

@@ -64,6 +64,13 @@ def inject_constants():
 @app.context_processor
 def inject_basics():
     return dict(len=len, str=str, float=float, int=int, list=list)
+
+if app.debug:
+    @app.after_request
+    def add_security_headers(resp):
+        resp.headers['Content-Security-Policy']="default-src 'self'"
+        return resp
+
 @app.route('/')
 def start_page():
     return show_search()
