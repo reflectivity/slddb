@@ -4,7 +4,7 @@ import os
 import time
 from io import BytesIO
 from flask import Flask
-from flask import request, render_template, send_file, flash, redirect, url_for, make_response
+from flask import request, render_template, send_file, flash, redirect, url_for, make_response, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user, current_user
 from flask_mail import Mail, Message
@@ -24,7 +24,7 @@ from slddb import constants
 
 from .api import calc_api, select_api, search_api
 from .querydb import search_db, show_search
-from .calcsld import calculate_selection, calculate_user, validate_selection, invalidate_selection
+from .calcsld import calculate_selection, calculate_user, validate_selection, invalidate_selection, get_graph
 from .inputdb import input_form, input_fill_cif, input_material, edit_selection, update_material, input_fill_blend
 from .blender import calculate_blend, formula_from_pdb
 from .periodic_table import get_periodic_table
@@ -387,3 +387,16 @@ def set_preference():
             continue
         resp.set_cookie(key, value, samesite='Strict')
     return resp
+
+@app.route('/favicon.ico')
+def favicon():
+    return app.send_static_file('favicon.ico')
+
+# @app.route('/plot.png')
+# def plot():
+#     from numpy import array
+#     image_binary=get_graph(array([1,2,3]), array([1,2,3]), array([3,2,1]))
+#     response = make_response(image_binary)
+#     response.headers.set('Content-Type', 'image/png')
+#     return response
+

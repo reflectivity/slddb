@@ -377,6 +377,6 @@ class CMultiSelect(CType):
                 output += f'<option value="{selection}">{selection}</option>'
         output += '</select><br />'
         output += f'<div class="hide_mobile"><input type="button" id="btnReset {field}" ' \
-                  f'value="clear" onclick="document.getElementById(\'compound {field}\').selectedIndex=-1;" />'
+                  f'value="clear" class="clear_field" data-field="{field}" />'
         output += ' use ctrl+click</div>'
         return output
