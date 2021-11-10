@@ -24,7 +24,8 @@ from slddb import constants
 
 from .api import calc_api, select_api, search_api
 from .querydb import search_db, show_search
-from .calcsld import calculate_selection, calculate_user, validate_selection, invalidate_selection, get_graph
+from .calcsld import calculate_selection, calculate_user, validate_selection, invalidate_selection, \
+    get_graph_xray, get_absorption_graph, get_deuteration_graph
 from .inputdb import input_form, input_fill_cif, input_material, edit_selection, update_material, input_fill_blend
 from .blender import calculate_blend, formula_from_pdb
 from .periodic_table import get_periodic_table
@@ -392,11 +393,31 @@ def set_preference():
 def favicon():
     return app.send_static_file('favicon.ico')
 
-# @app.route('/plot.png')
-# def plot():
-#     from numpy import array
-#     image_binary=get_graph(array([1,2,3]), array([1,2,3]), array([3,2,1]))
-#     response = make_response(image_binary)
-#     response.headers.set('Content-Type', 'image/png')
-#     return response
+@app.route('/plot_xray.png', methods=['GET'])
+def plot_xray():
+    image_binary=get_graph_xray(request.args.get('formula', 'H2O'),
+                                float(request.args.get('dens', 1.0)),
+                                request.args.get('name', None),
+                                bool(request.args.get('delta', False)))
+    response = make_response(image_binary)
+    response.headers.set('Content-Type', 'image/png')
+    return response
+
+@app.route('/plot_nabs.png', methods=['GET'])
+def plot_nabs():
+    image_binary=get_absorption_graph(request.args.get('formula', 'H2O'),
+                                float(request.args.get('dens', 1.0)),
+                                request.args.get('name', None))
+    response = make_response(image_binary)
+    response.headers.set('Content-Type', 'image/png')
+    return response
+
+@app.route('/plot_deuteration.png', methods=['GET'])
+def plot_deuteration():
+    image_binary=get_deuteration_graph(request.args.get('formula', 'H2O'),
+                                float(request.args.get('dens', 1.0)),
+                                request.args.get('name', None))
+    response = make_response(image_binary)
+    response.headers.set('Content-Type', 'image/png')
+    return response
 

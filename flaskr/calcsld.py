@@ -13,30 +13,40 @@ import base64
 from io import BytesIO
 from matplotlib.figure import Figure
 
-def get_graph(E, real, imag, name='Iron'):
+def get_graph_xray(formula, dens, name=None, use_delta=False):
+    material=Material(formula, dens=dens, name=name)
     # Generate the figure **without using pyplot**.
     fig = Figure()
     ax = fig.subplots()
-    ax.plot(E,  real/r_e_angstrom, label='Re')
-    ax.plot(E, -imag/r_e_angstrom, label='-Im')
+    if use_delta:
+        E, delta = material.delta_vs_E()
+        ax.plot(E,  delta, label='delta')
+        E, beta = material.beta_vs_E()
+        ax.plot(E, beta, label='beta')
+    else:
+        E, rho_x = material.rho_vs_E()
+        ax.plot(E,  rho_x.real/r_e_angstrom, label='Re')
+        ax.plot(E, -rho_x.imag/r_e_angstrom, label='-Im')
     ax.legend()
     ax.set_xscale('log')
     ax.set_xlabel('E (keV)')
-    ax.set_ylabel('electron density (rₑ/Å³)')
     ax.set_title('X-Ray optical parameters for %s'%name)
-    twin=ax.twinx()
-    ymin, ymax=ax.get_ylim()
-    twin.set_ylim(ymin*r_e*10., ymax*r_e*10)
-    twin.set_ylabel('SLD (10⁻⁶ Å⁻²)')
+    if use_delta:
+        ax.set_ylabel('refractive index components (1)')
+        ax.set_yscale('log')
+    else:
+        ax.set_ylabel('electron density (rₑ/Å³)')
+        twin=ax.twinx()
+        ymin, ymax=ax.get_ylim()
+        twin.set_ylim(ymin*r_e*10., ymax*r_e*10)
+        twin.set_ylabel('SLD (10⁻⁶ Å⁻²)')
     # Save it to a temporary buffer.
     buf = BytesIO()
     fig.savefig(buf, format="png")
-    fig.tight_layout()
-    # Embed the result in the html output.
-    data = base64.b64encode(buf.getbuffer()).decode("ascii")
-    return f'<img style="width: 40em; max-width: 100%;" src="data:image/png;base64,{data}" />'
+    return bytes(buf.getbuffer())
 
-def get_deuteration_graph(m: Material, name=None):
+def get_deuteration_graph(formula, dens, name=None):
+    m=Material(formula, dens=dens, name=name)
     # Generate a graph for matching H2O/D2O with the given material
     if name is None:
         name=str(m.formula)
@@ -72,12 +82,10 @@ def get_deuteration_graph(m: Material, name=None):
     # Save it to a temporary buffer.
     buf = BytesIO()
     fig.savefig(buf, format="png")
-    fig.tight_layout()
-    # Embed the result in the html output.
-    data = base64.b64encode(buf.getbuffer()).decode("ascii")
-    return f'<img style="width: 40em; max-width: 100%;" src="data:image/png;base64,{data}" />'
+    return bytes(buf.getbuffer())
 
-def get_absorption_graph(m: Material, name=None):
+def get_absorption_graph(formula, dens, name=None):
+    m=Material(formula, dens=dens, name=name)
     # Generate a graph for matching H2O/D2O with the given material
     if name is None:
         name=str(m.formula)
@@ -94,10 +102,7 @@ def get_absorption_graph(m: Material, name=None):
     # Save it to a temporary buffer.
     buf = BytesIO()
     fig.savefig(buf, format="png")
-    fig.tight_layout()
-    # Embed the result in the html output.
-    data = base64.b64encode(buf.getbuffer()).decode("ascii")
-    return f'<img style="width: 40em; max-width: 100%;" src="data:image/png;base64,{data}" />'
+    return bytes(buf.getbuffer())
 
 def calculate_selection(ID):
     db=SLDDB(DB_FILE)
@@ -110,7 +115,7 @@ def calculate_selection(ID):
     E, rho_x=material.rho_vs_E()
     _, delta=material.delta_vs_E()
     _, beta=material.beta_vs_E()
-    script=get_graph(E, rho_x.real, rho_x.imag, res[0]['name'])
+    script='' # get_graph(E, rho_x.real, rho_x.imag, res[0]['name'])
     if 'H' in material.formula or 'Hx' in material.formula:
         deuterated=material.deuterated
         if 'Hx' in material.formula:
@@ -124,22 +129,13 @@ def calculate_selection(ID):
     if 'H' in material.formula or 'Hx' in material.formula or 'D' in material.formula \
             or any([tag in res[0].get('tags', []) for tag in
                     ['polymer', 'biology', 'membrane', 'lipid', 'small organic', 'surfactant', 'protein']]):
-        script = '<table><tr><td colspan="2">' \
-                 '<button type="button" class="collapsible">Toggle graph: Contrast Matching/X-Ray</button>' \
-                 '</td></tr><tr><td class="uncollapsed">%s</td></tr>' \
-                 '<tr><td class="collapsed">%s</td></tr></table>'%(script,
-                                                   get_deuteration_graph(material, name=res[0]['name']))
-    elif material.has_ndata:
-        # wavlength dependant absopriton
-        script = '<table><tr><td colspan="2">' \
-                 '<button type="button" class="collapsible">Toggle graph: Neutron Absorption/X-Ray</button>' \
-                 '</td></tr><tr><td class="uncollapsed">%s</td></tr>' \
-                 '<tr><td class="collapsed">%s</td></tr></table>'%(script,
-                                                               get_absorption_graph(material, name=res[0]['name']))
+        contrast_matching = True
+    else:
+        contrast_matching = False
     return render_template('sldcalc.html', material=material, material_name=res[0]['name'],
                            material_description=res[0]['description'], deuterated=deuterated,
                            exchanged=exchanged, match_point=match_point,
-                           script=script, xray_E=E.tolist(),
+                           contrast_matching=contrast_matching, xray_E=E.tolist(),
                            xray_rho_real=nan_to_num(rho_x.real).tolist(),
                            xray_rho_imag=nan_to_num(rho_x.imag).tolist(),
                            xray_delta=nan_to_num(delta).tolist(), xray_beta=nan_to_num(beta).tolist(),
@@ -174,7 +170,7 @@ def calculate_user(formula, density, mu, density_choice, mu_choice, name=None, m
         E, rho_x=material.rho_vs_E()
         _, delta=material.delta_vs_E()
         _, beta=material.beta_vs_E()
-        script=get_graph(E, rho_x.real, rho_x.imag, name or str(formula))
+        script='' # get_graph(E, rho_x.real, rho_x.imag, name or str(formula))
         if 'H' in material.formula or 'Hx' in material.formula or 'D' in material.formula:
             deuterated=material.deuterated
             if 'Hx' in material.formula:
@@ -186,19 +182,12 @@ def calculate_user(formula, density, mu, density_choice, mu_choice, name=None, m
             deuterated=None
             exchanged=None
         if 'H' in material.formula or 'Hx' in material.formula or 'D' in material.formula:
-            script = '<table><tr><td colspan="2">' \
-                     '<button type="button" class="collapsible">Toggle graph: Contrast Matching/X-Ray</button>' \
-                     '</td></tr><tr><td class="uncollapsed">%s</td></tr>' \
-                     '<tr><td class="collapsed">%s</td></tr></table>'%(script, get_deuteration_graph(material, name=name))
-        elif material.has_ndata:
-            # wavlength dependant absopriton
-            script = '<table><tr><td colspan="2">' \
-                     '<button type="button" class="collapsible">Toggle graph: Neutron Absorption/X-Ray</button>' \
-                     '</td></tr><tr><td class="uncollapsed">%s</td></tr>' \
-                     '<tr><td class="collapsed">%s</td></tr></table>'%(script,
-                                                                       get_absorption_graph(material, name=name))
+            contrast_matching = True
+        else:
+            contrast_matching = False
         return render_template('sldcalc.html', material=material, deuterated=deuterated,
                            exchanged=exchanged, match_point=match_point,
+                           contrast_matching = contrast_matching,
                            material_name=name or "User input",
                            material_description=material_description, script=script, xray_E=E.tolist(),
                            xray_rho_real=nan_to_num(rho_x.real).tolist(),

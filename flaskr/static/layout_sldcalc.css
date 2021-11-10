@@ -41,9 +41,26 @@ td.right_info div {
     box-shadow: 3px 3px #aaa;
 }
 
-#densinput, #magninput,
+table.sldresult {
+    width: 28em;
+}
+
+#densresult, #densinput, #magninput,
   #cu_select, #mo_select, #user_select {
-    width: 150px;
+    width: 8em;
+}
+
+#magninput {
+    width: 15em;
+}
+
+#magnresult {
+    font-size: 80%;
+    width: 15.5em;
+}
+
+td.alignright option {
+    text-align: right;
 }
 
 #results_header {
@@ -93,7 +110,7 @@ p.periodic_table img {
     width: 12em;
 }
 
-buttom.preferences {
+#preferences_submit {
     background-color: #aaaacc;
     border: none;
     cursor: pointer;
@@ -110,4 +127,10 @@ buttom.preferences {
 #formula_2 {
     margin-top: 1.0em;
     width: 10em;
+}
+
+img.plot {
+    align: center;
+    width: 40em;
+    max-width: 100%;
 }

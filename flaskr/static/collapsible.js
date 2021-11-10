@@ -5,7 +5,7 @@ but_coll.addEventListener("click", function() {
     var coll_itms = document.getElementsByClassName("collapsed");
     for (var i = 0; i < coll_itms.length; i++) {
       var content = coll_itms[i];
-      if (content.style.display === "table-cell") {
+      if (content.style.display == "table-cell") {
         content.style.display = "none";
       } else {
         content.style.display = "table-cell";

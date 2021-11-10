@@ -16,14 +16,17 @@ function updateSlider(slideAmount) {
         factor=1.0e6;
         real_part=mdata.material_rho_real;
         imag_part=mdata.material_rho_imag;
+        plot_image.src=plot_url;
     } else if (unit == 'electron'){
         factor=1.0e5/mdata.r_e;
         real_part=mdata.material_rho_real;
         imag_part=mdata.material_rho_imag;
+        plot_image.src=plot_url;
     } else {
         factor=1.0;
         real_part=mdata.material_delta;
         imag_part=mdata.material_beta;
+        plot_image.src=plot_url+'&delta=1';
     }
 
     var factor; var val_real; var val_imag;
@@ -42,11 +45,11 @@ function updateSlider(slideAmount) {
     }
 
     if (unit == 'n_db') {
-        document.getElementById("value_real").innerHTML = (val_real).toExponential(4);
-        document.getElementById("value_imag").innerHTML = (val_imag).toExponential(4);
+        document.getElementById("value_real").innerHTML = (val_real).toExponential(3);
+        document.getElementById("value_imag").innerHTML = (val_imag).toExponential(3);
     } else {
-        document.getElementById("value_real").innerHTML = (val_real*factor).toFixed(6);
-        document.getElementById("value_imag").innerHTML = (val_imag*factor).toFixed(6)+'i';
+        document.getElementById("value_real").innerHTML = (val_real*factor).toFixed(5);
+        document.getElementById("value_imag").innerHTML = (val_imag*factor).toFixed(5)+'i';
     }
 
     document.getElementById("xray_energy_value").value = slideAmount;
@@ -167,20 +170,20 @@ function switch_density() {
 var can_switch=true;
 function switch_sld_cu(selection) {
     if (selection == 'electron') {
-        document.getElementById("cu_entry_real").innerHTML = mdata.material_sld_cu_real;
-        document.getElementById("cu_entry_imag").innerHTML = `${mdata.material_sld_cu_real}i`;
+        document.getElementById("cu_entry_real").innerHTML = mdata.material_cu_real.toFixed(5);
+        document.getElementById("cu_entry_imag").innerHTML = `${mdata.material_cu_imag.toFixed(5)}i`;
 //        {% if material.ID %}
 //        document.getElementById("download_link").href = '{{url_for('api_download', ID=material.ID, xray_unit='edens')|safe}}';
 //        {% endif %}
         } else if (selection == 'sld') {
-        document.getElementById("cu_entry_real").innerHTML = '{{"%.6f"%(1e6*material.rho_of_E(Cu_kalpha).real)}}';
-        document.getElementById("cu_entry_imag").innerHTML = '{{"%.6f"%(1e6*material.rho_of_E(Cu_kalpha).imag)}}i';
+        document.getElementById("cu_entry_real").innerHTML = mdata.material_sld_cu_real.toFixed(5);
+        document.getElementById("cu_entry_imag").innerHTML = `${mdata.material_sld_cu_imag.toFixed(5)}i`;
 //        {% if material.ID %}
 //        document.getElementById("download_link").href = '{{url_for('api_download', ID=material.ID, xray_unit='sld')|safe}}';
 //        {% endif %}
         } else if (selection == 'n_db') {
-        document.getElementById("cu_entry_real").innerHTML = '{{"%.4e"%(material.delta_of_E(Cu_kalpha))}}';
-        document.getElementById("cu_entry_imag").innerHTML = '{{"%.4e"%(material.beta_of_E(Cu_kalpha))}}';
+        document.getElementById("cu_entry_real").innerHTML = mdata.material_cu_delta.toExponential(3);
+        document.getElementById("cu_entry_imag").innerHTML = mdata.material_cu_beta.toExponential(3);
 //        {% if material.ID %}
 //        document.getElementById("download_link").href = '{{url_for('api_download', ID=material.ID, xray_unit='n_db')|safe}}';
 //        {% endif %}
@@ -197,14 +200,14 @@ function switch_sld_cu(selection) {
 
 function switch_sld_mo(selection) {
     if (selection == 'electron') {
-        document.getElementById("mo_entry_real").innerHTML = '{{"%.6f"%(material.rho_of_E(Mo_kalpha).real/r_e_angstrom)}}';
-        document.getElementById("mo_entry_imag").innerHTML = '{{"%.6f"%(material.rho_of_E(Mo_kalpha).imag/r_e_angstrom)}}i';
+        document.getElementById("mo_entry_real").innerHTML = mdata.material_mo_real.toFixed(5);
+        document.getElementById("mo_entry_imag").innerHTML = `${mdata.material_mo_imag.toFixed(5)}i`;
         } else if (selection == 'sld') {
-        document.getElementById("mo_entry_real").innerHTML = '{{"%.6f"%(1e6*material.rho_of_E(Mo_kalpha).real)}}';
-        document.getElementById("mo_entry_imag").innerHTML = '{{"%.6f"%(1e6*material.rho_of_E(Mo_kalpha).imag)}}i';
+        document.getElementById("mo_entry_real").innerHTML = mdata.material_sld_mo_real.toFixed(5);
+        document.getElementById("mo_entry_imag").innerHTML = `${mdata.material_sld_mo_imag.toFixed(5)}i`;
         } else if (selection == 'n_db') {
-        document.getElementById("mo_entry_real").innerHTML = '{{"%.4e"%(material.delta_of_E(Mo_kalpha))}}';
-        document.getElementById("mo_entry_imag").innerHTML = '{{"%.4e"%(material.beta_of_E(Mo_kalpha))}}';
+        document.getElementById("mo_entry_real").innerHTML = mdata.material_mo_delta.toExponential(3);
+        document.getElementById("mo_entry_imag").innerHTML = mdata.material_mo_beta.toExponential(3);
         }
     if (can_switch) {
         can_switch=false;
@@ -218,12 +221,15 @@ function switch_sld_mo(selection) {
 
 function switch_magn() {
     var selection = document.getElementById("magnresult").value;
-//    if (selection == 'msld') {material_neutron_magn={{1e6*material.rho_m}};}
-//    if (selection == 'muB') {material_neutron_magn={{material.mu}};}
-//    if (selection == 'magn') {material_neutron_magn={{material.M}};}
-//    document.getElementById("magn_value").innerHTML = material_neutron_magn.toFixed(6);
+    var material_neutron_magn=0.;
+    if (selection == 'msld') {material_neutron_magn= mdata.material_rho_m;}
+    if (selection == 'muB') {material_neutron_magn=mdata.material_mu;}
+    if (selection == 'magn') {material_neutron_magn=mdata.material_m;}
+    document.getElementById("magn_value").innerHTML = material_neutron_magn.toFixed(6);
 }
 
+const plot_image=document.getElementById("xray_image");
+const plot_url=plot_image.src;
 
 // setup the vairables
 var mdata = {};
@@ -233,42 +239,28 @@ for( var d in pref_form.dataset) {
     try{mdata[d]=JSON.parse(pref_form.dataset[d]);}
     catch (SyntaxError) {mdata[d]=pref_form.dataset[d]}
 }
-console.log(mdata)
 
 // connect actions
 document.getElementById("densresult").onchange=switch_density;
-//document.getElementById("deuteration_amount").onchange=function() {deuterateSlider(document.getElementById("deuteration_amount").value)};
-//document.getElementById("deuteration_amount_value").onchange=function() {deuterateValue(document.getElementById("deuteration_amount_value").value)};
-//document.getElementById("deuteration_amount_value").onkeyup=function(event) {if (event.key=='Enter') {deuterateValue(document.getElementById("deuteration_amount_value").value)}};
-//document.getElementById("exchange_amount").onchange=function() {deuterateSlider(document.getElementById("exchange_amount").value)};
-//document.getElementById("exchange_amount_value").onchange=function() {deuterateValue(document.getElementById("exchange_amount_value").value)};
-//document.getElementById("exchange_amount_value").onkeyup=function(event) {if (event.key=='Enter') {deuterateValue(document.getElementById("exchange_amount_value").value)}};
-//document.getElementById("d2o_amount").onchange=function() {deuterateSlider(document.getElementById("d2o_amount").value)};
-//document.getElementById("d2o_amount_value").onchange=function() {deuterateValue(document.getElementById("d2o_amount_value").value)};
-//document.getElementById("d2o_amount_value").onkeyup=function(event) {if (event.key=='Enter') {deuterateValue(document.getElementById("d2o_amount_value").value)}};
 
-if (mdata.material_neutron_magn!=0){document.getElementById("magnresult").onchange=switch_magn;}
+if (mdata.material_rho_m!=0){document.getElementById("magnresult").onchange=switch_magn;}
 document.getElementById("cu_select").onchange=function() {switch_sld_cu(document.getElementById("cu_select").value)};
 document.getElementById("mo_select").onchange=function() {switch_sld_mo(document.getElementById("mo_select").value)};
 document.getElementById("user_select").onchange=function() {updateSlider(-1)};
 document.getElementById("xray_energy").onchange=function() {updateSlider(document.getElementById("xray_energy").value)};
 document.getElementById("xray_energy_value").onchange=function() {updateValue(document.getElementById("xray_energy_value").value)};
+document.getElementById("xray_energy_value").onkeyup=function(event) {if (event.key=='Enter')
+            {updateValue(document.getElementById("xray_energy_value").value)}};
 
 document.getElementById("copy_all_button").onchange=copy_all;
 document.getElementById("copy_xe_button").onchange=copy_xE;
 
-var but_coll  = document.getElementsByClassName("collapsible")[0];
-if (typeof but_coll !== 'undefined') {
-    but_coll.addEventListener("click", toggleImageXrayNeutron);
-}
-
 // user preferences from cookies
-if (mdata.items_collapsed=='true') {but_coll.click();}
 if (mdata.user_densresult!='') {
     document.getElementById("densresult").value=mdata.user_densresult;
     switch_density();
 }
-if (mdata.user_magnresult!='' & mdata.material_neutron_magn!=0) {
+if (mdata.user_magnresult!='' & mdata.material_rho_m!=0) {
     document.getElementById("magnresult").value=mdata.user_magnresult;
     switch_magn();
 }
