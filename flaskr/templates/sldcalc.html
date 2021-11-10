@@ -244,6 +244,7 @@
       {% endif %}
 
       {% if material %}
+        <center>
         {% if material.has_ndata %}
             <table>
                 <tr><td colspan="2"><button type="button" class="collapsible">
@@ -267,7 +268,7 @@
         {% else %}
             <img id="xray_image" class="plot" src="{{url_for('plot_xray', formula=str(material.formula), dens=material.dens, name=material_name)}}" />
         {% endif %}
-        <center><button type="submit" form="preferences" id="preferences_submit"
+        <button type="submit" form="preferences" id="preferences_submit"
           title="Store the selected units for density, magnetism and x-ray results as well as active plot into cookies for future queries">
           Save current view as default (stores Cookie)</button>
             <p class="hide_mobile">You can look up the reference elemental data in the
@@ -275,7 +276,9 @@
         </center>
 
       <script src="{{url_for('static', filename='sldcalc_material.js')}}"></script>
-        {% if exchanged %}
+        {% if material.has_ndata %}
+        <script src="{{url_for('static', filename='sldcalc_ndata.js')}}"></script>
+        {% elif exchanged %}
         <script src="{{url_for('static', filename='sldcalc_exchanged.js')}}"></script>
         {% elif deuterated %}
         <script src="{{url_for('static', filename='sldcalc_deuterated.js')}}"></script>

@@ -171,28 +171,28 @@ li a:hover {
 }
 
 /* Adapt design to smaller screens */
-@media only screen and (max-width: 1500px) {
+@media only screen and (max-width: 1671px) {
     body, html{
     font-size: 17px;
     }
 }
-@media only screen and (max-width: 1412px) {
+@media only screen and (max-width: 1579px) {
     body, html{
     font-size: 16px;
     }
 }
-@media only screen and (max-width: 1324px) {
+@media only screen and (max-width: 1486px) {
     body, html{
     font-size: 15px;
     }
 }
-@media only screen and (max-width: 1235px) {
+@media only screen and (max-width: 1393px) {
     body, html{
     font-size: 14px;
     }
 }
 
-@media only screen and (max-width: 1130px) {
+@media only screen and (max-width: 1300px) {
     td.sides {
       display: none;
     }
@@ -203,6 +203,12 @@ li a:hover {
     }
     div.top_header {
         margin: 0.5em 0px 0.5em 0px;
+    }
+}
+
+@media only screen and (max-width: 900px) {
+    .hide_mobile {
+        display: none;
     }
 }
 
