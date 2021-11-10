@@ -103,7 +103,7 @@
                 data-user_cu_select="{{request.cookies.get('cu_select', '')}}"
             >
                 <input type="hidden" name="items_collapsed" value="{{request.cookies.get('items_collapsed', 'false').lower()}}" />
-        <table class="noborder sldresult{% if validated %} orso_validated{% endif %}{% if invalid %} orso_infalid{% endif %}">
+        <table class="noborder sldresult{% if validated %} orso_validated{% endif %}{% if invalid %} orso_invalid{% endif %}">
             {% if material.ID %}
             <tr><th>Compound (ORSO ID={{material.ID}})</th><td colspan=2>
                 <a href="{{url_for('calculate_sld', ID=material.ID, _anchor='results_header')|safe}}" target="_blank">{{material_name}}</a></td>

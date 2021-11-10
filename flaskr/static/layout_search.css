@@ -53,11 +53,6 @@ td.query_info_labels div {
     white-space: nowrap;
 }
 
-.orso_validated {background-color: #dfd;}
-.entry_used {background-color: #fff;}
-.entry_unused {background-color: #ddd;}
-.orso_invalid {background-color: #fdd;}
-
 div.desktop_scroll {
     min-height: 250px;
 }

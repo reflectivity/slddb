@@ -361,3 +361,8 @@ select, input[type=text], input[type=number] {
 .tooltip:hover .tooltiptext {
   visibility: visible;
 }
+
+.orso_validated, table.orso_validated td, table.orso_validated th {background-color: #dfd;}
+.entry_used, table.entry_used td, table.entry_used th {background-color: #fff;}
+.entry_unused, table.entry_unused td, table.entry_unused th {background-color: #ddd;}
+.orso_invalid, table.orso_invalid td, table.orso_invalid th {background-color: #fdd;}

@@ -41,9 +41,9 @@ def search_db(query, invalids=False, offset=0):
     hidden_columns=[True for field in DB_MATERIALS_FIELDS]
     advanced_search=any([key in advanced_fields for key in query.keys()])
     for row in res:
-        row['color_class']=''
+        row['color_class']='entry_used'
         if row['selected']==0:
-            row['color_class']='entry_used'
+            row['color_class']='entry_unused'
         if row['validated'] is not None:
             row['color_class']='orso_validated'
         if row['invalid'] is not None:
