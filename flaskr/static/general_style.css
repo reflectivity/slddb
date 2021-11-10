@@ -324,7 +324,12 @@ select, input[type=text], input[type=number] {
 .tooltip {
   position: relative;
   display: inline-block;
+  cursor: help;
 }
+.tooltip button {
+  cursor: grab;
+}
+
 
 /* Tooltip text */
 .tooltip .tooltiptext {

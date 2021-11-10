@@ -23,7 +23,7 @@
         {%for field in main_fields%}
           <tr><td class="alighright">{{field.capitalize()}}</td><td>{{ get_input(field)|safe }}</td></tr>
         {%endfor%}
-        <tr><td colspan="2"><button type="button" id="collapse_button" class="collapsible"
+        <tr><td colspan="2"><button type="button" id="collapse_button" class="collapsible hide_mobile"
                                     data-shown="{% if advanced_search %}true{% else %}false{% endif %}">
           <b>˅˅˅˅</b> Expand Full Search <b>˅˅˅˅</b></button></td></tr>
         {%for field in advanced_fields%}

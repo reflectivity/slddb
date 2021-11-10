@@ -63,9 +63,9 @@ function updateValue() {
 
 function copy_all() {
     var out = '';
-    out=out.concat('Compound', '\t', material_name, '\n');
-    out=out.concat('Description', '\t', material_description, '\n');
-    out=out.concat('Chemical Formula', '\t', chemical_formula, '\n');
+    out=out.concat('Compound', '\t', mdata.material_name, '\n');
+    out=out.concat('Description', '\t', mdata.material_description, '\n');
+    out=out.concat('Chemical Formula', '\t', mdata.chemical_formula, '\n');
 
     var dens_select=document.getElementById("densresult")
     out=out.concat(dens_select.options[dens_select.selectedIndex].text, '\t',
@@ -74,9 +74,10 @@ function copy_all() {
     out=out.concat('Neutron nuclear SLD (10⁻⁶ Å⁻²)',
                     '\t', document.getElementById("neutron_entry_real").innerHTML,
                     '\t', document.getElementById("neutron_entry_imag").innerHTML, '\n');
-    if (material_neutron_magn!=0) {
-    var magn_select=document.getElementById("magnresult")
-    out=out.concat(magn_select.options[magn_select.selectedIndex].text, '\t', material_neutron_magn, '\n');}
+    if (mdata.material_rho_m!=0) {
+        var magn_select=document.getElementById("magnresult")
+        out=out.concat(magn_select.options[magn_select.selectedIndex].text, '\t', mdata.material_rho_m, '\n');
+        }
 
     var xray_select=document.getElementById("cu_select");
     var xray_unit=xray_select.options[xray_select.selectedIndex].text
@@ -126,22 +127,24 @@ function copy_xE() {
     var unit = document.getElementById("user_select").value;
     var factor;
     if (unit == 'sld') {
+        var out = 'E (kev)\tSLD real\tSLD imag\n';
         factor=1.0e6;
-        real_part=material_rho_real;
-        imag_part=material_rho_imag;
+        real_part=mdata.material_rho_real;
+        imag_part=mdata.material_rho_imag;
     } else if (unit == 'electron'){
-        factor=1.0e5/r_e;
-        real_part=material_rho_real;
-        imag_part=material_rho_imag;
+        var out = 'E (kev)\te-dens real\te-dens imag\n';
+        factor=1.0e5/mdata.r_e;
+        real_part=mdata.material_rho_real;
+        imag_part=mdata.material_rho_imag;
     } else {
+        var out = 'E (kev)\tdelta\tbeta\n';
         factor=1.0;
-        real_part=material_delta;
-        imag_part=material_beta;
+        real_part=mdata.material_delta;
+        imag_part=mdata.material_beta;
     }
 
-    var out = 'E (kev)\treal\timag\n';
-    for (let i = 0; i < material_energies.length; i++) {
-      out+=`${material_energies[i]}\t${factor*real_part[i]}\t${factor*imag_part[i]}\n`;
+    for (let i = 0; i < mdata.material_energies.length; i++) {
+      out+=`${mdata.material_energies[i]}\t${factor*real_part[i]}\t${factor*imag_part[i]}\n`;
     }
 
     const SLD_real=document.getElementById("value_real").innerHTML;
@@ -252,8 +255,8 @@ document.getElementById("xray_energy_value").onchange=function() {updateValue(do
 document.getElementById("xray_energy_value").onkeyup=function(event) {if (event.key=='Enter')
             {updateValue(document.getElementById("xray_energy_value").value)}};
 
-document.getElementById("copy_all_button").onchange=copy_all;
-document.getElementById("copy_xe_button").onchange=copy_xE;
+document.getElementById("copy_all_button").onclick=copy_all;
+document.getElementById("copy_xe_button").onclick=copy_xE;
 
 // user preferences from cookies
 if (mdata.user_densresult!='') {

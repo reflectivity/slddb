@@ -105,23 +105,31 @@
                 <input type="hidden" name="items_collapsed" value="{{request.cookies.get('items_collapsed', 'false').lower()}}" />
         <table class="noborder sldresult{% if validated %} orso_validated{% endif %}{% if invalid %} orso_infalid{% endif %}">
             {% if material.ID %}
-            <tr><th>Compound (ORSO ID={{material.ID}})</th><td colspan=2>{{material_name}}</td>
+            <tr><th>Compound (ORSO ID={{material.ID}})</th><td colspan=2>
+                <a href="{{url_for('calculate_sld', ID=material.ID, _anchor='results_header')|safe}}" target="_blank">{{material_name}}</a></td>
                 <th class="hide_mobile">
-                    <a href="{{url_for('calculate_sld', ID=material.ID, _anchor='results_header')|safe}}" target="_blank">
-                        direct link</a>
                     <input type="hidden" name="return_link" value="{{url_for('calculate_sld',
                             ID=material.ID, _anchor='results_header')|safe}}" />
                 </th></tr>
             {% else %}
-            <tr><th>Compound</th><th colspan=2>{{material_name}}</th>
+            <tr><th>Compound</th><th colspan=2>
+                <a href="{{url_for('calculate_sld', formula=str(material.formula), density=material.dens,
+                                       mu=material.mu, densinput='density', magninput='muB',
+                                       name=material_name, _anchor='results_header')|safe}}" target="_blank">
+                    {{material_name}}</a></th>
                 <th class="hide_mobile">
-                    <a href="{{url_for('calculate_sld', formula=str(material.formula), density=material.dens, mu=material.mu, densinput='density', magninput='muB', name=material_name, _anchor='results_header')|safe}}" target="_blank">direct link</a>
-                    <input type="hidden" name="return_link" value="{{url_for('calculate_sld', formula=str(material.formula), density=material.dens, mu=material.mu, densinput='density', magninput='muB', name=material_name, _anchor='results_header')|safe}}" />
+                    <input type="hidden" name="return_link"
+                           value="{{url_for('calculate_sld', formula=str(material.formula),
+                           density=material.dens, mu=material.mu, densinput='density',
+                           magninput='muB', name=material_name, _anchor='results_header')|safe}}" />
                 </th></tr>
             {% endif %}
             <tr><td class="alignright">Description</td><td colspan=2>
                 <div id="material_description">{{material_description}}</div></td>
-                <td rowspan="3" class="hide_mobile"><center><button type="button" id="copy_all_button">Copy to<br />Clipboard</button></center></td></tr>
+                <td rowspan="3" class="hide_mobile"><center>
+                    <div class="tooltip"><button type="button" id="copy_all_button">Copy<br />Table</button>
+                        <div class="tooltiptext">📋 Copy the data of the full table into the clipboard.</div></div>
+                </center></td></tr>
             <tr><td class="alignright">Chemical Formula</td><td colspan=2>{{material}}</td></tr>
 
             <tr><td class="alignright"><select id="densresult" name="densresult">
@@ -144,7 +152,7 @@
                 <input type="number" min="0" max="100" value="0" class="slider_value" id="deuteration_amount_value">%
             </td><td class="hide_mobile aligncenter"><div class="tooltip">🛈<div class="tooltiptext">
                 Deuteration is calculated using the provided molecule volume and replacing hydrogen by deuterium.
-                This calculation does no include the effect of bond length changes that can lead to 1-2% changes
+                This calculation does not include the effect of bond length changes that can lead to 1-2% changes
                 in molecular volume.</div></div>
                 </td></tr>
             {% endif %}
@@ -196,7 +204,11 @@
                     <option value="electron">e-density (rₑ/Å³)</option>
                     <option value="sld">SLD (10⁻⁶ Å⁻²)</option>
                     <option value="n_db">n=1-δ+iβ (δ/-β)</option>
-                    </select></td><td class="hide_mobile"><button type="button" id="copy_xe_button">Full Data</button></td></tr>
+                    </select></td><td class="hide_mobile"><center><div class="tooltip">
+                    <button type="button" id="copy_xe_button">Data</button>
+                    <div class="tooltiptext">📋 Copy the energy dependant x-ray data to clipboard (E/real/imag).</div></div>
+                    </center>
+                </td></tr>
             <tr><td class="aligncenter"><form action="" onsubmit="return false;">
                 <input type="range" min="50" max="30000" value="8040" class="slider" id="xray_energy" step="20">
                 <input type="number" min="50" max="30000" value="8040" step="any" class="slider_value" id="xray_energy_value">

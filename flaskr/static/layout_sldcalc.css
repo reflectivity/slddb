@@ -45,18 +45,24 @@ table.sldresult {
     width: 28em;
 }
 
-#densresult, #densinput, #magninput,
-  #cu_select, #mo_select, #user_select {
+#densresult, #densinput {
+    width: 9em;
+}
+
+#cu_select, #mo_select, #user_select {
     width: 8em;
+    max-width: 180px;
 }
 
 #magninput {
     width: 15em;
+    max-width: 240px;
 }
 
 #magnresult {
     font-size: 80%;
     width: 15.5em;
+    max-width: 240px;
 }
 
 td.alignright option {
