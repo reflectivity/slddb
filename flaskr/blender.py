@@ -98,19 +98,19 @@ hx2o=Material([(get_element(element), amount) for element, amount in [('Hx', 2.0
 def collect_protein(acids):
     acids=clean_str(acids).upper()
     result=collect_combination(acids, AMINO_ABRV)+hx2o
-    result.extra_data['description']=f'protein; {len(acids)} residues'
+    result.extra_data['description']=f'protein - {len(acids)} residues'
     return result
 
 def collect_dna(bases):
     bases=clean_str(bases).upper()
     result=collect_combination(bases, DNA_ABRV)+hx2o
-    result.extra_data['description']=f'DNA; {len(bases)} residues'
+    result.extra_data['description']=f'DNA - {len(bases)} residues'
     return result
 
 def collect_rna(bases):
     bases=clean_str(bases).upper()
     result=collect_combination(bases, RNA_ABRV)+hx2o
-    result.extra_data['description']=f'RNA; {len(bases)} residues'
+    result.extra_data['description']=f'RNA - {len(bases)} residues'
     return result
 
 def collect_blendIDs(formula):
