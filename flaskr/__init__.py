@@ -32,6 +32,8 @@ from .periodic_table import get_periodic_table
 
 app=Flask("ORSO SLD Data Base", template_folder='flaskr/templates',
           static_folder='flaskr/static')
+# Try speeding up page load by using timed caching (reduce time lost due to TTFB)
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 3600
 
 try:
     app.config['SECRET_KEY']=open('flaskr/secret.key', 'rb').read()
@@ -391,7 +393,9 @@ def set_preference():
 
 @app.route('/favicon.ico')
 def favicon():
-    return app.send_static_file('favicon.ico')
+    response=app.send_static_file('favicon.ico')
+    response.cache_control.max_age = 300
+    return response
 
 @app.route('/plot_xray.png', methods=['GET'])
 def plot_xray():
@@ -400,6 +404,7 @@ def plot_xray():
                                 request.args.get('name', None),
                                 bool(request.args.get('delta', False)))
     response = make_response(image_binary)
+    response.cache_control.max_age = 300
     response.headers.set('Content-Type', 'image/png')
     return response
 
@@ -409,6 +414,7 @@ def plot_nabs():
                                 float(request.args.get('dens', 1.0)),
                                 request.args.get('name', None))
     response = make_response(image_binary)
+    response.cache_control.max_age = 300
     response.headers.set('Content-Type', 'image/png')
     return response
 
@@ -418,6 +424,7 @@ def plot_deuteration():
                                 float(request.args.get('dens', 1.0)),
                                 request.args.get('name', None))
     response = make_response(image_binary)
+    response.cache_control.max_age = 300
     response.headers.set('Content-Type', 'image/png')
     return response
 
