@@ -202,7 +202,10 @@ li a:hover {
           width: 5.5em;
     }
     div.top_header {
-        margin: 0.5em 0px 0.5em 0px;
+        margin: 0.3em 0px 0.7em 0px;
+    }
+    div.top_header h1 {
+        margin: 0.3em 0px 0.3em 0px;
     }
 }
 
@@ -232,6 +235,9 @@ li a:hover {
     img.top_logo {
           width: 3.5em;
     }
+    div.top_header h1 {
+        margin: 0em 0px 0em 0px;
+    }
 input, select, button {
     font-size: 150%;
 }
@@ -256,8 +262,10 @@ select, input[type=text], input[type=number] {
         margin: 0px 0px 0px 0px;
     }
     img.top_logo {
-        display: block;
-        width: 3.5em;
+          width: 3.5em;
+    }
+    div.top_header h1 {
+        margin: 0em 0px 0em 0px;
     }
 input, select, button {
     font-size: 150%;

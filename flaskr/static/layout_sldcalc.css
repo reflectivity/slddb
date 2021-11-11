@@ -18,8 +18,9 @@ div.italic_small {
 }
 
 td.center_calc {
+    margin-left: auto;
+    margin-right: auto;
     width: 18em;
-    align: center;
     vertical-align: top;
 }
 
@@ -100,7 +101,10 @@ td.alignright option {
 
 div.download_link {
     margin-top: 0.3em;
+    margin-left: auto;
+    margin-right: auto;
     text-align: right;
+    width: 28em;
 }
 
 div.download_link img{
@@ -108,7 +112,7 @@ div.download_link img{
 }
 
 p.periodic_table {
-    text-align:center;
+    text-align: center;
     margin-top: 5em;
 }
 
@@ -136,7 +140,55 @@ p.periodic_table img {
 }
 
 img.plot {
-    align: center;
+    margin-left: auto;
+    margin-right: auto;
     width: 40em;
     max-width: 100%;
+}
+
+/* phone in portrait */
+@media only screen and (max-width: 530px) {
+    table.sldresult {
+        width: 24em;
+        table-layout: auto;
+    }
+    table.sldresult td {
+        word-wrap: break-word;
+    }
+    #densresult, #densinput {
+        width: 6em;
+    }
+    #cu_select, #mo_select, #user_select {
+        width: 5em;
+    }
+    #magninput {
+        width: 6em;
+    }
+    #magnresult {
+        font-size: 150%;
+        width: 8em;
+    }
+    #preferences_submit {
+        display: none;
+    }
+
+    img.plot {
+        width: 24em;
+    }
+    .collapsible {
+        font-size: 120%;
+        line-height: 2.0;
+    }
+    div.download_link {
+        display: none;
+    }
+    #deuteration_amount, #exchange_amount, #d2o_amount {
+        display: none;
+    }
+    input[type=text], input[type=number] {
+        width: 6em;
+    }
+    #xray_energy{
+        display: none;
+    }
 }

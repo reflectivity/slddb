@@ -15,9 +15,10 @@ td.left_info div {
 }
 
 td.center_search {
+    margin-left: auto;
+    margin-right: auto;
     width: 23em;
     height: 1px;
-    align: center;
 }
 
 td.center_search table.noborder {
