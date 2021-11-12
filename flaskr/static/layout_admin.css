@@ -15,3 +15,21 @@
 tr.not_activated {
     color: #ff0000;
 }
+
+section.sqlite_query {
+    text-align: center;
+}
+
+section.sqlite_query p {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 40em;
+}
+
+div.search_top {
+    height: 1px;
+}
+
+#query_input {
+    width: 30em;
+}

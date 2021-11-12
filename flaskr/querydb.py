@@ -75,3 +75,11 @@ def search_db(query, invalids=False, offset=0):
                            advanced_fields=advanced_fields, get_input=get_input,
                            advanced_search=advanced_search, multipage=multipage, offset=offset)
 
+def custom_query(query):
+    db=SLDDB(DB_FILE)
+    c=db.db.cursor()
+    c.execute(query)
+    res=c.fetchall()
+    columns=c.description
+    c.close()
+    return columns, res

@@ -23,7 +23,7 @@ from slddb.material import Formula
 from slddb import constants
 
 from .api import calc_api, select_api, search_api
-from .querydb import search_db, show_search
+from .querydb import search_db, show_search, custom_query
 from .calcsld import calculate_selection, calculate_user, validate_selection, invalidate_selection, \
     get_graph_xray, get_absorption_graph, get_deuteration_graph
 from .inputdb import input_form, input_fill_cif, input_material, edit_selection, update_material, input_fill_blend
@@ -331,6 +331,21 @@ def add_user():
                 users=User.query.all()
             break
     return render_template('admin.html', users=users)
+
+@app.route('/admin_query')
+@login_required
+def admin_query():
+    users=User.query.all()
+    return render_template('admin_query.html', users=users)
+
+@app.route('/admin_query', methods=['POST'])
+@login_required
+def run_admin_query():
+    users=User.query.all()
+    query=request.form.get('query_input', '')
+    columns, results=custom_query(query)
+    return render_template('admin_query.html', users=users,
+                           query_input=query, columns=columns, results=results)
 
 def reset_password(user):
     # create a reset password token and send an email to the user

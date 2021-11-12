@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block nav_admin %}active_about{% endblock %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='layout_admin.css') }}">
+{% endblock %}
+
+{% block content %}
+<section class="sqlite_query full">
+    <table class="fullfixed">
+    <tr><td class="search_top">
+  <h2>This page is only meant for SLDDB admins, please be careful with the powers you are presented with!</h2>
+    <p>
+        This page allows to process arbitrary SQL query submission to be executed on the sqlite database.
+        While this can be used to do some maintenance tasks more efficiently it can potentially destroy
+        the whole databse.
+    </p>
+    <p>
+       <h4>Query send to database</h4>
+      <form method="post">
+          <textarea id="query_input" name="query_input">{%if query_input%}{{query_input}}{%else%}SELECT * FROM materials{%endif%}</textarea><br/>
+          <input type="submit">
+      </form>
+    </p>
+    </td></tr>
+    <tr><td class="full"><div class="fullauto desktop_scroll">
+        {% if results %}
+        <table class="withborder">
+          <thead>
+          {% for col in columns %}<th>{{col[0]}}</th>{% endfor %}
+          </thead>
+            {% for row in results %}
+            <tr>{% for col in row %}<td>{{col}}</td>{% endfor %}</tr>
+            {% endfor %}
+        </table>
+        {% endif %}
+    </div></td></tr>
+    </table>
+</section>
+
+{% endblock %}
