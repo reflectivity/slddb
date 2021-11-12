@@ -357,7 +357,7 @@ def user_query_password():
     ID=int(request.args.get('user_id', '1'))
     user=User.query.get(ID)
     if user.token_send is not None and check_password_hash(user.token_send, token):
-        return render_template('set_password.html', user_id=ID, token=token)
+        return render_template('set_password.html', user_id=ID, token=token, user_email=user.email)
     else:
         flash('token is not active for user with id %i'%ID)
         return show_search()
@@ -369,7 +369,7 @@ def user_set_password():
     user=User.query.get(ID)
     if user.token_send is not None and check_password_hash(user.token_send, token):
         pw=request.form.get('password', '')
-        pw2=request.form.get('password2', '')
+        pw2=request.form.get('confirm_password', '')
         if pw!='' and pw==pw2:
             hash=generate_password_hash(pw, method='sha256')
             User.query.filter_by(id=user.id).update(dict(token_send=None, password=hash))

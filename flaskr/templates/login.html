@@ -4,15 +4,9 @@
 
 {% block content %}
     <center>
-        {% if comment %}
-        <p style="color: #f00;">
-            {{comment}}
-        </p>
-        {% endif %}
-
 
     <form method="POST">
-      <table class="withborder">
+      <table class="noborder">
           <tr><td>User Email:</td><td><input name="email" id="email" value=""></td></tr>
           <tr><td>Password:</td><td><input type="password" name="password" id="password" value=""></td></tr>
           <tr><td colspan="2"><input type="checkbox" name="remember" id="remember">Remember me</td></tr>
