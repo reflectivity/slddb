@@ -1,6 +1,7 @@
 from flask import request, render_template
 from flask_login import current_user
 
+from .email_encryption import encryptor
 from slddb import SLDDB, DB_FILE
 from slddb.dbconfig import DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA, db_lookup
 
@@ -48,6 +49,8 @@ def search_db(query, invalids=False, offset=0):
             row['color_class']='orso_validated'
         if row['invalid'] is not None:
             row['color_class']='orso_invalid'
+        if row['created_by'] is not None:
+            row['created_by']=encryptor.decrypt(row['created_by'])
         for i, field in enumerate(DB_MATERIALS_FIELDS):
             if row[field] is not None and field not in DB_MATERIALS_HIDDEN_DATA:
                 hidden_columns[i]=False

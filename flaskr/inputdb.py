@@ -4,6 +4,7 @@ from werkzeug.utils import secure_filename
 
 from .querydb import search_db
 from .blender import collect_protein, collect_blend
+from .email_encryption import encryptor
 from slddb import SLDDB, DB_FILE
 from slddb.dbconfig import DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA, db_lookup
 from slddb.importers import CifImporter, PolymerSequence
@@ -80,7 +81,6 @@ def input_material(args):
         flash("You have to supply a name and Formula!")
         return render_template('input.html', fields=input_fields, get_input=get_input_args, get_unit=get_unit)
 
-
     useargs=dict(args.items())
     name=args['name']
     formula=args['formula']
@@ -89,6 +89,10 @@ def input_material(args):
     del(useargs['formula'])
 
     for key, value in list(useargs.items()):
+        if key=='created_by' and value!='':
+            # encrypt the users email information
+            value=encryptor.enrypt(value)
+            useargs[key]=value
         if db_lookup[key][1].html_list:
             useargs[key]=request.form.getlist(key)
         if value == '':
@@ -111,6 +115,8 @@ def edit_selection(ID, user):
             value = res[field]
             if value is None:
                 value = ""
+            elif field=='created_by':
+                value = encryptor.decrypt(value)
         else:
             value = ""
         return conv.html_input(field, value)

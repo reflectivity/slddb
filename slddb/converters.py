@@ -180,10 +180,24 @@ class CUrl(ValidatedString):
     placeholder = 'http://www.your_website.net'
 
 
-class CMail(ValidatedString):
-    regex = re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', re.IGNORECASE)
+# The user email gets encrypted, which does not allow verification on database level
+# class CMail(ValidatedString):
+#     regex = re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', re.IGNORECASE)
+#     placeholder = 'your.name@domain.net'
+#
+#     def html_input(self, field, value):
+#         return f'<input type="email" name="{field}" id="compound {field}" value="{value}"' \
+#                ' placeholder="'+self.placeholder+'" title="'+self.placeholder+'" />'
+
+class CMail(CType):
     placeholder = 'your.name@domain.net'
 
+    def __init__(self):
+        CType.__init__(self, str, str)
+
+    def html_input(self, field, value):
+        return f'<input type="email" name="{field}" id="compound {field}" value="{value}"' \
+               ' placeholder="'+self.placeholder+'" title="'+self.placeholder+'" />'
 
 class Cdoi(ValidatedString):
     regex = re.compile(
