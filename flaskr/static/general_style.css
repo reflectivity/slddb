@@ -88,8 +88,9 @@ table.withborder th {
       white-space: nowrap;
       overflow: hidden;
     }
-table.withborder td:hover,
-table.withborder th:hover {
+table.withborder td:hover {
+      display: block;
+      border: none;
       overflow: auto;
     }
 
