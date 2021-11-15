@@ -125,5 +125,6 @@ td.slight_pad {
     cursor: pointer;
     border: solid 1px;
     height: 2.1vw;
+    -webkit-user-select:none;
 }
 
