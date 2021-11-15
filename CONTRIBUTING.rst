@@ -22,6 +22,8 @@ If you are reporting a bug, please include:
 * Is it a bug on the website or the slddb python package?
 * Detailed steps to reproduce the bug.
 
+Alternatively, you can send an email to slddb@esss.dk .
+
 Fix Bugs
 ~~~~~~~~
 
