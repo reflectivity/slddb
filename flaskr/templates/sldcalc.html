@@ -37,7 +37,20 @@
     <form action="{{ url_for('calculate_sld', _anchor='results_header') }}" method="get"><center>
       <table class="noborder">
         <tr><th>Field</th><th>value for calculation</th></tr>
-        <tr><td class="alignright">Formula</td>
+        <tr><td class="alignright">Formula <div class="tooltip">🛈<div class="tooltiptext">
+               Chemical formula of a compound can be provided in various ways.
+               It will typically be a sequence of
+               chemical elements followed each by a number.<br/>Isotopes are written
+               with the mass number <i>N</i> in square brackets.
+               <i>D</i> for deuterium is also accepted for <i>H[2]</i>.
+               <br/>Repreating groups can be provided by a sub-formula in round brackets
+               followed by a number of repetitions.
+               <br/>For organic molecules that exchange hydrogen atoms with their environment,
+               such exchangable hydrogens are written separately as <i>Hx</i> element.
+               <br/>Examples:<br/>
+               Fe2O3 / H[2]2O / H2(C2H4)4 / B[10]4C
+               </div></div>
+        </td>
             <td><input type="text" name="formula" id="compound formula"
                        value="{{ request.args['formula'] or formula }}"
                        placeholder="Fe2O3 / H[2]2O / H2(C2H4)4"></td></tr>
