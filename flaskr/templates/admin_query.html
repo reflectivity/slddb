@@ -17,11 +17,15 @@
         the whole databse.
     </p>
     <p>
-       <h4>Query send to database</h4>
+       <h4>Query send to database (one statement per line)</h4>
       <form method="post">
           <textarea id="query_input" name="query_input">{%if query_input%}{{query_input}}{%else%}SELECT * FROM materials{%endif%}</textarea><br/>
           <input type="submit">
       </form>
+      Example queries: <br/>
+        SELECT * FROM materials WHERE `formula` like "%H2%"<br/>
+        PRAGMA table_info(materials)<br/>
+        UPDATE materials SET `{column}`="{value}" WHERE `formula` like "%Fe%"
     </p>
     </td></tr>
     <tr><td class="full"><div class="fullauto desktop_scroll">

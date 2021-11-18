@@ -343,8 +343,14 @@ def admin_query():
 def run_admin_query():
     users=User.query.all()
     query=request.form.get('query_input', '')
-    columns, results=custom_query(query)
-    return render_template('admin_query.html', users=users,
+    try:
+        columns, results=custom_query(query)
+        error=None
+    except Exception as e:
+        columns=None
+        results=None
+        error=repr(e)+'<br>'+"Raised when tried to execute query = '%s'"%query
+    return render_template('admin_query.html', users=users, error=error,
                            query_input=query, columns=columns, results=results)
 
 def reset_password(user):

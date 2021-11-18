@@ -78,8 +78,10 @@ def search_db(query, invalids=False, offset=0):
 def custom_query(query):
     db=SLDDB(DB_FILE)
     c=db.db.cursor()
-    c.execute(query)
+    for qitem in query.splitlines():
+        c.execute(qitem)
     res=c.fetchall()
     columns=c.description
     c.close()
+    db.db.commit()
     return columns, res
