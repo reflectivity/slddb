@@ -21,7 +21,7 @@ Up to now there is no interface to enter data, yet. This can, however, be done t
 	$ db=SLDDB(DB_FILE)
 	$ db.add_material('test', 'Fe2O3', density=7.8)
 	
-You can also add additional fields to that entry, currently limited to: E_x, FU_volume, HR_fomula, SLD_n, SLD_x, description.
+You can also add additional fields to that entry, currently limited to: E_x, FU_volume, HR_formula, SLD_n, SLD_x, description.
 Database queary from python is done using db.search_material(field=value).
 
 There is also a simple Qt5 interface that can be started with "slddbqt.py".
