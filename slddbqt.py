@@ -6,8 +6,8 @@ Qt GUI to access the SLDDB.
 import sys
 from datetime import datetime
 from PyQt5 import QtCore, QtWidgets, uic
-from slddb import SLDDB
-from slddb.dbconfig import DB_FILE, DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA
+from orsopy.slddb import SLDDB
+from orsopy.slddb.dbconfig import DB_FILE, DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA
 
 class SLDDBWindow(QtWidgets.QMainWindow):
     selected_material=None

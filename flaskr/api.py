@@ -1,10 +1,10 @@
 import json
 
 from .blender import collect_protein, collect_dna, collect_rna
-from slddb import SLDDB, DB_FILE
-from slddb.dbconfig import DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA, db_lookup
-from slddb.constants import Cu_kalpha, Mo_kalpha, r_e
-from slddb.material import Material, Formula
+from orsopy.slddb import SLDDB, DB_FILE
+from orsopy.slddb.dbconfig import DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA, db_lookup
+from orsopy.slddb.constants import Cu_kalpha, Mo_kalpha, r_e
+from orsopy.slddb.material import Material, Formula
 
 
 def calc_api(args):

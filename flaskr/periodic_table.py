@@ -1,8 +1,8 @@
 from flask import flash, render_template, redirect, url_for
-from slddb import SLDDB, DB_FILE
-from slddb.element_table.element import ELEMENT_NAMES, ELEMENT_FULLNAMES
-from slddb.element_table import get_element
-from slddb.constants import Cu_kalpha, Mo_kalpha
+from orsopy.slddb import SLDDB, DB_FILE
+from orsopy.slddb.element_table.element import ELEMENT_NAMES, ELEMENT_FULLNAMES
+from orsopy.slddb.element_table import get_element
+from orsopy.slddb.constants import Cu_kalpha, Mo_kalpha
 
 # The number of elements on the left and right of the periodic table per row
 COL_RANGES = [(1, 1), (2, 6), (2, 6), (2, 16), (2, 16), (2, 15), (2, 15)]

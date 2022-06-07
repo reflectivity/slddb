@@ -2,8 +2,8 @@ from flask import request, render_template
 from flask_login import current_user
 
 from .email_encryption import encryptor
-from slddb import SLDDB, DB_FILE
-from slddb.dbconfig import DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA, db_lookup
+from orsopy.slddb import SLDDB, DB_FILE
+from orsopy.slddb.dbconfig import DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA, db_lookup
 
 main_fields=['name', 'formula', 'tags']
 advanced_fields=['ID', 'physical_state', 'description','reference', 'CAS_No', 'temperature', 'comments', 'data_origin']

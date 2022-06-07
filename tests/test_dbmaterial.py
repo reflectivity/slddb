@@ -1,7 +1,7 @@
 import unittest
 import json
-from slddb import SLDDB
-from slddb.comparators import ExactString
+from orsopy.slddb import SLDDB
+from orsopy.slddb.comparators import ExactString
 
 class TestMaterialDB(unittest.TestCase):
     db:SLDDB

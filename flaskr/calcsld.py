@@ -3,10 +3,10 @@ import traceback
 
 from flask import render_template
 
-from slddb.constants import Cu_kalpha, Mo_kalpha, r_e, r_e_angstrom
-from slddb import SLDDB, DB_FILE
-from slddb.material import Material, Formula, H2O, D2O
-from slddb.element_table import get_element
+from orsopy.slddb.constants import Cu_kalpha, Mo_kalpha, r_e, r_e_angstrom
+from orsopy.slddb import SLDDB, DB_FILE
+from orsopy.slddb.material import Material, Formula, H2O, D2O
+from orsopy.slddb.element_table import get_element
 
 from numpy import nan_to_num
 import base64

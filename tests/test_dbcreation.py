@@ -1,5 +1,5 @@
 import unittest
-from slddb import SLDDB, dbconfig, element_table
+from orsopy.slddb import SLDDB, dbconfig, element_table
 from numpy import ndarray, testing
 
 class TestCreateDB(unittest.TestCase):

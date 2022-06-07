@@ -1,15 +1,15 @@
 import unittest
 from numpy.testing import assert_array_equal
 from numpy import isnan
-from slddb.material import Material, Formula
-from slddb.element_table import Element, element
-from slddb.constants import Cu_kalpha, Mo_kalpha, Cu_kalpha1, Mo_kalpha1
+from orsopy.slddb.material import Material, Formula
+from orsopy.slddb.element_table import Element, element
+from orsopy.slddb.constants import Cu_kalpha, Mo_kalpha, Cu_kalpha1, Mo_kalpha1
 
 # reference data uses Henke tables
-from slddb.element_table.xray_henke import XRAY_SCATTERING_FACTORS
+from orsopy.slddb.element_table.xray_henke import XRAY_SCATTERING_FACTORS
 element.XRAY_SCATTERING_FACTORS = XRAY_SCATTERING_FACTORS
 # import other n_lengths for coverage
-from slddb.element_table.nlengths import NEUTRON_SCATTERING_LENGTHS
+from orsopy.slddb.element_table.nlengths import NEUTRON_SCATTERING_LENGTHS
 # calculated using NIST calculator at https://www.ncnr.nist.gov/resources/activation/
 REFERENCE_RESULTS = {
     # compound: [neutron, xray Cu, xray Mo]
@@ -269,7 +269,7 @@ class TestMaterial(unittest.TestCase):
         m1=Material('H2O', dens=1.0)
         m2=Material('D2O', fu_dens=m1.fu_dens)
         # replace D2O with one that has equal volume
-        from slddb import material
+        from orsopy.slddb import material
         material.H2O=m1
         material.D2O=m2
         self.assertAlmostEqual((m1+m2).match_point, 0.5)

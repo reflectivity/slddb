@@ -1,7 +1,7 @@
 import unittest
 import os
 from glob import glob
-from slddb.importers import CifImporter
+from orsopy.slddb.importers import CifImporter
 
 NO_VALIDATION = ['7lzm.cif']
 

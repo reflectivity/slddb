@@ -1,9 +1,9 @@
 import unittest
 import json
 from datetime import datetime
-from slddb.converters import CType, CLimited, CArray, CFormula, CComplex, Converter, \
+from orsopy.slddb.converters import CType, CLimited, CArray, CFormula, CComplex, Converter, \
     CDate, CSelect, CMultiSelect, CUrl, Cdoi
-from slddb.material import Formula
+from orsopy.slddb.material import Formula
 from numpy import array, ndarray, testing
 
 class TestConverter(unittest.TestCase):

@@ -1,5 +1,5 @@
 import unittest
-from slddb.material import Formula
+from orsopy.slddb.material import Formula
 
 class TestFormula(unittest.TestCase):
     def test_valid(self):

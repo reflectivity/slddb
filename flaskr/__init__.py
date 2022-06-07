@@ -14,13 +14,13 @@ try:
 except ImportError:
     from wsgiref.util import FileWrapper
 
-import slddb
-from slddb import __version__, dbconfig
+from orsopy import slddb
+from orsopy.slddb import __version__, dbconfig
 # for flask use database file in startup folder
 DB_FILE='slddb.db';dbconfig.DB_FILE=DB_FILE;slddb.DB_FILE=DB_FILE
-from slddb.dbconfig import DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA, db_lookup
-from slddb.material import Formula
-from slddb import constants
+from orsopy.slddb.dbconfig import DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA, db_lookup
+from orsopy.slddb.material import Formula
+from orsopy.slddb import constants
 
 from .api import calc_api, select_api, search_api
 from .querydb import search_db, show_search, custom_query

@@ -4,7 +4,7 @@ Generate a python file that stores data collected from various sources.
 import os
 import periodictable
 import numpy as np
-from slddb import constants
+from orsopy.slddb import constants
 from urllib import request, error as urlerr
 
 def calc_mass(element, atoms, isotopes):

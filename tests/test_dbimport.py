@@ -2,7 +2,7 @@ import os
 import unittest
 import json
 from glob import glob
-from slddb import SLDDB
+from orsopy.slddb import SLDDB
 
 NO_IMPORT = ['7lzm.cif']
 

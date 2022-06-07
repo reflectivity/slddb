@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from slddb import element_table
+from orsopy.slddb import element_table
 
 class TestFormula(unittest.TestCase):
     def test_load_symbol(self):

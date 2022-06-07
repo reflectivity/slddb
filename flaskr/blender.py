@@ -3,11 +3,11 @@ import tempfile
 from flask import redirect, url_for
 from werkzeug.utils import secure_filename
 
-from slddb import DB_FILE, SLDDB
-from slddb.material import Material
-from slddb.element_table import get_element
-from slddb.importers import CifImporter, PolymerSequence
-from slddb.comparators import ExactString
+from orsopy.slddb import DB_FILE, SLDDB
+from orsopy.slddb.material import Material
+from orsopy.slddb.element_table import get_element
+from orsopy.slddb.importers import CifImporter, PolymerSequence
+from orsopy.slddb.comparators import ExactString
 
 CALC_DEFAULT_FIELDS = dict(densinput='volume',mu=0.0,magninput='muB')
 

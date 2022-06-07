@@ -42,8 +42,8 @@ class TestWebAPI(unittest.TestCase):
 
         # use the local api version to make sure test coverage works
         global api, slddb
-        import slddb
-        from slddb import api, webapi, dbconfig
+        from orsopy import slddb
+        from orsopy.slddb import api, webapi, dbconfig
         # overwrite local server URL
         cls._api_url=dbconfig.WEBAPI_URL
         dbconfig.WEBAPI_URL='http://127.0.0.1:5000/'
@@ -89,7 +89,7 @@ class TestWebAPI(unittest.TestCase):
         self.assertNotEqual(mtime, m2time)
         # test error when server does not exist
         from urllib.error import URLError
-        from slddb import webapi, dbconfig
+        from orsopy.slddb import webapi, dbconfig
         webapi.WEBAPI_URL='http://doesnot.exist/'
         with self.assertRaises(URLError):
             api.download_db()
@@ -125,7 +125,7 @@ class TestWebAPI(unittest.TestCase):
         api.first_access=True
         api.max_age=-1
 
-        from slddb import webapi, dbconfig
+        from orsopy.slddb import webapi, dbconfig
         webapi.WEBAPI_URL='http://doesnot.exist/'
         with self.assertWarns(UserWarning):
             api.check()
@@ -157,7 +157,7 @@ class TestWebAPI(unittest.TestCase):
         if not self.server_available:
             return
         # test database access if server is unavailable
-        from slddb import webapi, dbconfig
+        from orsopy.slddb import webapi, dbconfig
         webapi.WEBAPI_URL='http://doesnot.exist/'
 
         with self.subTest(msg='local search', i=0):
@@ -213,7 +213,7 @@ class TestConfigPaths(unittest.TestCase):
     def test_macpath(self):
         # mac version of config path
         os.environ['APPDATA']=self.path
-        from slddb import dbconfig
+        from orsopy.slddb import dbconfig
         reload(dbconfig)
         del os.environ['APPDATA']
 
@@ -225,7 +225,7 @@ class TestConfigPaths(unittest.TestCase):
     def test_linux(self):
         # mac version of config path
         os.environ['XDG_CONFIG_HOME']=self.path
-        from slddb import dbconfig
+        from orsopy.slddb import dbconfig
         reload(dbconfig)
         del os.environ['XDG_CONFIG_HOME']
 
@@ -237,7 +237,7 @@ class TestConfigPaths(unittest.TestCase):
     def test_rest(self):
         # mac version of config path
         os.environ['HOME']=self.path
-        from slddb import dbconfig
+        from orsopy.slddb import dbconfig
         reload(dbconfig)
         del os.environ['HOME']
 
