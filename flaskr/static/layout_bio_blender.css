@@ -1,18 +1,23 @@
 td.left_info {
+    font-size: 105%;
     text-align: right;
     vertical-align: center;
     width: 40%;
     overflow: auto;
-}
-
-td.left_info div{
-    font-size: 105%;
-    text-align: justify;
-    margin: 5px 1em 5px 1em;
-    max-height: 18em;
+    padding: 3em 1em 20pt 1em;
     hyphens: auto;
 }
 
+td.left_info div{
+    text-align: justify;
+    max-height: 20em;
+}
+
+div.italic_small {
+    font-size: 75%;
+    font-style: italic;
+    width: 100%;
+}
 
 td.center_blend {
     margin-left: auto;
