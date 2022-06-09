@@ -270,7 +270,7 @@ def login():
 
 @app.route('/login', methods=['POST'])
 def login_post():
-    email = request.form.get('email')
+    email = request.form.get('email').lower()
     password = request.form.get('password')
     remember = True if request.form.get('remember') else False
 
@@ -302,7 +302,7 @@ def admin():
 @login_required
 def add_user():
     if request.form.get('new_user', '')=='Submit' and request.form['user_email']!='' and request.form['user_name']!='':
-        new_user=User(name=request.form['user_name'], email=request.form['user_email'], admin=False)
+        new_user=User(name=request.form['user_name'], email=request.form['user_email'].lower(), admin=False)
         db.session.add(new_user)
         db.session.commit()
         reset_password(new_user)
