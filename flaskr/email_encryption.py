@@ -35,6 +35,10 @@ class SymmetricEncryption:
         return self.fernet.encrypt(value.encode()).decode()
 
     def decrypt(self, value: str):
-        return self.fernet.decrypt(value.encode()).decode()
+        try:
+            return self.fernet.decrypt(value.encode()).decode()
+        except Exception as e:
+            return f'ERROR: {repr(e)}'
+
 
 encryptor=SymmetricEncryption()

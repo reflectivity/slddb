@@ -141,6 +141,10 @@ def update_material(args):
     del(useargs['ID'])
 
     for key, value in list(useargs.items()):
+        if key=='created_by' and value!='':
+            # encrypt the users email information
+            value=encryptor.enrypt(value)
+            useargs[key]=value
         if db_lookup[key][1].html_list:
             useargs[key]=request.form.getlist(key)
         if value=='':
