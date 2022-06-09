@@ -170,6 +170,3 @@ class TestMaterialDB(unittest.TestCase):
         r3=self.db.search_material(name='iron')[0]['accessed']
         self.assertEqual(r1+1,r2)
         self.assertEqual(r2+1,r3)
-
-    def test_add_elements(self):
-        self.db.add_elements()
