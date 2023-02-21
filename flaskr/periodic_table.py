@@ -5,7 +5,7 @@ from orsopy.slddb.element_table import get_element
 from orsopy.slddb.constants import Cu_kalpha, Mo_kalpha
 
 # The number of elements on the left and right of the periodic table per row
-COL_RANGES = [(1, 1), (2, 6), (2, 6), (2, 16), (2, 16), (2, 15), (2, 15)]
+COL_RANGES = [(1, 1), (2, 6), (2, 6), (2, 16), (2, 16), (3, 15), (3, 15)]
 
 # Generate data that is only calculated once
 ELEMENTS = {}
@@ -15,8 +15,9 @@ for row in range(7):
         ELEMENTS[row, left] = (Z, ELEMENT_NAMES[Z])
         Z += 1
     if row>4:
+        ELEMENTS[row+3, 2] = (Z-1, ELEMENT_NAMES[Z-1])
         for sub in range(14):
-            ELEMENTS[row+3, 2+sub] = (Z, ELEMENT_NAMES[Z])
+            ELEMENTS[row+3, 3+sub] = (Z, ELEMENT_NAMES[Z])
             Z += 1
     for right in range(COL_RANGES[row][1]):
         ELEMENTS[row, 18-COL_RANGES[row][1]+right] = (Z, ELEMENT_NAMES[Z])
@@ -29,7 +30,10 @@ for g in range(2,12):
 for g in range(12,17):
     GROUP_COLORS[g]=[200, 200, 255]
 GROUP_COLORS[18] = [255, 255, 150]
-ELEMENT_COLORS=dict([(Z, list(GROUP_COLORS[col])) if row<7 else (Z, list(GROUP_COLORS[18])) for (row, col), (Z, _) in ELEMENTS.items()])
+ELEMENT_COLORS=dict([(Z, GROUP_COLORS[col]) if row<7 else (Z, GROUP_COLORS[18]) for (row, col), (Z, _) in ELEMENTS.items()])
+# Color La and Ac as 4f
+ELEMENT_COLORS[57]=[200, 200, 100]
+ELEMENT_COLORS[89]=ELEMENT_COLORS[57]
 FULLNAMES_OF_Z=dict([(Z, ELEMENT_FULLNAMES[ele].capitalize()) for Z, ele in ELEMENT_NAMES.items()])
 
 ELEMENT_B = {}
@@ -80,7 +84,7 @@ def get_periodic_table(requested_element=None, plot_scale=None):
         else:
             flash(f'No SLD for {ELEMENT_FULLNAMES[requested_element]}')
     scale_colors=PLOT_SCALES[plot_scale]
-    return render_template('periodic_table.html', elements=ELEMENTS, group_colors=GROUP_COLORS,
+    return render_template('periodic_table.html', elements=ELEMENTS,
                            element_names=ELEMENT_NAMES, element_colors=ELEMENT_COLORS,
                            element_fullnames=FULLNAMES_OF_Z, element_weight=ELEMENT_WEIGHT,
                            element_b=ELEMENT_B, element_f=ELEMENT_F, element_fMo=ELEMENT_F_MO,

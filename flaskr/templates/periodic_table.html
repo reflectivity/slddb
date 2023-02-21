@@ -44,14 +44,14 @@
                             data-url="{{url_for('periodic_table', sld_element=elements[row,column][1])}}">
                         {% else %}
                             {% if row<7 %}
-                            <td class="actual_element" data-color="{{group_colors[column]}}"
+                            <td class="actual_element" data-color="{{element_colors[Z]}}"
                             data-name="{{element_names[Z]}}" data-fullname="{{element_fullnames[Z]}}"
                             data-weight="{{element_weight[Z]}}" data-b="{{element_b[Z]}}"
                             data-fcu="{{element_f[Z]}}" data-fmo="{{element_fMo[Z]}}"
                             data-elementcolor="{{element_colors[Z]}}" data-z="{{Z}}"
                             data-url="{{url_for('periodic_table', sld_element=elements[row,column][1])}}">
                             {% else %}
-                            <td class="actual_element" data-color="{{group_colors[18]}}"
+                            <td class="actual_element" data-color="{{element_colors[Z]}}"
                             data-name="{{element_names[Z]}}" data-fullname="{{element_fullnames[Z]}}"
                             data-weight="{{element_weight[Z]}}" data-b="{{element_b[Z]}}"
                             data-fcu="{{element_f[Z]}}" data-fmo="{{element_fMo[Z]}}"
