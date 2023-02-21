@@ -24,6 +24,7 @@
               <li class="{% block nav_calculate_sld %}{% endblock %}"><a href="{{ url_for('calculate_sld') }}">Calculate SLD</a></li>
               <li class="{% block nav_bio_blender %}{% endblock %}"><a href="{{ url_for('bio_blender') }}">BioBlender</a></li>
               <li class="{% block nav_input_page %}{% endblock %} hide_mobile"><a href="{{ url_for('input_page') }}">Enter Material</a></li>
+              <li class="{% block nav_sample_model %}{% endblock %} hide_mobile"><a href="{{ url_for('sample_empty') }}">Simulate Sample</a></li>
               <li  class="{% block nav_about %}about{% endblock %}"><a href="{{ url_for('about_page') }}">About</a></li>
               {% if current_user.is_authenticated %}
                   <li  class="login"><a href="{{ url_for('logout') }}">{{current_user.name}} - Logout</a></li>

@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block nav_sample_model %}active{% endblock %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='layout_sample.css') }}">
+{% endblock %}
+
+
+{% block content %}
+
+<div class="container">
+    <div>
+        {% if structure %}
+        <div class="sample_structure">
+              {{ structure | safe }}
+        </div>
+        {% else %}
+        <p>
+        The ORSO project has defined a simple sample model that can be included in the header
+        of a reflectivity data file to describe the structure and materials the sample surface
+        is made from.</p>
+
+        <p>
+        On this page you can enter such a model description to see the evaluated sample structure
+        and get a reflectivity model for XRR or NR measurements of that structure.</p>
+        {% endif %}
+    </div>
+    <div class="center">
+        <form action="{{ url_for('sample_model') }}" method="post">
+            <b>Sample Model:</b>
+            <div>
+                <textarea id="sample_yaml" name="sample_yaml" rows="20"
+                    placeholder="JAML code for the sample model description.">{{ request.form.get('sample_yaml','') }}</textarea>
+            </div>
+            <div>
+                <input type="checkbox" name="single_layer" {% if request.form.get('single_layer', None) %} checked{% endif %}><label>individual layers</label>
+                <input type="Submit" name='submit' value="Analyze Model">
+            </div>
+        </form>
+    </div>
+    <div>
+        <p>Result of the model compilation:</p>
+        {% if img %}
+        <img class="plot" src="{{ img }}" />
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

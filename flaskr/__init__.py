@@ -15,7 +15,7 @@ except ImportError:
     from wsgiref.util import FileWrapper
 
 from orsopy import slddb
-from orsopy.slddb import __version__, dbconfig
+from orsopy.slddb import dbconfig
 # for flask use database file in startup folder
 DB_FILE='slddb.db';dbconfig.DB_FILE=DB_FILE;slddb.DB_FILE=DB_FILE
 from orsopy.slddb.dbconfig import DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA, db_lookup
@@ -27,8 +27,11 @@ from .querydb import search_db, show_search, custom_query
 from .calcsld import calculate_selection, calculate_user, validate_selection, invalidate_selection, \
     get_graph_xray, get_absorption_graph, get_deuteration_graph
 from .inputdb import input_form, input_fill_cif, input_material, edit_selection, update_material, input_fill_blend
+from .sample_model import sample_form, sample_form_eval, simulate_reflectivity
 from .blender import calculate_blend, formula_from_pdb
 from .periodic_table import get_periodic_table
+
+__version__ = "1.0 beta8"
 
 app=Flask("ORSO SLD Data Base", template_folder='flaskr/templates',
           static_folder='flaskr/static')
@@ -411,6 +414,27 @@ def set_preference():
             continue
         resp.set_cookie(key, value, samesite='Strict')
     return resp
+
+
+@app.route('/sample')
+def sample_empty():
+    return sample_form()
+
+@app.route('/sample', methods=['POST'])
+def sample_model():
+    if not request.form.get('submit', None)=='Analyze Model':
+        return sample_form()
+    else:
+        data=request.form.get('sample_yaml', '')
+        return sample_form_eval(data, single_layer=(request.form.get('single_layer', None) is not None))
+
+@app.route('/plot_sample.png', methods=['GET'])
+def plot_sample():
+    image_binary=simulate_reflectivity(request.args.get('xray', ''),request.args.get('neutron', ''))
+    response = make_response(image_binary)
+    response.cache_control.max_age = 300
+    response.headers.set('Content-Type', 'image/png')
+    return response
 
 @app.route('/favicon.ico')
 def favicon():
