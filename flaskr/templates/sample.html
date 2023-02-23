@@ -14,10 +14,13 @@
         {% if structure %}
         <div class="sample_structure">
               {{ structure | safe }}
+            <div class="columns"><div><b>d</b>: thickness / nm</div><div><b>σ</b>: roughness / nm</div></div>
         </div>
         {% else %}
         <p>
-        The ORSO project has defined a simple sample model that can be included in the header
+        The ORSO project has defined a
+            <a href="https://www.reflectometry.org/projects/simple_model" target="_blank">simple sample model</a>
+            that can be included in the header
         of a reflectivity data file to describe the structure and materials the sample surface
         is made from.</p>
 
@@ -28,22 +31,32 @@
     </div>
     <div class="center">
         <form action="{{ url_for('sample_model') }}" method="post">
-            <b>Sample Model:</b>
-            <div>
-                <textarea id="sample_yaml" name="sample_yaml" rows="20"
-                    placeholder="JAML code for the sample model description.">{{ request.form.get('sample_yaml','') }}</textarea>
+            <div class="columns"><div><b>Sample Model:</b></div>
+                <div><select name="example_scripts" id="example_scripts">
+                    <option value="empty">select example script</option>
+                </select></div>
             </div>
-            <div>
-                <input type="checkbox" name="single_layer" {% if request.form.get('single_layer', None) %} checked{% endif %}><label>individual layers</label>
-                <input type="Submit" name='submit' value="Analyze Model">
+            <textarea id="sample_yaml" name="sample_yaml" placeholder="JAML code for the sample model description."
+                     >{{ request.form.get('sample_yaml','') }}</textarea>
+            <div class="columns">
+                <div><input type="checkbox" name="single_layer" {% if request.form.get('single_layer', None) %} checked{% endif %}><label>individual layers</label></div>
+                <div><input type="Submit" name='submit' value="Analyze Model"></div>
             </div>
         </form>
     </div>
     <div>
-        <p>Result of the model compilation:</p>
         {% if img %}
         <img class="plot" src="{{ img }}" />
+        {% else %}
+        <p>The YAML header keys <i>data_source</i>/<i>sample</i>/<i>model</i> may be omitted when entering the data.
+        </p><p>Evaluation of a full ORSO header will work, as well.
+        </p>
         {% endif %}
     </div>
 </div>
+
+{% block script_end %}
+<script src="{{url_for('static', filename='sample_model.js')}}"></script>
+{% endblock %}
+
 {% endblock %}

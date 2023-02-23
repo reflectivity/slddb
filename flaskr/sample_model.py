@@ -7,15 +7,22 @@ from io import BytesIO
 from matplotlib.figure import Figure
 from refnx.reflect import SLD, ReflectModel, Structure
 from orsopy.fileio import model_language
+from orsopy.slddb import api as slddb_api
+from orsopy.slddb import SLDDB, DB_FILE
+from orsopy.utils.chemical_formula import Formula
 
-q = linspace(0.001, 0.2, 200)
+# make sure the material resolution is done locally
+slddb_api.use_webquery = False
+
+q = linspace(0.001, 0.4, 400)
 
 def sample_form():
     return render_template('sample.html')
 
 def simulate_reflectivity(xray, neutron):
-    fig = Figure()
-    ax = fig.subplots()
+    fig = Figure(figsize=(6,8))
+    fig.set_facecolor('none')
+    ax, ax2 = fig.subplots(nrows=2)
 
     structure = Structure()
     for lj in neutron.split('_'):
@@ -29,24 +36,28 @@ def simulate_reflectivity(xray, neutron):
         m = SLD(float(sldr)+1j*float(sldi))
         structurex |= m(float(d), float(sigma))
     modelx = ReflectModel(structurex, bkg=0.0)
+
+    ax.set_title('sample reflectivity')
     ax.semilogy(q, model(q), label="neutron")
     ax.semilogy(q, modelx(q), label="x-ray (Cu)")
     ax.legend(loc='lower left')
-    ax.set_xlabel("q [Å$^{-1}$]")
+    ax.set_xlabel("q / Å$^{-1}$")
     ax.set_ylabel("Reflectivity")
 
-    ax2 = fig.add_axes([0.65, 0.65, 0.27, 0.27])
-    ax2.plot([0,1],[0,1])
-    ax2.set_ylabel('SLDn')
-    ax2.set_xlabel('depth')
-    ax2.plot(*structure.sld_profile(), color='C0', label="neutron")
+    ax2.set_title('sample SLD profiles')
+    ax2.set_ylabel('SLDn / 10$^{-6}$ Å$^{-1}$')
+    ax2.set_xlabel('depth / nm')
+    x,y=structure.sld_profile()
+    ax2.plot(x/10., y, color='C0', label="neutron")
     ax2x=ax2.twinx()
-    ax2x.plot(*structurex.sld_profile(), color='C1', label="x-ray (Cu)")
-    ax2x.set_ylabel('SLDx')
+    x,y=structurex.sld_profile()
+    ax2x.plot(x/10., y, color='C1', label="x-ray (Cu)")
+    ax2x.set_ylabel('SLDx / 10$^{-6}$ Å$^{-1}$')
+    fig.subplots_adjust(hspace=0.35, wspace=0.1, top=0.95, bottom=0.1, left=0.15, right=0.85)
 
     # Save it to a temporary buffer.
     buf = BytesIO()
-    fig.savefig(buf, format="png")
+    fig.savefig(buf, format="png", dpi=300)
     return bytes(buf.getbuffer())
 
 
@@ -64,18 +75,37 @@ def create_plot_link(sample:model_language.SampleModel):
     return plink
 
 def sample_form_eval(data_yaml, single_layer=False):
-    # parse data as yaml
-    data = yaml.safe_load(data_yaml)
+    try:
+        # parse data as yaml
+        data = yaml.safe_load(data_yaml)
+    except Exception as e:
+        error = f'Could not parse yaml data:<br />{repr(e)}'
+        return render_template('sample.html', error=error)
+
     if "data_source" in data:
         data = data["data_source"]
     if "sample" in data:
-        data = data["sample"]["model"]
-    sample = model_language.SampleModel(**data)
+        data = data["sample"]
+    if "model" in data:
+        data = data["model"]
+
+    try:
+        sample = model_language.SampleModel(**data)
+    except Exception as e:
+        error = f'Could not parse the sample model:<br />{repr(e)}<br />'
+        error += f'<div class="tooltip">Hover here for YAML data<div class="tooltiptext">{data}</div></div>'
+        return render_template('sample.html', error=error)
+    # connect resolution API to local database
+    slddb_api.db = SLDDB(DB_FILE)
     if single_layer:
         structure = structure_to_html(sample.resolve_to_layers())
     else:
         structure = structure_to_html(sample.resolve_stack())
+
     img = create_plot_link(sample)
+
+    slddb_api.db.db.close()
+    slddb_api.db=None
     return render_template('sample.html', structure=structure, img=img)
 
 def structure_to_html(items):
@@ -93,16 +123,26 @@ def structure_to_html(items):
     return output
 
 def layer_table(layer:model_language.Layer):
+    if layer.material is None:
+        layer.generate_material()
     if isinstance(layer.material, model_language.Composit):
         return composite_table(layer)
     output = '<table class="layer">\n'
-    if layer.original_name:
-        output += f'<tr><th rowspan="2">{layer.original_name}</th><th>material</th><th>d</th><th>σ</th></tr>\n'
-    elif layer.material.original_name:
-        output += f'<tr><th rowspan="2">{layer.material.original_name}</th><th>material</th><th>d</th><th>σ</th></tr>\n'
-    else:
-        output += '<tr><th>material</th><th>d</th><th>σ</th></tr>\n'
-    output += f'<tr><td>{getattr(layer.material, "formula", None) or "SLD"}</td><td>{layer.thickness.as_unit("nm"):.2f}</td>' \
+    layer.material.generate_density()
+    material_info = f'{layer.material.comment or "defined values"}<br />'
+    for key in ['formula', 'number_density', 'mass_density', 'sld', 'relative_density']:
+        value = getattr(layer.material, key, None)
+        if value:
+            if hasattr(value, 'magnitude'):
+                value = f'{value.magnitude:.3g} {value.unit}'
+            elif hasattr(value, 'real') and hasattr(value, 'unit'):
+                value = f'{value.real:.3g}+{value.imag:.3g}i {value.unit}'
+            material_info+=f'{key} = {value}<br />'
+
+    output += f'<tr><th rowspan="2" class="expand">{layer.original_name or layer.material.original_name or ""}</th><th>material</th><th>d</th><th>σ</th></tr>\n'
+    output += f'<tr><td>{getattr(layer.material, "formula", None) or "SLD"} <div class="tooltip">🛈<div class="tooltiptext">' \
+              f'{material_info}' \
+              f'</div></div></td><td>{layer.thickness.as_unit("nm"):.2f}</td>' \
               f'<td>{layer.roughness.as_unit("nm"):.1f}</td></tr>\n'
     output += '</table>\n'
     return output
@@ -110,15 +150,26 @@ def layer_table(layer:model_language.Layer):
 def composite_table(layer:model_language.Layer):
     output = '<table class="layer">\n'
     nitems = len(layer.material.composition)
-    if layer.original_name:
-        output += f'<tr><th rowspan="{nitems+1}">{layer.original_name}</th><th>fraction</th><th>material</th><th>d</th><th>σ</th></tr>\n'
-    elif layer.material.original_name:
-        output += f'<tr><th rowspan="{nitems+1}">{layer.material.original_name}</th><th>fraction</th><th>material</th><th>d</th><th>σ</th></tr>\n'
-    else:
-        output += f'<tr><th>material</th><th>fraction</th><th>d</th><th>σ</th></tr>\n'
+
+    layer.material.generate_density()
+    output += f'<tr><th rowspan="{nitems+1}" class="expand">{layer.original_name or layer.material.original_name or "composit"}</th>' \
+              f'<th>fraction</th><th>material</th><th>d</th><th>σ</th></tr>\n'
     for i, (key, fraction) in enumerate(layer.material.composition.items()):
         material = layer.material._composition_materials[key]
-        output += f'<tr><td>{getattr(material, "formula", None) or key}</td><td>{fraction*100:.1f}%</td>'
+
+        material_info = f'{material.comment or "defined values"}<br />'
+        for key in ['formula', 'number_density', 'mass_density', 'sld', 'relative_density']:
+            value = getattr(material, key, None)
+            if value:
+                if hasattr(value, 'magnitude'):
+                    value = f'{value.magnitude:.3g} {value.unit}'
+                elif hasattr(value, 'real'):
+                    value = f'{value.real:.3g}+{value.imag:.3g}i {value.unit}'
+                material_info += f'{key} = {value}<br />'
+
+        output += f'<tr><td>{getattr(material, "formula", None) or key} <div class="tooltip">🛈<div class="tooltiptext">' \
+              f'{material_info}' \
+              f'</div></div></td><td>{fraction*100:.1f}%</td>'
         if i==0:
             output += f'<td rospan="{nitems}">{layer.thickness.as_unit("nm"):.2f}</td>' \
                       f'<td rospan="{nitems}">{layer.roughness.as_unit("nm"):.1f}</td></tr>\n'
