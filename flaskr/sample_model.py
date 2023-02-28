@@ -38,8 +38,8 @@ def simulate_reflectivity(xray, neutron):
     modelx = ReflectModel(structurex, bkg=0.0)
 
     ax.set_title('sample reflectivity')
-    ax.semilogy(q, model(q), label="neutron")
-    ax.semilogy(q, modelx(q), label="x-ray (Cu)")
+    ax.semilogy(q, model(q)+1e-9, label="neutron")
+    ax.semilogy(q, modelx(q)+1e-9, label="x-ray (Cu)")
     ax.legend(loc='lower left')
     ax.set_xlabel("q / Å$^{-1}$")
     ax.set_ylabel("Reflectivity")

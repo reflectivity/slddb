@@ -31,10 +31,9 @@ stack: air | 10 ( Si 70 | Fe 70 ) | Si
 materials:
   Fe:
     magnetic_moment: 2.2
-    sld: 5.02e-6
   Si:
     formula: SiN0.01
-    rel_density: 0.95
+    relative_density: 0.95
 globals:
   length_unit: angstrom
   m_moment_unit: muB
