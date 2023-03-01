@@ -36,7 +36,7 @@
                     <option value="empty">select example script</option>
                 </select></div>
             </div>
-            <textarea id="sample_yaml" name="sample_yaml" placeholder="JAML code for the sample model description."
+            <textarea id="sample_yaml" name="sample_yaml" placeholder="YAML code for the sample model description."
                      >{{ request.form.get('sample_yaml','') }}</textarea>
             <div class="columns">
                 <div><input type="checkbox" name="single_layer" {% if request.form.get('single_layer', None) %} checked{% endif %}><label>individual layers</label></div>
