@@ -19,17 +19,27 @@ q = linspace(0.001, 0.4, 400)
 def sample_form():
     return render_template('sample.html')
 
-def simulate_reflectivity(xray, neutron):
+def simulate_reflectivity(xray, neutron, magnetic=None):
     fig = Figure(figsize=(6,8))
     fig.set_facecolor('none')
     ax, ax2 = fig.subplots(nrows=2)
 
     structure = Structure()
-    for lj in neutron.split('_'):
+    if magnetic:
+        magnetic=magnetic.split('_')
+        structure_down = Structure()
+    for j, lj in enumerate(neutron.split('_')):
         d, sigma, sldr, sldi = lj.split(';')
-        m = SLD(float(sldr)+1j*float(sldi))
+        if magnetic:
+            m = SLD(float(sldr)+float(magnetic[j])+1j*float(sldi))
+            m_down = SLD(float(sldr)-float(magnetic[j])+1j*float(sldi))
+            structure_down |= m_down(float(d), float(sigma))
+        else:
+            m = SLD(float(sldr)+1j*float(sldi))
         structure |= m(float(d), float(sigma))
     model = ReflectModel(structure, bkg=0.0)
+    if magnetic:
+        model_down = ReflectModel(structure_down, bkg=0.0)
     structurex = Structure()
     for lj in xray.split('_'):
         d, sigma, sldr, sldi = lj.split(';')
@@ -38,8 +48,12 @@ def simulate_reflectivity(xray, neutron):
     modelx = ReflectModel(structurex, bkg=0.0)
 
     ax.set_title('sample reflectivity')
-    ax.semilogy(q, model(q)+1e-9, label="neutron")
-    ax.semilogy(q, modelx(q)+1e-9, label="x-ray (Cu)")
+    if magnetic:
+        ax.semilogy(q, model(q)+1e-9, label="neutron-u", color='C0')
+        ax.semilogy(q, model_down(q)+1e-9, label="neutron-d", color='C2')
+    else:
+        ax.semilogy(q, model(q)+1e-9, label="neutron", color='C0')
+    ax.semilogy(q, modelx(q)+1e-9, label="x-ray (Cu)", color='C1')
     ax.legend(loc='lower left')
     ax.set_xlabel("q / Å$^{-1}$")
     ax.set_ylabel("Reflectivity")
@@ -48,7 +62,12 @@ def simulate_reflectivity(xray, neutron):
     ax2.set_ylabel('SLDn / 10$^{-6}$ Å$^{-1}$')
     ax2.set_xlabel('depth / nm')
     x,y=structure.sld_profile()
-    ax2.plot(x/10., y, color='C0', label="neutron")
+    if magnetic:
+        ax2.plot(x/10., y, color='C0', label="neutron-u")
+        x, y = structure_down.sld_profile()
+        ax2.plot(x/10., y, color='C2', label="neutron-d")
+    else:
+        ax2.plot(x/10., y, color='C0', label="neutron")
     ax2x=ax2.twinx()
     x,y=structurex.sld_profile()
     ax2x.plot(x/10., y, color='C1', label="x-ray (Cu)")
@@ -60,18 +79,27 @@ def simulate_reflectivity(xray, neutron):
     fig.savefig(buf, format="png", dpi=300)
     return bytes(buf.getbuffer())
 
-
+bM=0.000_002_7 # nm / µB
 def create_plot_link(sample:model_language.SampleModel):
     plink='plot_sample.png?'
     xray = []
     neutron = []
+    magnetic = []
     layers = sample.resolve_to_layers()
     for lj in layers:
         nsld = lj.material.get_sld() * 1e6+0j
+        print(lj)
+        if getattr(lj.material, 'magnetic_moment', None) is not None:
+            msld = bM*lj.material.magnetic_moment.as_unit('muB')*lj.material.number_density.as_unit('1/nm^3')*1e4
+        else:
+            msld = 0.
+        magnetic.append(msld)
         neutron.append(f'{lj.thickness.as_unit("angstrom")};{lj.roughness.as_unit("angstrom")};{nsld.real};{nsld.imag}')
         xsld = lj.material.get_sld(xray_energy="Cu") * 1e6 + 0j
         xray.append(f'{lj.thickness.as_unit("angstrom")};{lj.roughness.as_unit("angstrom")};{xsld.real};{xsld.imag}')
     plink += f'xray={"_".join(xray)}&neutron={"_".join(neutron)}'
+    if any([msld!=0 for msld in magnetic]):
+        plink += f'&magnetic={"_".join([str(msld) for msld in magnetic])}'
     return plink
 
 def sample_form_eval(data_yaml, single_layer=False):
@@ -130,7 +158,7 @@ def layer_table(layer:model_language.Layer):
     output = '<table class="layer">\n'
     layer.material.generate_density()
     material_info = f'{layer.material.comment or "defined values"}<br />'
-    for key in ['formula', 'number_density', 'mass_density', 'sld', 'relative_density']:
+    for key in ['formula', 'number_density', 'mass_density', 'sld', 'relative_density', 'magnetic_moment']:
         value = getattr(layer.material, key, None)
         if value:
             if hasattr(value, 'magnitude'):

@@ -430,7 +430,8 @@ def sample_model():
 
 @app.route('/plot_sample.png', methods=['GET'])
 def plot_sample():
-    image_binary=simulate_reflectivity(request.args.get('xray', ''),request.args.get('neutron', ''))
+    image_binary=simulate_reflectivity(request.args.get('xray', ''),request.args.get('neutron', ''),
+                                       request.args.get('magnetic', None))
     response = make_response(image_binary)
     response.cache_control.max_age = 300
     response.headers.set('Content-Type', 'image/png')
