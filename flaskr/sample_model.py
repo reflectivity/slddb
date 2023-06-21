@@ -131,7 +131,7 @@ def sample_form_eval(data_yaml, single_layer=False):
             structure = structure_to_html(sample.resolve_stack())
     except Exception as e:
         error = f'Could not evaluate the sample model:<br />{repr(e)}<br />'
-        error += f'<div class="tooltip">Hover here for YAML data<div class="tooltiptext">{data}</div></div>'
+        error += f'<div class="tooltip">Hover here for SampleModel<div class="tooltiptext">{sample}</div></div>'
         return render_template('sample.html', error=error)
 
     img = create_plot_link(sample)
