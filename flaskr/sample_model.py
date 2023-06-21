@@ -88,7 +88,6 @@ def create_plot_link(sample:model_language.SampleModel):
     layers = sample.resolve_to_layers()
     for lj in layers:
         nsld = lj.material.get_sld() * 1e6+0j
-        print(lj)
         if getattr(lj.material, 'magnetic_moment', None) is not None:
             msld = bM*lj.material.magnetic_moment.as_unit('muB')*lj.material.number_density.as_unit('1/nm^3')*1e4
         else:
@@ -140,7 +139,14 @@ def structure_to_html(items):
     output = ""
     for item in items:
         if isinstance(item, model_language.Layer):
-            output+=f'<div class="sample_item">{layer_table(item)}</div>\n'
+            item_table_html = layer_table(item)
+            if 'average element density' in (item.material.comment or 'none') or \
+                getattr(item.material, 'relative_density', None) is not None:
+                output += f'<div class="sample_mixed">{item_table_html}</div>\n'
+            elif item.material.comment is None:
+                output += f'<div class="sample_defined">{item_table_html}</div>\n'
+            else:
+                output+=f'<div class="sample_item">{item_table_html}</div>\n'
         elif isinstance(item, model_language.SubStack):
             if item.original_name:
                 output += f'<div class="sample_stack">{item.repetitions} x {item.original_name}\n    '

@@ -59,6 +59,18 @@ div.sample_item {
     padding: 0.5em;
 }
 
+div.sample_mixed {
+    background-color: #dddd88;
+    border: solid 2px;
+    padding: 0.5em;
+}
+
+div.sample_defined {
+    background-color: #ccffcc;
+    border: solid 2px;
+    padding: 0.5em;
+}
+
 div.columns {
     display: flex;
     flex-direction: row;
