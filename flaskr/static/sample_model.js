@@ -186,7 +186,23 @@ materials:
     sld: 0.2E-06
   tail_group:
     formula: CH2
-    mass_density: 1.2`
+    mass_density: 1.2`,
+  "composits": `stack: Si | film | water
+sub_stacks:
+  film:
+    repetitions: 2
+    stack: head_group 4 | tail_group 22 | tail_group 22 | head_group 4
+materials:
+  head_group:
+    sld: 0.2E-06
+  tail_group:
+    formula: CH2
+    mass_density: 1.2
+composits:
+  water:
+    composition:
+      H2O: 0.9
+      D2O: 0.1`
 };
 
 const example_select = document.getElementById("example_scripts");
