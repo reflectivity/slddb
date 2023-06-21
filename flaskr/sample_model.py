@@ -124,10 +124,15 @@ def sample_form_eval(data_yaml, single_layer=False):
         return render_template('sample.html', error=error)
     # connect resolution API to local database
     slddb_api.db = SLDDB(DB_FILE)
-    if single_layer:
-        structure = structure_to_html(sample.resolve_to_layers())
-    else:
-        structure = structure_to_html(sample.resolve_stack())
+    try:
+        if single_layer:
+            structure = structure_to_html(sample.resolve_to_layers())
+        else:
+            structure = structure_to_html(sample.resolve_stack())
+    except Exception as e:
+        error = f'Could not evaluate the sample model:<br />{repr(e)}<br />'
+        error += f'<div class="tooltip">Hover here for YAML data<div class="tooltiptext">{data}</div></div>'
+        return render_template('sample.html', error=error)
 
     img = create_plot_link(sample)
 
