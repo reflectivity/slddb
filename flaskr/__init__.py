@@ -20,15 +20,6 @@ from orsopy.slddb.dbconfig import DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA,
 from orsopy.slddb.material import Formula
 from orsopy.slddb import constants
 
-from .api import calc_api, select_api, search_api
-from .querydb import search_db, show_search, custom_query
-from .calcsld import calculate_selection, calculate_user, validate_selection, invalidate_selection, \
-    get_graph_xray, get_absorption_graph, get_deuteration_graph
-from .inputdb import input_form, input_fill_cif, input_material, edit_selection, update_material, input_fill_blend
-from .sample_model import sample_form, sample_form_eval, simulate_reflectivity
-from .blender import calculate_blend, formula_from_pdb
-from .periodic_table import get_periodic_table
-
 __version__ = "1.0 beta8"
 
 app=Flask("ORSO SLD Data Base", template_folder='flaskr/templates',
@@ -38,6 +29,17 @@ app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 3600
 
 # for flask use database file in instance folder
 DB_FILE=os.path.join(app.instance_path, 'slddb.db');dbconfig.DB_FILE=DB_FILE;slddb.DB_FILE=DB_FILE
+
+# local imports after defining the DB_FILE
+# TODO: get rid of the coupling introduced by this
+from .api import calc_api, select_api, search_api
+from .querydb import search_db, show_search, custom_query
+from .calcsld import calculate_selection, calculate_user, validate_selection, invalidate_selection, \
+    get_graph_xray, get_absorption_graph, get_deuteration_graph
+from .inputdb import input_form, input_fill_cif, input_material, edit_selection, update_material, input_fill_blend
+from .sample_model import sample_form, sample_form_eval, simulate_reflectivity
+from .blender import calculate_blend, formula_from_pdb
+from .periodic_table import get_periodic_table
 
 try:
     app.config['SECRET_KEY']=app.open_instance_resource('secret.key', 'rb').read()
