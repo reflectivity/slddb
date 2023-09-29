@@ -16,8 +16,6 @@ except ImportError:
 
 from orsopy import slddb
 from orsopy.slddb import dbconfig
-# for flask use database file in startup folder
-DB_FILE='slddb.db';dbconfig.DB_FILE=DB_FILE;slddb.DB_FILE=DB_FILE
 from orsopy.slddb.dbconfig import DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA, db_lookup
 from orsopy.slddb.material import Formula
 from orsopy.slddb import constants
@@ -38,21 +36,25 @@ app=Flask("ORSO SLD Data Base", template_folder='flaskr/templates',
 # Try speeding up page load by using timed caching (reduce time lost due to TTFB)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 3600
 
+# for flask use database file in instance folder
+DB_FILE=os.path.join(app.instance_path, 'slddb.db');dbconfig.DB_FILE=DB_FILE;slddb.DB_FILE=DB_FILE
+
 try:
-    app.config['SECRET_KEY']=open('flaskr/secret.key', 'rb').read()
+    app.config['SECRET_KEY']=app.open_instance_resource('secret.key', 'rb').read()
 except IOError:
     pass
-app.config['SQLALCHEMY_DATABASE_URI']='sqlite:///flaskr/db.sqlite'
+
+app.config['SQLALCHEMY_DATABASE_URI']='sqlite:///user_db.sqlite'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=True
 db=SQLAlchemy()
 db.init_app(app)
 
-app.config['MAIL_SERVER']='10.0.0.103'
-app.config['MAIL_PORT'] = 25
-#app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME', '175ffa3adc24f2')
-#app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD', '31fde10b3694db')
-#app.config['MAIL_USE_TLS'] = True
-#app.config['MAIL_USE_SSL'] = False
+app.config['MAIL_SERVER']=os.environ.get('MAIL_SERVER', 'smtp.mailtrap.io')
+app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 2525))
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME', '175ffa3adc24f2')
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD', '31fde10b3694db')
+# app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', '1')=='1'
+# app.config['MAIL_USE_SSL'] = os.environ.get('MAIL_USE_SSL', '0')=='1'
 mail=Mail(app)
 MAIL_SENDER='ORSO SLDdb Admin <slddb@esss.dk>'
 
@@ -359,7 +361,7 @@ def run_admin_query():
 def reset_password(user):
     # create a reset password token and send an email to the user
     token=gen_salt(20)
-    sha_token=generate_password_hash(token, method='sha256')
+    sha_token=generate_password_hash(token, method='scrypt')
     User.query.filter_by(id=user.id).update(dict(token_send=sha_token, password=None))
     db.session.commit()
     url=url_for('user_query_password', _external=True, token=token, user_id=user.id)
@@ -395,7 +397,7 @@ def user_set_password():
         pw=request.form.get('password', '')
         pw2=request.form.get('confirm_password', '')
         if pw!='' and pw==pw2:
-            hash=generate_password_hash(pw, method='sha256')
+            hash=generate_password_hash(pw, method='scrypt')
             User.query.filter_by(id=user.id).update(dict(token_send=None, password=hash))
             db.session.commit()
             return redirect(url_for('login'))

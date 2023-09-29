@@ -22,7 +22,7 @@ def add_user(name, email, admin=False, password=None):
 
         if password is None:
             password=getpass('Password:')
-        new_user = User(email=email, name=name, password=generate_password_hash(password, method='sha256'),
+        new_user = User(email=email, name=name, password=generate_password_hash(password, method='scrypt'),
                         admin=admin)
 
         # add the new user to the database
@@ -32,13 +32,15 @@ def add_user(name, email, admin=False, password=None):
 def generate_secret():
     # create a random secret key for the application
     # WARNING: this key file should never be checked into the git repository
-    open(os.path.join(FLASK_ROOT, 'secret.key'), 'wb').write(os.urandom(16))
+    app.open_instance_resource('secret.key', 'wb').write(os.urandom(16))
+    app.config['SECRET_KEY'] = app.open_instance_resource('secret.key', 'rb').read()
 
 def initial_setup():
+    print('Instance path: ', os.path.abspath(app.instance_path))
     # Generate initial credential setup
-    if os.path.exists(os.path.join(FLASK_ROOT, 'db.sqlite')):
+    if os.path.exists(os.path.join(app.instance_path, 'user_db.sqlite')):
         print("Removing old authentication database.")
-        os.remove(os.path.join(FLASK_ROOT, 'db.sqlite'))
+        os.remove(os.path.join(app.instance_path, 'user_db.sqlite'))
     print("Generating new secret key.")
     generate_secret()
     print("Setup new databse.")

@@ -5,3 +5,4 @@ flaskr/db.sqlite
 flaskr/secret.key
 /tests/cover/
 slddb.db
+instance

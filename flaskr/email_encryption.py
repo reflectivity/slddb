@@ -8,7 +8,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.fernet import Fernet
 
-KEY_FILE=os.path.join(os.path.dirname(__file__), 'secret.key')
+KEY_FILE='secret.key'
 SALT=b'ORSO_'
 
 class SymmetricEncryption:
@@ -16,11 +16,13 @@ class SymmetricEncryption:
     fernet: Fernet
 
     def __init__(self):
-        self.key=self.get_key()
-        self.fernet=Fernet(self.key)
+        self.key=None
+        self.fernet=None
 
     def get_key(self):
-        p = open(KEY_FILE, 'rb').read()
+        from . import app
+
+        p = app.open_instance_resource(KEY_FILE, 'rb').read()
         kdf = PBKDF2HMAC(
                 algorithm=hashes.SHA256(),
                 length=32,
@@ -29,16 +31,20 @@ class SymmetricEncryption:
                 backend=default_backend()
                 )
         key = base64.urlsafe_b64encode(kdf.derive(p))
-        return key
+        self.key=key
+        self.fernet = Fernet(self.key)
 
     def enrypt(self, value: str):
+        if self.key is None:
+            self.get_key()
         return self.fernet.encrypt(value.encode()).decode()
 
     def decrypt(self, value: str):
+        if self.key is None:
+            self.get_key()
         try:
             return self.fernet.decrypt(value.encode()).decode()
         except Exception as e:
             return f'ERROR: {repr(e)}'
-
 
 encryptor=SymmetricEncryption()
