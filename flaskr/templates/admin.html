@@ -7,6 +7,7 @@
 {% endblock %}
 
 {% block content %}
+{% if current_user.admin %}
 <center>
   <h2>This page is only meant for SLDDB admins, please be careful with the powers you are presented with!</h2>
   <br /><br />
@@ -40,5 +41,8 @@
   <br/><br/>
   <a href="{{url_for('admin_query')}}">Admin custom SQlite query page</a>
 </center>
+{% else %}
+  <h2>This page requires a user with admin rights!</h2>
+{% endif %}
 
 {% endblock %}

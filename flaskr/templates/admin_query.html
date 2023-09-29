@@ -7,6 +7,7 @@
 {% endblock %}
 
 {% block content %}
+{% if current_user.admin %}
 <section class="sqlite_query full">
     <table class="fullfixed">
     <tr><td class="search_top">
@@ -42,5 +43,8 @@
     </div></td></tr>
     </table>
 </section>
+{% else %}
+  <h2>This page requires a user with admin rights!</h2>
+{% endif %}
 
 {% endblock %}
