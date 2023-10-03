@@ -58,7 +58,6 @@ app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME', '175ffa3adc24f2')
 app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD', '31fde10b3694db')
 # app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', '1')=='1'
 # app.config['MAIL_USE_SSL'] = os.environ.get('MAIL_USE_SSL', '0')=='1'
-mail=Mail(app)
 MAIL_SENDER='ORSO SLDdb Admin <slddb@esss.dk>'
 
 login_manager=LoginManager()
@@ -390,6 +389,7 @@ def reset_password(user):
                     html=f"Dear {user.name},<br /><br />your account password for the ORSO slddb has been reset. "
                          f"You can now set a new password with the following link:<br />"
                          f"<a href='{url}'>{url}</a><br /><br />Kind regards,<br />The ORSO Team")
+    mail = Mail(app)
     mail.send(message)
 
 @app.route('/reset_password', methods=["GET"])

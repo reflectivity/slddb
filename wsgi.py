@@ -1,7 +1,9 @@
 from flaskr import app
-import os
 
 def application(env, start_response):
-    output=app(env, start_response)
-    print(app.config)
-    return output
+    # if apache SetEnv is used to configure mail server options
+    app.config['MAIL_SERVER'] = env.get('MAIL_SERVER', 'smtp.mailtrap.io')
+    app.config['MAIL_PORT'] = int(env.get('MAIL_PORT', 2525))
+    app.config['MAIL_USERNAME'] = env.get('MAIL_USERNAME', '175ffa3adc24f2')
+    app.config['MAIL_PASSWORD'] = env.get('MAIL_PASSWORD', '31fde10b3694db')
+    return app(env, start_response)
