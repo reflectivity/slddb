@@ -221,17 +221,17 @@ def api_download():
     mem_json.seek(0)
     if 'ID' in request.args:
         result = send_file(mem_json, mimetype='application/json', as_attachment=True,
-                           attachment_filename=f'orso_slddb_{request.args["ID"]}.json', conditional=True)
+                           download_name=f'orso_slddb_{request.args["ID"]}.json', conditional=True)
     else:
         result = send_file(mem_json, mimetype='application/json', as_attachment=True,
-                           attachment_filename=f'orso_slddb_query_{time.strftime("%Y%H%M%S")}.json',
-                           conditional=True, cache_timeout=0)
+                           download_name=f'orso_slddb_query_{time.strftime("%Y%H%M%S")}.json',
+                           conditional=True, max_age=0)
     return result
 
 @app.route('/download_db')
 def download_database():
     result=send_file(DB_FILE, mimetype='application/x-sqlite3', as_attachment=True,
-                     attachment_filename=os.path.basename(DB_FILE), conditional=True)
+                     download_name=os.path.basename(DB_FILE), conditional=True)
     return result
 
 @app.route('/download_api')
@@ -251,7 +251,7 @@ def download_api():
                         open(os.path.join(package_path, fi), 'rb').read())
     mem_zip.seek(0)
     result=send_file(mem_zip, mimetype='application/zip', as_attachment=True,
-                     attachment_filename='slddb.zip', conditional=True)
+                     download_name='slddb.zip', conditional=True)
     return result
 
 @app.route('/periodic_table')
