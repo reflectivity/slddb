@@ -1,4 +1,5 @@
 import json
+import traceback
 import zipfile
 import os
 import time
@@ -20,7 +21,7 @@ from orsopy.slddb.dbconfig import DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA,
 from orsopy.slddb.material import Formula
 from orsopy.slddb import constants
 
-__version__ = "1.0 beta8"
+__version__ = "1.0 beta9"
 
 app=Flask("ORSO SLD Data Base", template_folder='flaskr/templates',
           static_folder='flaskr/static')
@@ -308,11 +309,19 @@ def admin():
 @app.route('/admin', methods=['POST'])
 @login_required
 def add_user():
+    error = None
     if request.form.get('new_user', '')=='Submit' and request.form['user_email']!='' and request.form['user_name']!='':
-        new_user=User(name=request.form['user_name'], email=request.form['user_email'].lower(), admin=False)
-        db.session.add(new_user)
-        db.session.commit()
-        reset_password(new_user)
+        try:
+            new_user=User(name=request.form['user_name'], email=request.form['user_email'].lower(), admin=False)
+            db.session.add(new_user)
+            db.session.commit()
+        except Exception as e:
+            error = repr(e)+'<br>'+"Raised when trying to add user = '%s'"%request.form['user_name']
+        try:
+            reset_password(new_user)
+        except Exception as e:
+            error = repr(e)+'<br>'+"Raised when trying to send password mail"
+            error += '<!--\n%s\n-->'%traceback.format_exc()
     users=User.query.all()
     for ui in users:
         if request.form.get('toggle_admin_%i'%ui.id, '')=='toggle':
@@ -334,10 +343,14 @@ def add_user():
             if ui.id==current_user.id:
                 flash("You can't reset your own password, you are already logged in!")
             else:
-                reset_password(ui)
+                try:
+                    reset_password(ui)
+                except Exception as e:
+                    error = repr(e)+'<br>'+"Raised when trying to send password mail"
+                    error += '<!--\n%s\n-->'%traceback.format_exc()
                 users=User.query.all()
             break
-    return render_template('admin.html', users=users)
+    return render_template('admin.html', users=users, error=error)
 
 @app.route('/admin_query')
 @login_required
