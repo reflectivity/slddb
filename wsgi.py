@@ -6,4 +6,5 @@ def application(env, start_response):
     app.config['MAIL_PORT'] = int(env.get('MAIL_PORT', 2525))
     app.config['MAIL_USERNAME'] = env.get('MAIL_USERNAME', '175ffa3adc24f2')
     app.config['MAIL_PASSWORD'] = env.get('MAIL_PASSWORD', '31fde10b3694db')
+    app.config['MAIL_PASSWORD'] = env.get('MAIL_SENDER', 'ORSO SLDdb Admin <slddb@esss.dk>')
     return app(env, start_response)

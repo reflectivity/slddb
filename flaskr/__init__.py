@@ -58,7 +58,7 @@ app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME', '175ffa3adc24f2')
 app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD', '31fde10b3694db')
 # app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', '1')=='1'
 # app.config['MAIL_USE_SSL'] = os.environ.get('MAIL_USE_SSL', '0')=='1'
-MAIL_SENDER='ORSO SLDdb Admin <slddb@esss.dk>'
+MAIL_SENDER=os.environ.get('MAIL_SENDER', 'ORSO SLDdb Admin <slddb@esss.dk>')
 
 login_manager=LoginManager()
 login_manager.init_app(app)
@@ -381,14 +381,16 @@ def reset_password(user):
     url=url_for('user_query_password', _external=True, token=token, user_id=user.id)
 
     message=Message(subject='Password reset for ORSO SLDDB',
-                    sender=current_user.email,
+                    sender=MAIL_SENDER,
                     recipients=[user.email],
                     body=f"Dear {user.name},\n\nyour account password for the ORSO slddb has been reset. "
                          f"You can now set a new password with the following link:\n"
-                         f"{url}\n\nKind regards,\nThe ORSO Team",
+                         f"{url}\n\nKind regards,\n"
+                         f"{current_user.name} on behalf of the ORSO Team",
                     html=f"Dear {user.name},<br /><br />your account password for the ORSO slddb has been reset. "
                          f"You can now set a new password with the following link:<br />"
-                         f"<a href='{url}'>{url}</a><br /><br />Kind regards,<br />The ORSO Team")
+                         f"<a href='{url}'>{url}</a><br /><br />Kind regards,<br />"
+                         f"{current_user.name} on behalf of the ORSO Team")
     mail = Mail(app)
     mail.send(message)
 
