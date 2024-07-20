@@ -96,7 +96,7 @@ def get_absorption_graph(formula, dens, name=None):
     ax.semilogx(L, -rho_n.imag*1e6)
     ax.set_xlabel('Wavelength [Å]')
     ax.set_ylabel('-Im(SLD) (10⁻⁶ Å⁻²)')
-    ax.set_title('Neutron wavelength dependant absorption part of %s'%name)
+    ax.set_title('Neutron wavelength dependent absorption part of %s'%name)
     ax.set_xlim([0.2, 20.])
     ax.grid()
     # Save it to a temporary buffer.
