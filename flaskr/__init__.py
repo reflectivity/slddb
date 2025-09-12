@@ -45,9 +45,9 @@ from .periodic_table import get_periodic_table
 try:
     app.config['SECRET_KEY']=app.open_instance_resource('secret.key', 'rb').read()
 except IOError:
-    pass
+    print("Key file not found, need to create a secret key file")
 
-app.config['SQLALCHEMY_DATABASE_URI']='sqlite:///user_db.sqlite'
+app.config['SQLALCHEMY_DATABASE_URI']=f'sqlite:///{app.instance_path}/user_db.sqlite'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=True
 db=SQLAlchemy()
 db.init_app(app)
