@@ -241,8 +241,8 @@ def download_api():
     files=[n for n in os.listdir(package_path) if n.endswith('.py')]
     files+=[os.path.join('element_table', n)
             for n in os.listdir(os.path.join(package_path, 'element_table')) if n.endswith('.py')]
-    files+=[os.path.join('element_table', 'nabs_geant4', n)
-             for n in os.listdir(os.path.join(package_path, 'element_table', 'nabs_geant4')) if n.endswith('.npz')]
+    files+=[os.path.join('element_table', 'nabs_geant4_data', n)
+             for n in os.listdir(os.path.join(package_path, 'element_table', 'nabs_geant4_data')) if n.endswith('.npz')]
 
     with zipfile.ZipFile(mem_zip, mode='w', compression=zipfile.ZIP_DEFLATED) as zf:
         for fi in files:
