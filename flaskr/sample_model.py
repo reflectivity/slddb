@@ -52,12 +52,12 @@ def simulate_reflectivity(hash):
     structurex = Structure()
     if magnetic:
         structure_down = Structure()
-    for j, lj in enumerate(layers):
+    for lj in layers:
         mx = SLD(lj.sldx_r+1j*lj.sldx_i)
         structurex |= mx(lj.thickness, lj.roughness)
         if magnetic:
             m = SLD(lj.sldn_r+lj.sldm+lj.sldn_i*1j)
-            m_down = SLD(j.sldn_r-lj.sldm+lj.sldn_i*1j)
+            m_down = SLD(lj.sldn_r-lj.sldm+lj.sldn_i*1j)
             structure_down |= m_down(lj.thickness, lj.roughness)
         else:
             m = SLD(lj.sldn_r+lj.sldn_i*1j)
