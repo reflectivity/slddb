@@ -9,3 +9,4 @@ numpy
 orsopy
 refnx
 pycifrw
+pint

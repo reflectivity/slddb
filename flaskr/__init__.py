@@ -21,7 +21,7 @@ from orsopy.slddb.dbconfig import DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA,
 from orsopy.slddb.material import Formula
 from orsopy.slddb import constants
 
-__version__ = "1.0 beta9"
+__version__ = "1.0.0"
 
 app=Flask("ORSO SLD Data Base", template_folder='flaskr/templates',
           static_folder='flaskr/static')
@@ -56,8 +56,9 @@ app.config['MAIL_SERVER']=os.environ.get('MAIL_SERVER', 'smtp.mailtrap.io')
 app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 2525))
 app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME', '175ffa3adc24f2')
 app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD', '31fde10b3694db')
-# app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', '1')=='1'
-# app.config['MAIL_USE_SSL'] = os.environ.get('MAIL_USE_SSL', '0')=='1'
+app.config['MAIL_USE_TLS'] = os.environ.get('MAIL_USE_TLS', '1')=='1'
+app.config['MAIL_USE_SSL'] = os.environ.get('MAIL_USE_SSL', '0')=='1'
+app.config['MAIL_TIMEOUT'] = 2.0
 MAIL_SENDER=os.environ.get('MAIL_SENDER', 'ORSO SLDdb Admin <slddb@esss.dk>')
 
 login_manager=LoginManager()
@@ -316,11 +317,13 @@ def add_user():
             db.session.commit()
         except Exception as e:
             error = repr(e)+'<br>'+"Raised when trying to add user = '%s'"%request.form['user_name']
-        try:
-            reset_password(new_user)
-        except Exception as e:
-            error = repr(e)+'<br>'+"Raised when trying to send password mail"
-            error += '<!--\n%s\n-->'%traceback.format_exc()
+            db.session.rollback()
+        else:
+            try:
+                reset_password(new_user)
+            except Exception as e:
+                error = repr(e)+'<br>'+"Raised when trying to send password mail"
+                error += '<!--\n%s\n-->'%traceback.format_exc()
     users=User.query.all()
     for ui in users:
         if request.form.get('toggle_admin_%i'%ui.id, '')=='toggle':
