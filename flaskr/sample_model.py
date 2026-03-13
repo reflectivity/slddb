@@ -1,10 +1,14 @@
 import yaml
+import json
+import sqlite3
+import hashlib
 
 from flask import render_template
 
 from numpy import linspace
 from io import BytesIO
 from matplotlib.figure import Figure
+from dataclasses import dataclass, asdict
 from refnx.reflect import SLD, ReflectModel, Structure
 from orsopy.fileio import model_language
 from orsopy.slddb import api as slddb_api
@@ -19,32 +23,48 @@ q = linspace(0.001, 0.4, 400)
 def sample_form():
     return render_template('sample.html')
 
-def simulate_reflectivity(xray, neutron, magnetic=None):
+@dataclass
+class LayerInfo:
+    thickness: float
+    roughness: float
+    sldx_r: float
+    sldx_i: float
+    sldn_r: float
+    sldn_i: float
+    sldm: float
+
+#TODO: Add resolved_samples table creation to databse setup.
+def simulate_reflectivity(hash):
+    db = sqlite3.connect(DB_FILE)
+    c = db.cursor()
+    qstr = "SELECT data FROM resolved_samples WHERE hash=?"
+    c.execute(qstr, (hash,))
+    res = c.fetchone()
+    data = json.loads(res[0])
+    layers = [LayerInfo(**di) for di in data]
+    magnetic = any([li.sldm for li in layers])
+
     fig = Figure(figsize=(6,8))
     fig.set_facecolor('none')
     ax, ax2 = fig.subplots(nrows=2)
 
     structure = Structure()
+    structurex = Structure()
     if magnetic:
-        magnetic=magnetic.split('_')
         structure_down = Structure()
-    for j, lj in enumerate(neutron.split('_')):
-        d, sigma, sldr, sldi = lj.split(';')
+    for j, lj in enumerate(layers):
+        mx = SLD(lj.sldx_r+1j*lj.sldx_i)
+        structurex |= mx(lj.thickness, lj.roughness)
         if magnetic:
-            m = SLD(float(sldr)+float(magnetic[j])+1j*float(sldi))
-            m_down = SLD(float(sldr)-float(magnetic[j])+1j*float(sldi))
-            structure_down |= m_down(float(d), float(sigma))
+            m = SLD(lj.sldn_r+lj.sldm+lj.sldn_i*1j)
+            m_down = SLD(j.sldn_r-lj.sldm+lj.sldn_i*1j)
+            structure_down |= m_down(lj.thickness, lj.roughness)
         else:
-            m = SLD(float(sldr)+1j*float(sldi))
-        structure |= m(float(d), float(sigma))
+            m = SLD(lj.sldn_r+lj.sldn_i*1j)
+        structure |= m(lj.thickness, lj.roughness)
     model = ReflectModel(structure, bkg=0.0)
     if magnetic:
         model_down = ReflectModel(structure_down, bkg=0.0)
-    structurex = Structure()
-    for lj in xray.split('_'):
-        d, sigma, sldr, sldi = lj.split(';')
-        m = SLD(float(sldr)+1j*float(sldi))
-        structurex |= m(float(d), float(sigma))
     modelx = ReflectModel(structurex, bkg=0.0)
 
     ax.set_title('sample reflectivity')
@@ -82,23 +102,40 @@ def simulate_reflectivity(xray, neutron, magnetic=None):
 bM=0.000_002_7 # nm / µB
 def create_plot_link(sample:model_language.SampleModel):
     plink='plot_sample.png?'
-    xray = []
-    neutron = []
-    magnetic = []
     layers = sample.resolve_to_layers()
+    data = []
     for lj in layers:
-        nsld = lj.material.get_sld() * 1e6+0j
+        nsld = complex(lj.material.get_sld() * 1e6+0j)
         if getattr(lj.material, 'magnetic_moment', None) is not None:
-            msld = bM*lj.material.magnetic_moment.as_unit('muB')*lj.material.number_density.as_unit('1/nm^3')*1e4
+            msld = float(bM*lj.material.magnetic_moment.as_unit('muB')*lj.material.number_density.as_unit('1/nm^3')*1e4)
         else:
             msld = 0.
-        magnetic.append(msld)
-        neutron.append(f'{lj.thickness.as_unit("angstrom")};{lj.roughness.as_unit("angstrom")};{nsld.real};{nsld.imag}')
-        xsld = lj.material.get_sld(xray_energy="Cu") * 1e6 + 0j
-        xray.append(f'{lj.thickness.as_unit("angstrom")};{lj.roughness.as_unit("angstrom")};{xsld.real};{xsld.imag}')
-    plink += f'xray={"_".join(xray)}&neutron={"_".join(neutron)}'
-    if any([msld!=0 for msld in magnetic]):
-        plink += f'&magnetic={"_".join([str(msld) for msld in magnetic])}'
+        xsld = complex(lj.material.get_sld(xray_energy="Cu") * 1e6 + 0j)
+        data.append(
+                asdict(LayerInfo(thickness=lj.thickness.as_unit("angstrom"),
+                          roughness=lj.roughness.as_unit("angstrom"),
+                          sldx_r=xsld.real, sldx_i=xsld.imag,
+                          sldn_r=nsld.real, sldn_i=nsld.imag,
+                          sldm=msld
+                          ))
+                )
+    data_str = json.dumps(data).encode('utf-8')
+    hash = hashlib.sha256(data_str).hexdigest()
+    db = sqlite3.connect(DB_FILE)
+    c = db.cursor()
+    qstr = "SELECT * FROM resolved_samples WHERE hash=? AND inserted < date('now', '+30 days')"
+    c.execute(qstr, (hash,))
+    if len(c.fetchall())==0:
+        # purge old data
+        qstr = "DELETE FROM resolved_samples WHERE inserted < date('now', '+30 days')"
+        c.execute(qstr)
+        qstr = "INSERT INTO resolved_samples (hash, data) VALUES (?,?)"
+        c.execute(qstr, (hash, data_str))
+        c.close()
+        db.commit()
+
+
+    plink += f'hash={hash}'
     return plink
 
 def sample_form_eval(data_yaml, single_layer=False):

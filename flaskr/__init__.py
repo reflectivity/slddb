@@ -21,7 +21,7 @@ from orsopy.slddb.dbconfig import DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA,
 from orsopy.slddb.material import Formula
 from orsopy.slddb import constants
 
-__version__ = "1.0.0"
+__version__ = "1.0.1"
 
 app=Flask("ORSO SLD Data Base", template_folder='flaskr/templates',
           static_folder='flaskr/static')
@@ -452,8 +452,7 @@ def sample_model():
 
 @app.route('/plot_sample.png', methods=['GET'])
 def plot_sample():
-    image_binary=simulate_reflectivity(request.args.get('xray', ''),request.args.get('neutron', ''),
-                                       request.args.get('magnetic', None))
+    image_binary=simulate_reflectivity(request.args.get('hash', ''))
     response = make_response(image_binary)
     response.cache_control.max_age = 300
     response.headers.set('Content-Type', 'image/png')
