@@ -1,4 +1,4 @@
-from flaskr import app
+from slddb_server import app
 
 def application(env, start_response):
     # if apache SetEnv is used to configure mail server options
