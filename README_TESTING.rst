@@ -3,13 +3,13 @@ This is the development version for the SLD Database. To test on you local machi
 1. Install python3 packages for periodictable, flask, bokeh
 2. Set environment variables:
     - PYTHONPATH to directory of repository
-	- FLASK_APP = flaskr
+	- FLASK_APP = slddb_server
 3. Create database with "python3 create_database.py"
 3b Expand database by materials from Christy "python3 testdata_christy.py"
 4. Run "flask run" and visit http://127.0.0.1:5000/
 
 x. To setup initial authentication for ORSO users run:
-    $ python -m flaskr.authentication
+    $ python -m slddb_server.authentication
     To setup new users a valid SMTP server is required to send the activation emails.
     (Defaults to mailtrap fake server for testing.)
     To activate a real SMTP server set the following environment variables before starting the flask server:

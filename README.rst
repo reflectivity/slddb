@@ -1,7 +1,7 @@
 ========================================
 ORSO Scattering Length Density Data Base
 ========================================
-.. image:: https://raw.githubusercontent.com/reflectivity/slddb/master/flaskr/static/orso_db.png
+.. image:: https://raw.githubusercontent.com/reflectivity/slddb/master/slddb_server/static/orso_db.png
     :width: 15em
     :align: left
 
