@@ -1,0 +1,311 @@
+{% extends 'base.html' %}
+
+{% block nav_calculate_sld %}active{% endblock %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='layout_sldcalc.css') }}">
+{% endblock %}
+
+{% block content %}
+<script src="{{url_for('static', filename='sldcalc_general.js')}}"></script>
+    <table class="full"><tr>
+      <td class="hide_mobile left_info">
+          <div>
+          This page provides the calculated SLD values from items selected from the database or entered manually.
+          Using the given chemical formula and one type of density information the tabulated
+          x-ray and neutron atomic scattering data are used to calculate the optical parameters.
+          <br />
+          You can select a specific x-ray energy to get customized calculated values.
+          For hydrogen containing compounds there is a similar functionality to choose deuteration amount.
+          Isotopes are specified with N in square brackets (<i>B[10]</i>).
+          <br /><br />
+          <div class="italic_small">
+              Physical constants are taken from <a href="https://doi.org/10.1063/5.0064853">
+              CODATA Internationally recommended 2018</a> values.
+              Neutron scattering lengths use the values from the
+              <a href="https://www.ill.eu/fileadmin/user_upload/ILL/1_About_ILL/Documentation/NeutronDataBooklet.pdf">
+                  ILL Neutron Data Booklet</a> provided by the python
+                <a href="https://periodictable.readthedocs.io/en/latest/">periodictable</a> package.
+              X-ray energy dependent scattering is base on the <a href="https://dx.doi.org/10.18434/T4HS32">
+              NIST Standard Reference Database 66</a>.
+          </div>
+          </div>
+      </td>
+
+    <td class="center_calc">
+    <p></p>
+    <form action="{{ url_for('calculate_sld', _anchor='results_header') }}" method="get"><center>
+      <table class="noborder">
+        <tr><th>Field</th><th>value for calculation</th></tr>
+        <tr><td class="alignright">Formula <div class="tooltip">🛈<div class="tooltiptext">
+               Chemical formula of a compound can be provided in various ways.
+               It will typically be a sequence of
+               chemical elements followed each by a number.<br/>Isotopes are written
+               with the mass number <i>N</i> in square brackets.
+               <i>D</i> for deuterium is also accepted for <i>H[2]</i>.
+               <br/>Repreating groups can be provided by a sub-formula in round brackets
+               followed by a number of repetitions.
+               <br/>For organic molecules that exchange hydrogen atoms with their environment,
+               such exchangable hydrogens are written separately as <i>Hx</i> element.
+               <br/>Examples:<br/>
+               Fe2O3 / H[2]2O / H2(C2H4)4 / B[10]4C
+               </div></div>
+        </td>
+            <td><input type="text" name="formula" id="compound formula"
+                       value="{{ request.args['formula'] or formula }}"
+                       placeholder="Fe2O3 / H[2]2O / H2(C2H4)4"></td></tr>
+        <tr><td class="alignright"><select id="densinput" name="densinput">
+          <option value="density">Density (g/cm³)</option>
+          <option value="FUdens" {% if request.args['densinput']=='FUdens' %} selected {% endif %}>Density (FU/Å³)</option>
+          <option value="FUdnm" {% if request.args['densinput']=='FUdnm' %} selected {% endif %}>Density (FU/nm³)</option>
+          <option value="volume" {% if request.args['densinput']=='volume' %} selected {% endif %}>FU Volume (Å³)</option>
+        </select></td><td><input type='number' step="any" name="density" id="compound density"
+                                 value="{{ request.args['density'] or density }}"></td></tr>
+        <tr><td class="alignright"><select id="magninput" name="magninput">
+            <option value="muB">Magnetisation (µB/FU)</option>
+            <option value="magn" {% if request.args['magninput']=='magn' %} selected {% endif %}>
+                Magnetisation (kA/m=emu/cm³)</option>
+            </select></td>
+            <td><input type='number' step="any" name="mu" id="compound mu" value="{{ request.args['mu'] or mu }}"></td></tr>
+        <tr><td colspan="2"><center><input type="submit"></center></td> </tr>
+      </table>
+    </center></form>
+
+    <p></p>
+
+      {% if material %}
+        <center><a href="{{ url_for('start_page') }}">back to database query</a></center>
+      <center>
+      <h2 id="results_header">Result of SLD calculation:</h2>
+            <form action="{{ url_for('set_preference') }}" id="preferences" method="POST"
+                data-material_energies = "{{ xray_E }}"
+                data-material_rho_real = "{{ xray_rho_real }}"
+                data-material_rho_imag = "{{ xray_rho_imag }}"
+                data-material_delta = "{{ xray_delta }}"
+                data-material_beta = "{{ xray_beta }}"
+
+                data-material_neutron_real = "{{1e6*material.rho_n.real}}"
+                data-material_neutron_imag = "{{1e6*material.rho_n.imag}}"
+                data-material_sld_cu_real = "{{1e6*material.rho_of_E(Cu_kalpha).real}}"
+                data-material_sld_cu_imag = "{{1e6*material.rho_of_E(Cu_kalpha).imag}}"
+                data-material_sld_mo_real = "{{1e6*material.rho_of_E(Mo_kalpha).real}}"
+                data-material_sld_mo_imag = "{{1e6*material.rho_of_E(Mo_kalpha).imag}}"
+                data-material_cu_real = "{{material.rho_of_E(Cu_kalpha).real/r_e_angstrom}}"
+                data-material_cu_imag = "{{material.rho_of_E(Cu_kalpha).imag/r_e_angstrom}}"
+                data-material_mo_real = "{{material.rho_of_E(Mo_kalpha).real/r_e_angstrom}}"
+                data-material_mo_imag = "{{material.rho_of_E(Mo_kalpha).imag/r_e_angstrom}}"
+                data-material_cu_delta = "{{material.delta_of_E(Cu_kalpha)}}"
+                data-material_cu_beta = "{{material.beta_of_E(Cu_kalpha)}}"
+                data-material_mo_delta = "{{material.delta_of_E(Mo_kalpha)}}"
+                data-material_mo_beta = "{{material.beta_of_E(Mo_kalpha)}}"
+                data-material_dens = "{{material.dens}}"
+                data-material_fu_dens = "{{material.fu_dens}}"
+                data-material_fu_volume = "{{material.fu_volume}}"
+
+                data-material_rho_m = "{{1e6*material.rho_m.real}}"
+                data-material_mu = "{{material.mu}}"
+                data-material_m = "{{material.M}}"
+
+                data-r_e="{{r_e}}"
+                data-material_name = "{{material_name}}"
+                data-material_description = "{{material_description}}"
+                data-chemical_formula = "{{material}}"
+
+                data-user_densresult="{{request.cookies.get('densresult', '')}}"
+                data-user_magnresult="{{request.cookies.get('magnresult', '')}}"
+                data-user_cu_select="{{request.cookies.get('cu_select', '')}}"
+            >
+                <input type="hidden" name="items_collapsed" value="{{request.cookies.get('items_collapsed', 'false').lower()}}" />
+        <table class="noborder sldresult{% if validated %} orso_validated{% endif %}{% if invalid %} orso_invalid{% endif %}">
+            {% if material.ID %}
+            <tr><th>Compound (ORSO ID={{material.ID}})</th><td colspan=2>
+                <a href="{{url_for('calculate_sld', ID=material.ID, _anchor='results_header')|safe}}" target="_blank">{{material_name}}</a></td>
+                <th class="hide_mobile">
+                    <input type="hidden" name="return_link" value="{{url_for('calculate_sld',
+                            ID=material.ID, _anchor='results_header')|safe}}" />
+                </th></tr>
+            {% else %}
+            <tr><th>Compound</th><th colspan=2>
+                <a href="{{url_for('calculate_sld', formula=str(material.formula), density=material.dens,
+                                       mu=material.mu, densinput='density', magninput='muB',
+                                       name=material_name, _anchor='results_header')|safe}}" target="_blank">
+                    {{material_name}}</a></th>
+                <th class="hide_mobile">
+                    <input type="hidden" name="return_link"
+                           value="{{url_for('calculate_sld', formula=str(material.formula),
+                           density=material.dens, mu=material.mu, densinput='density',
+                           magninput='muB', name=material_name, _anchor='results_header')|safe}}" />
+                </th></tr>
+            {% endif %}
+            <tr><td class="alignright">Description</td><td colspan=2>
+                <div id="material_description">{{material_description}}</div></td>
+                <td rowspan="3" class="hide_mobile"><center>
+                    <div class="tooltip"><button type="button" id="copy_all_button">Copy<br />Table</button>
+                        <div class="tooltiptext">📋 Copy the data of the full table into the clipboard.</div></div>
+                </center></td></tr>
+            <tr><td class="alignright">Chemical Formula</td><td colspan=2>{{material}}</td></tr>
+
+            <tr><td class="alignright"><select id="densresult" name="densresult">
+              <option value="density">Density (g/cm³)</option>
+              <option value="FUdens">Density (FU/Å³)</option>
+              <option value="FUdnm">Density (FU/nm³)</option>
+              <option value="volume">FU Volume (Å³)</option>
+            </select></td><td colspan=2 id="density_value">{{"%.4f"%material.dens}}</td></tr>
+            <tr><td class="alignright">Neutron nuclear SLD (10⁻⁶ Å⁻²)</td>
+              <td id="neutron_entry_real">{{"%.5f"%(1e6*material.rho_n.real)}}</td>
+              <td id="neutron_entry_imag">{{"%.5f"%(1e6*material.rho_n.imag)}}i</td>
+              <td class="hide_mobile">{% if material.has_ndata %}@1.8 Å{% endif %}</td></tr>
+            {% if deuterated %}
+            <tr><td class="alignright">Material Deuteration</td><td colspan="2">
+                <input type="range" min="0" max="100" value="0" class="slider" id="deuteration_amount" step="1"
+                       data-deuterated_neutron_real = "{{1e6*deuterated.rho_n.real}}"
+                       data-deuterated_neutron_imag = "{{1e6*deuterated.rho_n.imag}}"
+                       data-deuterated_density = "{{deuterated.dens}}"
+                       data-hydrogenated_density = "{{material.dens}}">
+                <input type="number" min="0" max="100" value="0" class="slider_value" id="deuteration_amount_value">%
+            </td><td class="hide_mobile aligncenter"><div class="tooltip">🛈<div class="tooltiptext">
+                Deuteration is calculated using the provided molecule volume and replacing hydrogen by deuterium.
+                This calculation does not include the effect of bond length changes that can lead to 1-2% changes
+                in molecular volume.</div></div>
+                </td></tr>
+            {% endif %}
+            {% if exchanged %}
+            <tr><td class="alignright">Amount Hx-exchange</td><td colspan="2">
+                <input type="range" min="0" max="100" value="90" class="slider" id="exchange_amount" step="1"
+                        data-hydrogenated_density = "{{material.dens}}"
+                        data-exchanged_diff_real = "{{1e6*(exchanged.rho_n.real-material.rho_n.real)}}"
+                        data-exchanged_diff_imag = "{{1e6*(exchanged.rho_n.imag-material.rho_n.imag)}}"
+                        data-exchanged_diff_density = "{{exchanged.dens-material.dens}}">
+                <input type="number" min="0" max="100" value="90" class="slider_value" id="exchange_amount_value">%
+            </td><td class="hide_mobile"></td></tr>
+            <tr><td class="alignright">D<sub>2</sub>O in solution</td><td colspan="2">
+                <input type="range" min="0" max="100" value="0" class="slider" id="d2o_amount" step="1">
+                <input type="number" min="0" max="100" value="0" class="slider_value" id="d2o_amount_value">%
+            </td><td class="hide_mobile"></td></tr>
+            <tr><td class="alignright">Match Point</td><td colspan="2" id="match_point_value">
+                {{"%.2f"%match_point}}% D<sub>2</sub>O</td><td class="hide_mobile aligncenter">
+                <div class="tooltip">🛈<div class="tooltiptext">
+                The match point is the amount of D<sub>2</sub>O required to match the molecule contrast
+                    for a given level of deuteration and exchange.</div></div></td></tr>
+            {% endif %}
+            {% if material.rho_m!=0 %}
+            <tr><td class="alignright"><select id="magnresult" name="magnresult">
+                <option value="msld">Neutron magnetic<br/> SLD (10⁻⁶ Å⁻²)</option>
+                <option value="muB">Magnetisation (µB/FU)</option>
+                <option value="magn">Magnetisation (kA/m = emu/cm³)</option>
+                </select></td><td colspan=2 id="magn_value">{{"%.6f"%(1e6*material.rho_m)}}</td>
+                <td class="hide_mobile"></td></tr>
+            {% endif %}
+            <tr><td class="alignright">Cu-Kɑ <select id="cu_select" name="cu_select">
+                    <option value="electron">e-density (rₑ/Å³)</option>
+                    <option value="sld">SLD (10⁻⁶ Å⁻²)</option>
+                    <option value="n_db">n=1-δ+iβ (δ/-β)</option>
+                    </select></td>
+              <td id="cu_entry_real">{{"%.6f"%(material.rho_of_E(Cu_kalpha).real/r_e_angstrom)}}</td>
+              <td id="cu_entry_imag">{{"%.6f"%(material.rho_of_E(Cu_kalpha).imag/r_e_angstrom)}}i</td>
+              <td class="hide_mobile"></td></tr>
+            <tr><td class="alignright">Mo-Kɑ <select id="mo_select" name="mo_select">
+                    <option value="electron">e-density (rₑ/Å³)</option>
+                    <option value="sld">SLD (10⁻⁶ Å⁻²)</option>
+                    <option value="n_db">n=1-δ+iβ (δ/-β)</option>
+                    </select></td>
+              <td id="mo_entry_real">{{"%.6f"%(material.rho_of_E(Mo_kalpha).real/r_e_angstrom)}}</td>
+              <td id="mo_entry_imag">{{"%.6f"%(material.rho_of_E(Mo_kalpha).imag/r_e_angstrom)}}i</td>
+              <td class="hide_mobile"></td></tr>
+            <tr id="user_select_tr"><th>Custom Energy (eV)</th>
+              <td colspan="2"><select id="user_select" name="user_select">
+                    <option value="electron">e-density (rₑ/Å³)</option>
+                    <option value="sld">SLD (10⁻⁶ Å⁻²)</option>
+                    <option value="n_db">n=1-δ+iβ (δ/-β)</option>
+                    </select></td><td class="hide_mobile"><center><div class="tooltip">
+                    <button type="button" id="copy_xe_button">Data</button>
+                    <div class="tooltiptext">📋 Copy the energy dependent x-ray data to clipboard (E/real/imag).</div></div>
+                    </center>
+                </td></tr>
+            <tr><td class="aligncenter"><form action="" onsubmit="return false;">
+                <input type="range" min="50" max="30000" value="8040" class="slider" id="xray_energy" step="20">
+                <input type="number" min="50" max="30000" value="8040" step="any" class="slider_value" id="xray_energy_value">
+                </form></td>
+                <td><div id="value_real">{{"%.6f"%(material.rho_of_E(Cu_kalpha).real/r_e_angstrom)}}</div></td>
+                <td><div id="value_imag">{{"%.6f"%(material.rho_of_E(Cu_kalpha).imag/r_e_angstrom)}}i</div></td>
+                <td class="hide_mobile"></td></tr>
+            {% if validated %}
+            <tr><td colspan="4">This entry was validated by ORSO<br />({{ validated }} by {{ validated_by }})</td></tr>
+            {% endif %}
+            {% if invalid %}
+            <tr><td colspan="4">This entry was removed by ORSO because it was invalid<br />({{ invalid }} by {{ invalid_by }})</td></tr>
+            {% endif %}
+        </table>
+            </form>
+            <div class="download_link">
+            {% if material.ID %}
+            <a id="download_link" href="{{url_for('api_download', ID=material.ID, xray_unit='edens')|safe}}">
+            {% else %}
+            <a id="download_link" href="{{url_for('api_download', sldcalc='true', xray_unit='edens',
+                                                  formula=str(material.formula), density=material.dens,
+                                                  name=material_name, material_description=material_description)|safe}}">
+            {% endif %}
+                Download full record as JSON<img src="{{url_for('static', filename='JSON_vector_logo.svg')}}" /></a>
+            </div>
+      </center><p></p>
+      {% else %}
+        <p class="hide_mobile periodic_table">
+          <a href="{{url_for('periodic_table')}}">
+              <img src="{{url_for('static', filename='periodic_table.png')}}"></a><br/>
+          You can look up the reference elemental data in the <a href="{{url_for('periodic_table')}}">periodic table</a>.
+            </p>
+      {% endif %}
+
+      {% if material %}
+        <center>
+        {% if material.has_ndata %}
+            <table>
+                <tr><td colspan="2"><button type="button" class="collapsible">
+                    Toggle graph: Contrast Matching/X-Ray</button></td></tr>
+                <tr><td class="uncollapsed">
+                    <img id="xray_image" class="plot" src="{{url_for('plot_xray', formula=str(material.formula), dens=material.dens, name=material_name)}}" />
+                </td></tr>
+                <tr><td class="collapsed">
+                    <img class="plot" src="{{url_for('plot_nabs', formula=str(material.formula), dens=material.dens, name=material_name)}}" />
+            </td></tr></table>
+        {% elif contrast_matching %}
+            <table>
+                <tr><td colspan="2"><button type="button" class="collapsible">
+                    Toggle graph: Contrast Matching/X-Ray</button></td></tr>
+                <tr><td class="uncollapsed">
+                    <img id="xray_image" class="plot" src="{{url_for('plot_xray', formula=str(material.formula), dens=material.dens, name=material_name)}}" />
+                </td></tr>
+                <tr><td class="collapsed">
+                    <img class="plot" src="{{url_for('plot_deuteration', formula=str(material.formula), dens=material.dens, name=material_name)}}" />
+            </td></tr></table>
+        {% else %}
+            <img id="xray_image" class="plot" src="{{url_for('plot_xray', formula=str(material.formula), dens=material.dens, name=material_name)}}" />
+        {% endif %}
+        <button type="submit" form="preferences" id="preferences_submit"
+          title="Store the selected units for density, magnetism and x-ray results as well as active plot into cookies for future queries">
+          Save current view as default (stores Cookie)</button>
+            <p class="hide_mobile">You can look up the reference elemental data in the
+                <a href="{{url_for('periodic_table')}}">periodic table</a>.</p>
+        </center>
+
+      <script src="{{url_for('static', filename='sldcalc_material.js')}}"></script>
+        {% if material.has_ndata %}
+        <script src="{{url_for('static', filename='sldcalc_ndata.js')}}"></script>
+        {% elif exchanged %}
+        <script src="{{url_for('static', filename='sldcalc_exchanged.js')}}"></script>
+        {% elif deuterated %}
+        <script src="{{url_for('static', filename='sldcalc_deuterated.js')}}"></script>
+        {% endif %}
+      {% endif %}
+    </td>
+
+      <td class="hide_mobile right_info">
+        <div id="sld_formula">
+            <h4 class="nomargin">Formulas used for the calculation:</h4>
+            <img id="formula_1" src="{{url_for('static', filename='formula_sld-1.svg')}}"/><br />
+            <img id="formula_2" src="{{url_for('static', filename='formula_sld-2.svg')}}"/>
+        </div>
+      </td>
+    </tr></table>
+
+{% endblock %}

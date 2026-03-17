@@ -1,0 +1,16 @@
+div.center_about {
+    max-width: 42em;
+    font-size: 115%;
+    text-align: justify;
+    hyphens: auto;
+}
+
+div.center2_about {
+    background-color: #ddd;
+    padding: 12px;
+    box-shadow: 3px 3px #aaa;
+}
+
+#api_download {
+    text-shadow: 1px 1px #888;
+}

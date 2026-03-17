@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block nav_about %}active_about{% endblock %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='layout_about.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='highlight.min.css') }}">
+<script src="{{ url_for('static', filename='highlight.min.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<center>
+    <div class="center_about">
+    <p>
+        This is a database for materials for scattering length density (SLD)
+        calculations for neutron and x-ray reflectometry and small angle scattering.
+        <br/>
+        It is provided by the <a href="https://www.reflectometry.org/">Open Reflectometry Standards Organization (ORSO)</a>.
+        <br/>
+        <center><i>Please report any issues and suggestions on <a href="https://github.com/reflectivity/slddb/issues">GitHub</a>
+        or directly to <a href="mailto:slddb@esss.dk">SLDdb Admin</a>.</i></center>
+    </p>
+    <p>
+        In addition to the manual search on this website we provide a simple API
+        that can be called by other software and provides data as JSON text.
+    </p>
+    <div class="center2_about">
+        <h4 class="nomargin">Application Programmers Interface (API) Usage:</h4><br />
+
+        Manual calculation of SLD from formula and density values:<br/>
+        <a href="{{ url_for('api_query', _external=True, formula="Fe2O3", density=7.8, sldcalc="true") }}">
+        <i>{{ url_for('api_query', _external=True, formula="XXX", density="YYY", sldcalc="true") }}</i></a>
+        <br/>
+        <a href="{{ url_for('api_query', _external=True, protein="abtd", sldcalc="true") }}">
+        <i>{{ url_for('api_query', _external=True, protein="XXX", sldcalc="true") }}</i></a>
+        <br/>
+        <a href="{{ url_for('api_query', _external=True, dna="agat", sldcalc="true") }}">
+        <i>{{ url_for('api_query', _external=True, dna="XXX", sldcalc="true") }}</i></a>
+        <br/><br/>
+
+        Retrieve a list of fields that can be used for database queries.<br/>
+        <a href="{{ url_for('api_query', _external=True, get_fields=True) }}">
+        <i>{{ url_for('api_query', _external=True, get_fields=True) }}</i></a>
+        <br/><br/>
+
+        Search database for material using arbitrary fields.<br/>
+        <a href="{{ url_for('api_query', _external=True, name="DNA") }}">
+        <i>{{ url_for('api_query', _external=True, field1="XXX", field2="YYY") }}</i></a>
+        <br/><br/>
+
+        Calculation of SLD form database material.<br/>
+        <a href="{{ url_for('api_query', _external=True, ID=24, xray_unit="sld") }}">
+        <i>{{ url_for('api_query', _external=True, ID="XXX", xray_unit="edens") }}</i><br /><br /></a>
+        Units for x-ray results are:
+            <ol type="1" class="nomargin">
+                <li><i>edens</i>: electron density (rₑ/Å³)</li><br />
+                <li><i>sld</i>: scattering length density (1/Å²)</li><br />
+                <li><i>n_db</i>: optical constants (δ/β) for refractive index (n=1-δ+iβ) (1)</li>
+            </ol>
+        <br/><br/>
+        The resulting data is a dictionary with the SLD information and some further materials parameters.
+        Units for the given values are provided unter the <i>"units"</i> keyword.
+    </div>
+
+        <br/><br/>
+        A <a href="https://www.reflectometry.org/orsopy/">Python library</a> that implements the API is part of
+        <a href="https://pypi.org/project/orsopy/" id="orsopy">orsopy</a> (pip install orsopy).
+    <div class="center2_about">
+        <h4 class="nomargin">Example query:</h4>
+        <pre style="font-size: 0.7em;"><code class="language-python">from slddb import api
+results = api.search(formula='H2O')
+m = api.material(227)
+m.rho_n
+>>> (-5.604469813674761e-07-6.184574861844118e-11j)
+m.deuterated.rho_n
+>>> (6.401622754133627e-06-1.141384440755734e-13j)
+m.rho_of_E("Cu")
+>>> (9.466996986659358e-06-2.9724201644979845e-08j)</code></pre>
+    </div>
+</center>
+
+<script>hljs.highlightAll();</script>
+{% endblock %}

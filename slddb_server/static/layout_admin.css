@@ -1,0 +1,35 @@
+
+#user_name {
+    border: solid 1px;
+    margin: 2px;
+    box-shadow: none;
+    background-color: #fff;
+}
+
+#user_email {
+    border: solid 1px;
+    margin: 2px;
+    width: 200px;
+}
+
+tr.not_activated {
+    color: #ff0000;
+}
+
+section.sqlite_query {
+    text-align: center;
+}
+
+section.sqlite_query p {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 40em;
+}
+
+div.search_top {
+    height: 1px;
+}
+
+#query_input {
+    width: 70%;
+}

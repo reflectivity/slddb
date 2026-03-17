@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block nav_input_page %}active{% endblock %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='layout_input.css') }}">
+{% endblock %}
+
+{% block content %}
+    <table class="full"><tr>
+      <td class="hide_mobile left_info">
+          Here you can enter new materials into the database.
+          Each material will get its unique ID and if relevant will be reviewed by ORSO and then validated.
+          Please provide as much information as possible, especially suitable references to allow us
+          to check the validity of the data.
+          <br /><br />
+          <small><sup>*</sup>  Is a mandatory field for any material.<br />
+          <sup>**</sup> One way to determine density is required. This can be either <i>density</i>, <i>FU_volume</i>,
+          <i>SLD_n</i> or <i>SLD_x</i> with energy <i>E_x</i>.</small>
+          <br /><br />
+          If you provide your email address above, which is hidden from users of the database,
+          ORSO will be able to contact you if there are questions about the entries you have provided.
+      </td>
+
+    <td class="center_input">
+    {% if editing_entry %}
+        <div class="edit_warning">
+            You are editing SLD DB entry ID={{ editing_entry }},
+            please be careful when editing.
+            (Editing will void previous validation.)
+        </div>
+    {% endif %}
+    <form method="POST" action="{{ url_for('eval_input') }}"><center>
+        <table class="withborder">
+            <tr><td class="alignright"><b>Your email</b> (hidden)</td>
+              <td>{{ get_input("created_by")|safe }}</td></tr>
+        </table>
+      <table class="noborder">
+          <tr><th>Compound field:</th><th>Value:</th></tr>
+    {%for field in fields%}
+          <tr><td class="alignright">{{field}} {{get_unit(field)}}</td>
+              <td>{{ get_input(field)|safe }}</td></tr>
+    {%endfor%}
+        <tr><td colspan="2"><center>
+            {% if editing_entry %}
+            <input type="hidden" name="ID" value="{{ editing_entry }}">
+            <input type="submit" name="material" value="Update">
+            {% else %}
+            <input type="submit" name="material">
+            {% endif %}
+        </center></td> </tr>
+      </table>
+    </center></form></td>
+
+      <td class="hide_mobile right_info">
+      <form method="POST" enctype="multipart/form-data">
+          Upload CIF file<br />
+          <input type="file" accept=".cif,.cif.gz" id="cif_file" name="cif_file">
+          <input type="button" value="Choose File" id="choose_file"  />
+      </form></td>
+    </tr></table>
+<script src="{{url_for('static', filename='input.js')}}"></script>
+{% endblock %}

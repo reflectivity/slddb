@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block nav_bio_blender %}active{% endblock %}
+
+{% block extra_styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='layout_bio_blender.css') }}">
+{% endblock %}
+
+{% block content %}
+
+  <table>
+    <tr><td class="left_info">
+      <div class="hide_mobile">
+        <p>
+          Here you can use tabulated values for amino acids and nucleotides to create a larger molecule and "blend"
+          their SLDs together. It also allows manual combination of any entries in the database using their IDs.
+        </p>
+        <p>
+          The calculation of SLD is done by providing the sum of the chemical elements as well as their volume
+          from all constituents. The values of molecular volume used for the constituents is documented
+          in the associated database entry.
+        </p>
+        <p>
+        <div class="italic_small">
+          This calculator was inspired by the
+          <a href="http://psldc.isis.rl.ac.uk/">ISIS Biomolecular neutron Scattering Length Density Calculator (BSLDC)</a>
+          written by Luke Clifton & Daniel Myatt
+          and uses values taken from papers by
+          <a href="https://doi.org/10.1111/j.1432-1033.1986.tb09653.x">Perkins</a> and
+          <a href="https://doi.org/10.1088/0034-4885/39/10/001">Jacrot</a>.
+        </div>
+        </p>
+      </div>
+    </td><td class="center_blend">
+    <form action="{{ url_for('combine_blender') }}" method="post"><center>
+      <table class="noborder">
+        <tr><th id="compound_name">Compound Name:</th></tr>
+          <tr><td class="aligncenter">
+            <input type="text" id="name" name="name" value="{{ request.form.get('name','') }}{% if fill_name %}{{ fill_name }}{% endif %}"></tr>
+        <tr><th>Molecule Structure:</th></tr>
+          <tr><td class="aligncenter">
+            <textarea id="structure" name="structure" rows="8"
+            placeholder="Either a string of letters (protein/RNA/DNA) or sequence of (scalar*ID).
+
+Example Protein: ardbwt
+Example DNA: ATTAG
+Example Database IDs: (3*125)(4*51)">{{ request.form.get('structure','') }}{% if fill_formula %}{{ fill_formula }}{% endif %}</textarea></tr>
+          <tr><td class="aligncenter">
+            <input type="radio" id="protein" name="molecule_type" value="protein" {% if request.form.get('molecule_type','protein')=='protein' %} checked {% endif %}>Protein</input>
+            <input type="radio" id="dna" name="molecule_type" value="dna"{% if request.form.get('molecule_type','protein')=='dna' %} checked {% endif %}>DNA</input>
+            <input type="radio" id="rna" name="molecule_type" value="rna"{% if request.form.get('molecule_type','protein')=='rna' %} checked {% endif %}>RNA</input>
+            <input type="radio" id="database" name="molecule_type" value="db"{% if request.form.get('molecule_type','protein')=='db' %} checked {% endif %}>Database IDs</input>
+          </td></tr>
+          <tr><td class="aligncenter"><input type="Submit" name='submit' value="Calculate SLD">
+            <input type="Submit" name='submit' value="Enter in Database"></td></tr>
+      </table>
+    </center></form>
+      <p class="aligncenter">
+      <form method="POST" enctype="multipart/form-data">
+          Fill from PDB CIF/FASTA file<br />
+          <input type="file" accept=".cif,.cif.gz,.fasta,.fna,.ffn,.faa,.frn,.fa" id="pdb_file" name="pdb_file">
+          <input type="button" value="Choose File" id="choose_file" />
+          (sequence <input type="number" value="{{request.form.get('sequence', 1)}}" min="1" max="99" id="sequence" name="sequence" />)
+      </form>
+      </p>
+    </td>
+      <td class="right_info">
+          <img class="hide_mobile" src="{{ url_for('static', filename='bio_blender.png') }}">
+      </td>
+    </tr>
+  </table>
+<script src="{{url_for('static', filename='bio_blender.js')}}"></script>
+{% endblock %}
