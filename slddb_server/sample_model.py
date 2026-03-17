@@ -10,12 +10,12 @@ from io import BytesIO
 from matplotlib.figure import Figure
 from dataclasses import dataclass, asdict
 
-from orsopy.fileio.model_building_blocks import Material
+from slddb.material import Material
 from refnx.reflect import SLD, ReflectModel, Structure
 from orsopy.fileio import model_language, model_complex
-from orsopy.slddb import api as slddb_api
-from orsopy.slddb import SLDDB, DB_FILE
-from orsopy.utils.chemical_formula import Formula
+from slddb import api as slddb_api
+from slddb import SLDDB, DB_FILE
+# from slddb.chemical_formula import Formula
 
 # make sure the material resolution is done locally
 slddb_api.use_webquery = False
@@ -35,7 +35,6 @@ class LayerInfo:
     sldn_i: float
     sldm: float
 
-#TODO: Add resolved_samples table creation to databse setup.
 def simulate_reflectivity(hash):
     db = sqlite3.connect(DB_FILE)
     c = db.cursor()

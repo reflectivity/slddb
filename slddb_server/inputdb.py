@@ -3,11 +3,11 @@ from flask import request, render_template, flash, url_for, redirect
 from werkzeug.utils import secure_filename
 
 from .querydb import search_db
-from .blender import collect_protein, collect_blend
+from slddb.blender import collect_protein, collect_blend
 from .email_encryption import encryptor
-from orsopy.slddb import SLDDB, DB_FILE
-from orsopy.slddb.dbconfig import DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA, db_lookup
-from orsopy.slddb.importers import CifImporter, PolymerSequence
+from slddb import SLDDB, DB_FILE
+from slddb.dbconfig import DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA, db_lookup
+from slddb.importers import CifImporter, PolymerSequence
 
 input_fields=[field for field in DB_MATERIALS_FIELDS[1:]
               if field not in DB_MATERIALS_HIDDEN_DATA]

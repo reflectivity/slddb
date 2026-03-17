@@ -1,13 +1,17 @@
 """
 Material Data from Christy Kinane's table for testing database.
 """
+from pathlib import Path
 
-from orsopy import slddb
-from orsopy.slddb import __version__, dbconfig
-# for flask use database file in startup folder
-DB_FILE='slddb.db';dbconfig.DB_FILE=DB_FILE;slddb.DB_FILE=DB_FILE
-from orsopy.slddb import SLDDB
-from orsopy.slddb.dbconfig import DB_FILE
+import slddb
+from slddb import dbconfig
+# for flask use database file in instance folder
+DB_FILE = Path('instance') / 'slddb.db'
+dbconfig.DB_FILE = DB_FILE
+slddb.DB_FILE = DB_FILE
+
+from slddb import SLDDB
+from slddb.dbconfig import DB_FILE
 
 data=[   ['Si', 2.33, 0.0],
          ['Ag', 10.49, 0.0],

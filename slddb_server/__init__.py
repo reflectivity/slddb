@@ -15,25 +15,26 @@ try:
 except ImportError:
     from wsgiref.util import FileWrapper
 
-from orsopy import slddb
-from orsopy.slddb import dbconfig
-from orsopy.slddb.dbconfig import DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA, db_lookup
-from orsopy.slddb.material import Formula
-from orsopy.slddb import constants
+import slddb
+from slddb import dbconfig
+from slddb.dbconfig import DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA, db_lookup
+from slddb.material import Formula
+from slddb import constants
 
 __version__ = "1.0.2"
 
-app=Flask("ORSO SLD Data Base", template_folder='flaskr/templates',
-          static_folder='flaskr/static')
+app=Flask("ORSO SLD Data Base", template_folder='slddb_server/templates',
+          static_folder='slddb_server/static')
 # Try speeding up page load by using timed caching (reduce time lost due to TTFB)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 3600
 
 # for flask use database file in instance folder
-DB_FILE=os.path.join(app.instance_path, 'slddb.db');dbconfig.DB_FILE=DB_FILE;slddb.DB_FILE=DB_FILE
+DB_FILE=os.path.join(app.instance_path, 'slddb.db')
+dbconfig.DB_FILE=DB_FILE
+slddb.DB_FILE=DB_FILE
 
 # local imports after defining the DB_FILE
-# TODO: get rid of the coupling introduced by this
-from .api import calc_api, select_api, search_api
+from slddb.api import calc_api, select_api, search_api, query_api
 from .querydb import search_db, show_search, custom_query
 from .calcsld import calculate_selection, calculate_user, validate_selection, invalidate_selection, \
     get_graph_xray, get_absorption_graph, get_deuteration_graph
@@ -206,16 +207,7 @@ def combine_blender():
 
 @app.route('/api', methods=['GET'])
 def api_query():
-    if 'ID' in request.args:
-        # handle as query
-        return select_api(request.args)
-    elif 'sldcalc' in request.args:
-        return calc_api(request.args)
-    elif 'get_fields' in request.args:
-        return json.dumps([field for field in DB_MATERIALS_FIELDS if field not in DB_MATERIALS_HIDDEN_DATA],
-                          indent='    ')
-    else:
-        return search_api(request.args)
+    return json.dumps(query_api(request.args), indent=4)
 
 @app.route('/api_download', methods=['GET'])
 def api_download():

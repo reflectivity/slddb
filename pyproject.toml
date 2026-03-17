@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "slddb"
+version = "0.1.0"
+authors = [
+    {name = "Artur Glavic", email = "artur.glavic@psi.ch"},
+]
+description = "Scattering Length Density Database"
+readme = "README.rst"
+requires-python = ">=3.8"
+license = "MIT"
+license-files = ["LICENSE"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Physics",
+]
+dependencies = [
+    "periodictable",
+    "numpy",
+    "scipy",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-cov",
+]
+server = [
+    "flask",
+    "flask-login",
+    "flask-sqlalchemy",
+    "flask-mail",
+    "cryptography",
+    "matplotlib",
+    "refnx",
+    "pycifrw"
+]
+dev = [
+    "black",
+    "isort",
+    "flake8",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/reflectivity/slddb"
+"Bug Tracker" = "https://github.com/reflectivity/slddb/issues"
+
+[tool.setuptools]
+packages = ["slddb", "slddb-server"]
+
+[tool.setuptools_scm]
+# This enables automatic version numbering from Git tags
+write_to = "slddb/_version.py"
