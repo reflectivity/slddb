@@ -215,12 +215,26 @@ for (let name in example_yaml_scripts) {
 function example_selected() {
     name = example_select.value;
     if (name==="empty") {
-        yaml_text_entry.value = "";
+         editor.setValue('');
     } else {
         text = example_yaml_scripts[name];
-        yaml_text_entry.value = text;
+        editor.setValue(text);
+        editor.clearSelection()
         example_select.value = "empty";
     }
 };
 
 example_select.addEventListener("change", example_selected);
+
+var editor = ace.edit("editor");
+editor.setTheme("ace/theme/eclipse");
+editor.renderer.setShowGutter(false);
+editor.setOption("useSoftTabs", true);
+editor.session.setTabSize(2);
+editor.session.setMode("ace/mode/yaml");
+
+function store_before_submit() {
+    document.getElementById("sample_yaml").value = editor.getValue();
+}
+
+document.getElementById("submit_yaml").addEventListener("submit", store_before_submit);

@@ -21,7 +21,7 @@ from orsopy.slddb.dbconfig import DB_MATERIALS_FIELDS, DB_MATERIALS_HIDDEN_DATA,
 from orsopy.slddb.material import Formula
 from orsopy.slddb import constants
 
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 
 app=Flask("ORSO SLD Data Base", template_folder='flaskr/templates',
           static_folder='flaskr/static')
@@ -79,7 +79,11 @@ def inject_basics():
 if app.debug:
     @app.after_request
     def add_security_headers(resp):
-        resp.headers['Content-Security-Policy']="default-src 'self'"
+        resp.headers['Content-Security-Policy']=("default-src 'self'"
+                                                 " 'sha256-O6piNkhLv4BI/Oje+MccCmgUSrS1sIp+CMaOsvD/VWU=';"
+                                                 "style-src 'self' 'unsafe-inline';"
+                                                 "worker-src 'self' blob:;"
+                                                 "img-src 'self' data:;")
         return resp
 
 @app.route('/')

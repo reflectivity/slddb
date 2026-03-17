@@ -9,8 +9,10 @@ from numpy import linspace
 from io import BytesIO
 from matplotlib.figure import Figure
 from dataclasses import dataclass, asdict
+
+from orsopy.fileio.model_building_blocks import Material
 from refnx.reflect import SLD, ReflectModel, Structure
-from orsopy.fileio import model_language
+from orsopy.fileio import model_language, model_complex
 from orsopy.slddb import api as slddb_api
 from orsopy.slddb import SLDDB, DB_FILE
 from orsopy.utils.chemical_formula import Formula
@@ -171,7 +173,11 @@ def sample_form_eval(data_yaml, single_layer=False):
         error += f'<div class="tooltip">Hover here for SampleModel<div class="tooltiptext">{sample}</div></div>'
         return render_template('sample.html', error=error)
 
-    img = create_plot_link(sample)
+    try:
+        img = create_plot_link(sample)
+    except Exception as e:
+        error = f'Could not evaluate the layer sequence:<br />{repr(e)}<br />'
+        return render_template('sample.html', structure=structure, error=error)
 
     slddb_api.db.db.close()
     slddb_api.db=None
@@ -196,6 +202,14 @@ def structure_to_html(items):
                 output+=f'<div class="sample_stack">{item.repetitions} x Stack\n    '
             output+=structure_to_html(item.sequence).replace('\n', '    \n')
             output+='</div>\n'
+        elif isinstance(item, model_complex.FunctionTwoElements):
+            output += (f'<div class="sample_special"><table><tr><th>{item.original_name or ""}</th><td class="alignright">FunctionTwoElements\n'
+                       f'<div class="tooltip">🛈<div class="tooltiptext"> SLD = m1 * (f-1) + m2 * f<br />'
+                       f'f(x) = {item.function}<br />(with x = (z-z0)/d</div></div></td></tr></table>\n    ')
+            output+=two_elements_table(item)
+            output+='</div>\n'
+        else:
+            output+= '<div class="sample_unknown">Unknown Item Type</div>\n'
     return output
 
 def layer_table(layer:model_language.Layer):
@@ -204,16 +218,9 @@ def layer_table(layer:model_language.Layer):
     if isinstance(layer.material, model_language.Composit):
         return composite_table(layer)
     output = '<table class="layer">\n'
-    layer.material.generate_density()
-    material_info = f'{layer.material.comment or "defined values"}<br />'
-    for key in ['formula', 'number_density', 'mass_density', 'sld', 'relative_density', 'magnetic_moment']:
-        value = getattr(layer.material, key, None)
-        if value:
-            if hasattr(value, 'magnitude'):
-                value = f'{value.magnitude:.3g} {value.unit}'
-            elif hasattr(value, 'real') and hasattr(value, 'unit'):
-                value = f'{value.real:.3g}+{value.imag:.3g}i {value.unit}'
-            material_info+=f'{key} = {value}<br />'
+    material = layer.material
+    material.generate_density()
+    material_info = get_material_info(material)
 
     output += f'<tr><th rowspan="2" class="expand">{layer.original_name or layer.material.original_name or ""}</th><th>material</th><th>d</th><th>σ</th></tr>\n'
     output += f'<tr><td>{getattr(layer.material, "formula", None) or "SLD"} <div class="tooltip">🛈<div class="tooltiptext">' \
@@ -223,11 +230,48 @@ def layer_table(layer:model_language.Layer):
     output += '</table>\n'
     return output
 
-def composite_table(layer:model_language.Layer):
+
+def get_material_info(material: Material) -> str:
+    material_info = f'{material.comment or "defined values"}<br />'
+    for key in ['formula', 'number_density', 'mass_density', 'sld', 'relative_density', 'magnetic_moment']:
+        value = getattr(material, key, None)
+        if value:
+            if hasattr(value, 'magnitude'):
+                value = f'{value.magnitude:.3g} {value.unit}'
+            elif hasattr(value, 'real') and hasattr(value, 'unit'):
+                value = f'{value.real:.3g}+{value.imag:.3g}i {value.unit}'
+            material_info += f'{key} = {value}<br />'
+    return material_info
+
+
+def two_elements_table(item:model_complex.FunctionTwoElements):
     output = '<table class="layer">\n'
+    SRinfo = (f'<div class="tooltip">🛈<div class="tooltiptext">slice resolution {item.slice_resolution.as_unit("nm"):.0f} nm<br />'
+              f'=>{int(item.thickness.as_unit("nm")/item.slice_resolution.as_unit("nm"))} slices</div></div>')
+    output += '<tr>' \
+              f'<th>mat. 1</th><th>mat. 2</th><th>d </th><th>σ</th></tr>\n'
+    output += '<tr>'
+    m1, m2 = item._materials
+    m1.generate_density()
+    m2.generate_density()
+    m1info = get_material_info(m1)
+    m2info = get_material_info(m2)
+    output += f'<tr><td>{getattr(m1, "formula", None) or "SLD"} ' \
+              f'<div class="tooltip">🛈<div class="tooltiptext">{m1info}</div></div></td>'
+    output += f'<td>{getattr(m2, "formula", None) or "SLD"} ' \
+              f'<div class="tooltip">🛈<div class="tooltiptext">{m2info}</div></div></td>'
+    output +=f'<td>{item.thickness.as_unit("nm"):.2f} {SRinfo}</td>' \
+              f'<td>{item.roughness.as_unit("nm"):.1f}</td></tr>\n'
+
+
+    output += '</table>\n'
+    return output
+
+def composite_table(layer:model_language.Layer):
     nitems = len(layer.material.composition)
 
     layer.material.generate_density()
+    output = '<table class="layer">\n'
     output += f'<tr><th rowspan="{nitems+1}" class="expand">{layer.original_name or layer.material.original_name or "composit"}</th>' \
               f'<th>fraction</th><th>material</th><th>d</th><th>σ</th></tr>\n'
     for i, (key, fraction) in enumerate(layer.material.composition.items()):

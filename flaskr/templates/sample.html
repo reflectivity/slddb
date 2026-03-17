@@ -4,8 +4,9 @@
 
 {% block extra_styles %}
 <link rel="stylesheet" href="{{ url_for('static', filename='layout_sample.css') }}">
-{% endblock %}
 
+<script src="{{ url_for('static', filename='ace.js') }}"></script>
+{% endblock %}
 
 {% block content %}
 
@@ -30,14 +31,14 @@
         {% endif %}
     </div>
     <div class="center">
-        <form action="{{ url_for('sample_model') }}" method="post">
+        <form action="{{ url_for('sample_model') }}" method="post" id='submit_yaml' >
             <div class="columns"><div><b>Sample Model:</b></div>
                 <div><select name="example_scripts" id="example_scripts">
                     <option value="empty">select example script</option>
                 </select></div>
             </div>
-            <textarea id="sample_yaml" name="sample_yaml" placeholder="YAML code for the sample model description."
-                     >{{ request.form.get('sample_yaml','') }}</textarea>
+            <div id="editor">{{ request.form.get('sample_yaml','') }}</div>
+            <input type="hidden" id="sample_yaml" name="sample_yaml" />
             <div class="columns">
                 <div><input type="checkbox" name="single_layer" {% if request.form.get('single_layer', None) %} checked{% endif %}><label>individual layers</label></div>
                 <div><input type="Submit" name='submit' value="Analyze Model"></div>
@@ -54,9 +55,8 @@
         {% endif %}
     </div>
 </div>
+{% endblock %}
 
 {% block script_end %}
 <script src="{{url_for('static', filename='sample_model.js')}}"></script>
-{% endblock %}
-
 {% endblock %}
