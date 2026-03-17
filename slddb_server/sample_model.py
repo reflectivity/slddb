@@ -35,7 +35,6 @@ class LayerInfo:
     sldn_i: float
     sldm: float
 
-#TODO: Add resolved_samples table creation to databse setup.
 def simulate_reflectivity(hash):
     db = sqlite3.connect(DB_FILE)
     c = db.cursor()
