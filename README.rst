@@ -5,7 +5,7 @@ ORSO Scattering Length Density Data Base
     :width: 15em
     :align: left
 
-This repository contains the source code for the website https://slddb.esss.dk/slddb/ that provides
+This repository contains the source code for the website https://slddb.reflectometry.org/ that provides
 a facility to calculate neutron and x-ray scattering length densities and store associated
 material parameters with proper references in a database.
 
@@ -21,10 +21,6 @@ is also included here.
 .. image:: https://github.com/reflectivity/slddb/actions/workflows/codeql-analysis.yml/badge.svg
         :target: https://github.com/reflectivity/slddb/actions/workflows/codeql-analysis.yml
         :alt: CodeQL
-
-.. image:: https://coveralls.io/repos/github/reflectivity/slddb/badge.svg?branch=master
-        :target: https://coveralls.io/github/reflectivity/slddb?branch=master
-        :alt: Coverage Level
 
 Features
 --------
