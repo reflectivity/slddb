@@ -108,7 +108,7 @@ def create_plot_link(sample:model_language.SampleModel):
     data = []
     for lj in layers:
         nsld = complex(lj.material.get_sld() * 1e6+0j)
-        if getattr(lj.material, 'magnetic_moment', None) is not None:
+        if getattr(lj.material, 'magnetic_moment', None) is not None and lj.material.number_density is not None:
             msld = float(bM*lj.material.magnetic_moment.as_unit('muB')*lj.material.number_density.as_unit('1/nm^3')*1e4)
         else:
             msld = 0.

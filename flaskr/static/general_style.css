@@ -359,7 +359,7 @@ select, input[type=text], input[type=number] {
   margin-left: -9em; /* Use half of the width (120/2 = 60), to center the tooltip */
   white-space: normal;
 
-  position: fixed;
+  position: absolute;
   z-index: 10;
 }
 

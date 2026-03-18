@@ -3,7 +3,7 @@
 {% block nav_sample_model %}active{% endblock %}
 
 {% block extra_styles %}
-<link rel="stylesheet" href="{{ url_for('static', filename='layout_sample.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='layout_sample.css?v2') }}">
 
 <script src="{{ url_for('static', filename='ace.js') }}"></script>
 {% endblock %}
@@ -58,5 +58,6 @@
 {% endblock %}
 
 {% block script_end %}
-<script src="{{url_for('static', filename='sample_model.js')}}"></script>
+<script src="{{url_for('static', filename='example_models.js')}}"></script>
+<script src="{{url_for('static', filename='sample_model.js?v2')}}"></script>
 {% endblock %}
