@@ -58,6 +58,6 @@
 {% endblock %}
 
 {% block script_end %}
-<script src="{{url_for('static', filename='example_models.js')}}"></script>
+<script src="{{url_for('static', filename='example_models.js', v=2)}}"></script>
 <script src="{{url_for('static', filename='sample_model.js', v=2)}}"></script>
 {% endblock %}
